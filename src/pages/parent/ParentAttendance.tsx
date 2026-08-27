@@ -2,9 +2,28 @@ import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { CalendarCheck, Send, CheckCircle2, AlertCircle, Plus, Clock, FileText } from 'lucide-react';
+import {
+  CalendarCheck,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Clock,
+  FileText,
+  Download,
+  Printer,
+  Calendar,
+  FileSpreadsheet
+} from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
 import { Modal } from '../../components/common/Modal';
+import { AttendanceReportModal } from '../../components/common/AttendanceReportModal';
+import {
+  calculateDateRange,
+  getStudentAttendanceRecords,
+  downloadStudentAttendanceCSV,
+  AttendanceRangeType
+} from '../../utils/attendanceExport';
 
 export const ParentAttendance: React.FC = () => {
   const { attendanceLogs, leaves, applyLeave, students } = useSchoolData();
@@ -15,6 +34,10 @@ export const ParentAttendance: React.FC = () => {
   const [toDate, setToDate] = useState('');
   const [reason, setReason] = useState('');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  
+  // Quick download range state on parent dashboard
+  const [quickRange, setQuickRange] = useState<AttendanceRangeType>('semester');
 
   const student = students.find(s => s.id === currentUser.id || s.loginId === currentUser.loginId) || students[0];
 
@@ -41,36 +64,53 @@ export const ParentAttendance: React.FC = () => {
     setIsLeaveModalOpen(false);
   };
 
+  const handleQuickDownloadCSV = (range: AttendanceRangeType) => {
+    const { startDate, endDate, label } = calculateDateRange(range);
+    const { items, summary } = getStudentAttendanceRecords(student, attendanceLogs, startDate, endDate);
+    downloadStudentAttendanceCSV(student, items, summary, label);
+    toast('Attendance CSV Downloaded!', `Saved attendance file for ${label}`, 'success');
+  };
+
   const presentCount = attendanceLogs.filter(a => a.status === 'Present').length;
   const lateCount = attendanceLogs.filter(a => a.status === 'Late').length;
   const absentCount = attendanceLogs.filter(a => a.status === 'Absent').length;
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header with Apply Leave CTA */}
+      {/* Header with Apply Leave & Download CTA */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h3 className="text-xl font-bold font-cinzel text-slate-900">Attendance & Leave Management</h3>
           <p className="text-xs text-slate-500">
-            Monitor daily classroom presence, attendance ledger, and submit formal leave requests
+            Monitor classroom presence, download attendance statements (1 day to whole semester), and file leave requests
           </p>
         </div>
 
-        <button
-          onClick={() => setIsLeaveModalOpen(true)}
-          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Apply for Leave</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-300 shadow-xs"
+          >
+            <Download className="w-4 h-4 text-blue-600" />
+            <span>Download & Print Statement</span>
+          </button>
+
+          <button
+            onClick={() => setIsLeaveModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Apply for Leave</span>
+          </button>
+        </div>
       </div>
 
       {/* Attendance Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
           <span className="text-xs text-slate-500 font-semibold uppercase">Present Days</span>
-          <div className="text-3xl font-bold font-cinzel text-emerald-600">{presentCount} Days</div>
-          <span className="text-[11px] text-emerald-700">96.4% Regular Attendance</span>
+          <div className="text-3xl font-bold font-cinzel text-emerald-600">{student?.attendanceRate || 96.5}%</div>
+          <span className="text-[11px] text-emerald-700">Regular Attendance</span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
@@ -91,6 +131,67 @@ export const ParentAttendance: React.FC = () => {
           <span className="text-[11px] text-emerald-600 font-semibold">
             {leaves.filter(l => l.status === 'Approved').length} Approved • {leaves.filter(l => l.status === 'Pending').length} Pending
           </span>
+        </div>
+      </div>
+
+      {/* Download Attendance Statements Card (1 Day to Whole Semester) */}
+      <div className="p-6 rounded-2xl bg-white border-2 border-blue-100 shadow-xs space-y-4 text-xs">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+            <FileSpreadsheet className="w-4 h-4 text-blue-600" />
+            <span>Download Scholar Attendance Report (1 Day to Whole Semester)</span>
+          </h4>
+          <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">
+            Instant CSV & PDF
+          </span>
+        </div>
+
+        <p className="text-slate-600">
+          Export an official attendance record for <strong>{student.name}</strong> ({student.grade}-{student.section}). Choose from a single day, weekly, monthly, or full semester archive.
+        </p>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => handleQuickDownloadCSV('1day')}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-semibold border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-600" />
+              <span>Today / 1 Day (CSV)</span>
+            </button>
+
+            <button
+              onClick={() => handleQuickDownloadCSV('7days')}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-semibold border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-600" />
+              <span>Last 7 Days (CSV)</span>
+            </button>
+
+            <button
+              onClick={() => handleQuickDownloadCSV('30days')}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-semibold border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-600" />
+              <span>Current Month (CSV)</span>
+            </button>
+
+            <button
+              onClick={() => handleQuickDownloadCSV('semester')}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Whole Semester (CSV)</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5 text-blue-400" />
+            <span>Open Printable Certificate View →</span>
+          </button>
         </div>
       </div>
 
@@ -209,9 +310,18 @@ export const ParentAttendance: React.FC = () => {
 
       {/* Daily Attendance History */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
-        <h3 className="text-base font-bold font-cinzel text-slate-900 pb-3 border-b border-slate-100">
-          Daily Roll History Log
-        </h3>
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 className="text-base font-bold font-cinzel text-slate-900">
+            Daily Roll History Log
+          </h3>
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="text-xs font-bold text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export Range →</span>
+          </button>
+        </div>
 
         <div className="overflow-x-auto text-xs">
           <table className="w-full text-left">
@@ -310,6 +420,16 @@ export const ParentAttendance: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Attendance Download & Printable Report Modal */}
+      {isReportModalOpen && (
+        <AttendanceReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          student={student}
+          existingLogs={attendanceLogs}
+        />
+      )}
     </div>
   );
 };

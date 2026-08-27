@@ -1,0 +1,6 @@
+# Googlebot & Standard Web Crawlers
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://paradise-public-school.web.app/sitemap.xml

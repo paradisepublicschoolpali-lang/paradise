@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#1E40AF"/>
+  <path d="M 256 60 L 410 130 C 410 320 256 450 256 450 C 256 450 102 320 102 130 Z" fill="#1E3A8A" stroke="#3B82F6" stroke-width="10"/>
+  <path d="M 256 90 L 380 150 C 380 305 256 415 256 415 C 256 415 132 305 132 150 Z" fill="none" stroke="#93C5FD" stroke-width="4" stroke-dasharray="8 5" opacity="0.7"/>
+  <text x="256" y="300" font-family="'Cinzel', 'Times New Roman', serif" font-size="140" font-weight="900" fill="#FFFFFF" text-anchor="middle">P</text>
+  <polygon points="256,120 264,138 284,138 270,149 276,168 256,156 236,168 242,149 228,138 248,138" fill="#FBBF24"/>
+</svg>

@@ -17,7 +17,8 @@ import {
   Image as ImageIcon,
   Settings,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  ClipboardList
 } from 'lucide-react';
 
 interface MenuItem {
@@ -42,12 +43,13 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   setIsMobileOpen
 }) => {
   const { role, currentUser, logout } = useAuth();
-  const { fees, homework, admissions } = useSchoolData();
+  const { fees, homework, admissions, leaves } = useSchoolData();
 
   // Badges calculation
   const pendingFeesCount = fees.filter(f => f.status === 'Pending' || f.status === 'Overdue').length;
   const activeHomeworkCount = homework.filter(h => h.status === 'Active').length;
   const pendingAdmissionsCount = admissions.filter(a => a.status === 'Pending' || a.status === 'Under Review').length;
+  const pendingLeavesCount = leaves.filter(l => l.status === 'Pending').length;
 
   const parentMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -59,17 +61,21 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     { id: 'fees', label: 'Fees & Payment', icon: <CreditCard className="w-4 h-4" />, badge: pendingFeesCount > 0 ? 'Due' : undefined, badgeColor: 'bg-red-100 text-red-700' },
   ];
 
+  // Teacher portal with homework REMOVED
   const teacherMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'classes', label: 'Classes & Timetable', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'attendance', label: 'Daily Attendance', icon: <CalendarCheck className="w-4 h-4" /> },
-    { id: 'homework', label: 'Homework Manager', icon: <FileCheck2 className="w-4 h-4" /> },
-    { id: 'results', label: 'Results Entry', icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'attendance', label: 'Daily Roll Call', icon: <CalendarCheck className="w-4 h-4" /> },
+    { id: 'results', label: 'Results & Marks Entry', icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'notices', label: 'Notice Broadcaster', icon: <Bell className="w-4 h-4" /> },
   ];
 
+  // Admin portal with MAXIMUM POWER (Results Controller, Attendance Master, Homework Directorate, Directory, Fees, Admissions, etc.)
   const adminMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard & KPIs', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'results', label: 'Gradebook & Exams', icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'attendance', label: 'Attendance & Leaves', icon: <CalendarCheck className="w-4 h-4" />, badge: pendingLeavesCount ? `${pendingLeavesCount}` : undefined, badgeColor: 'bg-amber-100 text-amber-800' },
+    { id: 'homework', label: 'Homework Directorate', icon: <ClipboardList className="w-4 h-4" />, badge: activeHomeworkCount ? `${activeHomeworkCount}` : undefined },
     { id: 'students', label: 'Students Directory', icon: <Users className="w-4 h-4" /> },
     { id: 'teachers', label: 'Faculty Directory', icon: <UserCheck className="w-4 h-4" /> },
     { id: 'fees', label: 'Fee Management', icon: <CreditCard className="w-4 h-4" /> },
@@ -77,12 +83,12 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     { id: 'notices', label: 'Notices & Circulars', icon: <Bell className="w-4 h-4" /> },
     { id: 'events', label: 'Events Manager', icon: <Calendar className="w-4 h-4" /> },
     { id: 'gallery', label: 'Gallery Manager', icon: <ImageIcon className="w-4 h-4" /> },
-    { id: 'settings', label: 'School Settings', icon: <Settings className="w-4 h-4" /> },
+    { id: 'settings', label: 'Settings & Cloud DB', icon: <Settings className="w-4 h-4" /> },
   ];
 
   const menuItems: MenuItem[] = role === 'parent' ? parentMenuItems : role === 'teacher' ? teacherMenuItems : adminMenuItems;
 
-  const roleTitle = role === 'parent' ? 'Parent & Student' : role === 'teacher' ? 'Faculty & Teacher' : 'Administration';
+  const roleTitle = role === 'parent' ? 'Parent & Student' : role === 'teacher' ? 'Faculty' : 'Supreme Directorate';
   const roleBadgeColor = role === 'parent' ? 'bg-blue-100 text-blue-800' : role === 'teacher' ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800';
 
   const selectTab = (tabId: string) => {
@@ -176,7 +182,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
             className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border border-slate-200"
           >
             <LogOut className="w-4 h-4 text-blue-600" />
-            <span>← Return to Portal Gateway</span>
+            <span>Sign Out / Lock Portal</span>
           </button>
         </div>
       </aside>

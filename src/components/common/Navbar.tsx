@@ -119,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
               <button
                 onClick={logout}
                 className="p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700"
-                title="Switch Portal"
+                title="Portal Login"
               >
                 <LayoutGrid className="w-4 h-4 text-blue-600" />
               </button>

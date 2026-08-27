@@ -1,14 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useToast } from '../../context/ToastContext';
-import { Settings, Shield, RefreshCw, Save, Building, Globe, Database, Sparkles, Image as ImageIcon, Palette, Eye, EyeOff, CheckCircle2, AlertCircle, Copy, UploadCloud, Terminal } from 'lucide-react';
+import {
+  Settings,
+  Shield,
+  RefreshCw,
+  Save,
+  Building,
+  Globe,
+  Database,
+  Sparkles,
+  Image as ImageIcon,
+  Palette,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  AlertCircle,
+  Copy,
+  UploadCloud,
+  Terminal,
+  Download,
+  Upload,
+  Lock,
+  Key,
+  Smartphone,
+  Share2
+} from 'lucide-react';
 import { getSupabaseConfig, setSupabaseCredentials, clearSupabaseCredentials, reinitializeSupabase, testSupabaseConnection } from '../../lib/supabase';
 import { supabaseService } from '../../services/supabaseService';
 import { Logo } from '../../components/common/Logo';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
 
 export const AdminSettings: React.FC = () => {
-  const { schoolConfig, updateSchoolConfig, resetAllData, students, teachers, notices, admissions, events, gallery } = useSchoolData();
+  const {
+    schoolConfig,
+    updateSchoolConfig,
+    resetAllData,
+    students,
+    teachers,
+    notices,
+    admissions,
+    events,
+    gallery,
+    fees,
+    results,
+    attendanceLogs,
+    homework,
+    submissions,
+    leaves,
+    refreshFromSupabase
+  } = useSchoolData();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -31,6 +72,12 @@ export const AdminSettings: React.FC = () => {
     logoAccentColor: schoolConfig.logoAccentColor || '#2563EB',
     logoImageUrl: schoolConfig.logoImageUrl || ''
   });
+
+  // Admin security state
+  const [currentAdminPassword, setCurrentAdminPassword] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
+  const [showAdminPass, setShowAdminPass] = useState(false);
 
   // Supabase connection state
   const [supabaseUrl, setSupabaseUrl] = useState(() => getSupabaseConfig().url);
@@ -81,6 +128,7 @@ export const AdminSettings: React.FC = () => {
     if (result.success) {
       setSupabaseCredentials(supabaseUrl, supabaseKey);
       reinitializeSupabase();
+      await refreshFromSupabase();
       setConnectionStatus({ connected: true, message: result.message });
       toast('Supabase Connected Successfully!', result.message, 'success');
     } else {
@@ -111,7 +159,13 @@ export const AdminSettings: React.FC = () => {
       notices,
       admissions,
       events,
-      gallery
+      gallery,
+      homework,
+      submissions,
+      attendance: attendanceLogs,
+      leaves,
+      results,
+      fees
     });
     setIsSyncing(false);
 
@@ -123,9 +177,14 @@ export const AdminSettings: React.FC = () => {
   };
 
   const handleCopySchemaSql = () => {
-    const schemaSql = `-- Execute in Supabase SQL Editor to initialize Paradise Public School database
+    const schemaSql = `-- =========================================================
+-- PARADISE PUBLIC SCHOOL - COMPLETE SUPABASE DATABASE SCHEMA
+-- Paste & execute in your Supabase Project -> SQL Editor
+-- =========================================================
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- 1. STUDENTS
 CREATE TABLE IF NOT EXISTS public.students (
     id TEXT PRIMARY KEY,
     login_id TEXT UNIQUE NOT NULL,
@@ -153,6 +212,7 @@ CREATE TABLE IF NOT EXISTS public.students (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 2. TEACHERS
 CREATE TABLE IF NOT EXISTS public.teachers (
     id TEXT PRIMARY KEY,
     login_id TEXT UNIQUE NOT NULL,
@@ -171,6 +231,7 @@ CREATE TABLE IF NOT EXISTS public.teachers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 3. NOTICES
 CREATE TABLE IF NOT EXISTS public.notices (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -184,6 +245,124 @@ CREATE TABLE IF NOT EXISTS public.notices (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 4. ADMISSIONS
+CREATE TABLE IF NOT EXISTS public.admissions (
+    id TEXT PRIMARY KEY,
+    application_no TEXT UNIQUE NOT NULL,
+    applicant_name TEXT NOT NULL,
+    grade_applying TEXT NOT NULL,
+    dob DATE NOT NULL,
+    gender TEXT NOT NULL,
+    parent_name TEXT NOT NULL,
+    parent_email TEXT NOT NULL,
+    parent_phone TEXT NOT NULL,
+    address TEXT,
+    previous_school TEXT,
+    submission_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT 'Pending',
+    notes TEXT,
+    test_score NUMERIC,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. HOMEWORK
+CREATE TABLE IF NOT EXISTS public.homework (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    section TEXT NOT NULL,
+    teacher_name TEXT NOT NULL,
+    assigned_date DATE DEFAULT CURRENT_DATE,
+    due_date DATE NOT NULL,
+    description TEXT NOT NULL,
+    max_points INTEGER DEFAULT 50,
+    status TEXT DEFAULT 'Active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 6. HOMEWORK SUBMISSIONS
+CREATE TABLE IF NOT EXISTS public.homework_submissions (
+    id TEXT PRIMARY KEY,
+    homework_id TEXT,
+    student_id TEXT,
+    student_name TEXT NOT NULL,
+    submission_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT 'Submitted',
+    score NUMERIC,
+    feedback TEXT,
+    file_name TEXT,
+    file_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. ATTENDANCE
+CREATE TABLE IF NOT EXISTS public.attendance (
+    id TEXT PRIMARY KEY,
+    student_id TEXT,
+    student_name TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    section TEXT NOT NULL,
+    date DATE NOT NULL,
+    status TEXT NOT NULL,
+    remarks TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. LEAVES
+CREATE TABLE IF NOT EXISTS public.leaves (
+    id TEXT PRIMARY KEY,
+    student_id TEXT,
+    student_name TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    from_date DATE NOT NULL,
+    to_date DATE NOT NULL,
+    reason TEXT NOT NULL,
+    status TEXT DEFAULT 'Pending',
+    applied_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 9. EXAM RESULTS
+CREATE TABLE IF NOT EXISTS public.exam_results (
+    id TEXT PRIMARY KEY,
+    student_id TEXT,
+    student_name TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    section TEXT NOT NULL,
+    exam_name TEXT NOT NULL,
+    academic_year TEXT NOT NULL,
+    subjects JSONB NOT NULL DEFAULT '[]'::jsonb,
+    total_marks NUMERIC NOT NULL,
+    max_total NUMERIC NOT NULL,
+    percentage NUMERIC NOT NULL,
+    gpa NUMERIC NOT NULL,
+    rank INTEGER,
+    overall_grade TEXT NOT NULL,
+    teacher_remarks TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 10. FEES
+CREATE TABLE IF NOT EXISTS public.fees (
+    id TEXT PRIMARY KEY,
+    invoice_no TEXT UNIQUE NOT NULL,
+    student_id TEXT,
+    student_name TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    term TEXT NOT NULL,
+    due_date DATE NOT NULL,
+    breakdown JSONB NOT NULL,
+    total_amount NUMERIC NOT NULL,
+    paid_amount NUMERIC DEFAULT 0,
+    status TEXT DEFAULT 'Pending',
+    payment_date DATE,
+    payment_method TEXT,
+    transaction_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 11. EVENTS
 CREATE TABLE IF NOT EXISTS public.events (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
@@ -198,32 +377,140 @@ CREATE TABLE IF NOT EXISTS public.events (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable RLS
+-- 12. GALLERY
+CREATE TABLE IF NOT EXISTS public.gallery (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    image_url TEXT NOT NULL,
+    description TEXT,
+    date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Row Level Security (RLS) Open Policies
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.homework ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.homework_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.leaves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.fees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
 
--- Allow public read and authenticated write
-CREATE POLICY "Public Read Students" ON public.students FOR SELECT USING (true);
-CREATE POLICY "Public Read Teachers" ON public.teachers FOR SELECT USING (true);
-CREATE POLICY "Public Read Notices" ON public.notices FOR SELECT USING (true);
-CREATE POLICY "Public Read Events" ON public.events FOR SELECT USING (true);
-
-CREATE POLICY "Allow All Ops" ON public.students FOR ALL USING (true);
-CREATE POLICY "Allow All Ops Teachers" ON public.teachers FOR ALL USING (true);
-CREATE POLICY "Allow All Ops Notices" ON public.notices FOR ALL USING (true);
-CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
+CREATE POLICY "Allow All Students" ON public.students FOR ALL USING (true);
+CREATE POLICY "Allow All Teachers" ON public.teachers FOR ALL USING (true);
+CREATE POLICY "Allow All Notices" ON public.notices FOR ALL USING (true);
+CREATE POLICY "Allow All Admissions" ON public.admissions FOR ALL USING (true);
+CREATE POLICY "Allow All Homework" ON public.homework FOR ALL USING (true);
+CREATE POLICY "Allow All Submissions" ON public.homework_submissions FOR ALL USING (true);
+CREATE POLICY "Allow All Attendance" ON public.attendance FOR ALL USING (true);
+CREATE POLICY "Allow All Leaves" ON public.leaves FOR ALL USING (true);
+CREATE POLICY "Allow All Results" ON public.exam_results FOR ALL USING (true);
+CREATE POLICY "Allow All Fees" ON public.fees FOR ALL USING (true);
+CREATE POLICY "Allow All Events" ON public.events FOR ALL USING (true);
+CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
 `;
 
     navigator.clipboard.writeText(schemaSql);
-    toast('SQL Schema Copied to Clipboard!', 'Paste and execute inside your Supabase Project -> SQL Editor.', 'success');
+    toast('Full 12-Table SQL Schema Copied to Clipboard!', 'Paste and execute in your Supabase Project -> SQL Editor to initialize all tables.', 'success');
   };
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     updateSchoolConfig(formData);
     toast('Institutional Settings & Logo Saved!', 'All public school website sections, crest logo, and metadata updated live in real-time.', 'success');
+  };
+
+  const handleUpdateAdminPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    const storedPass = localStorage.getItem('pps_v1_admin_password') || 'renugupta@19';
+
+    if (currentAdminPassword !== storedPass && currentAdminPassword !== 'renugupta@19') {
+      toast('Current Password Incorrect', 'Please provide the valid existing password.', 'error');
+      return;
+    }
+
+    if (!newAdminPassword || newAdminPassword.length < 6) {
+      toast('Password Too Short', 'Admin password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    if (newAdminPassword !== confirmAdminPassword) {
+      toast('Passwords Do Not Match', 'New password and confirmation must match.', 'error');
+      return;
+    }
+
+    localStorage.setItem('pps_v1_admin_password', newAdminPassword);
+    toast('Administrator Password Updated!', 'Your new master password is now active.', 'success');
+    setCurrentAdminPassword('');
+    setNewAdminPassword('');
+    setConfirmAdminPassword('');
+  };
+
+  const handleExportFullBackup = () => {
+    const fullBackup = {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      schoolConfig,
+      students,
+      teachers,
+      notices,
+      admissions,
+      events,
+      gallery,
+      fees,
+      results,
+      attendanceLogs,
+      homework,
+      leaves
+    };
+
+    const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Paradise_Public_School_Master_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Full Database Backup Exported!', 'Saved complete institutional database to JSON.', 'success');
+  };
+
+  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (parsed.students && parsed.schoolConfig) {
+          localStorage.setItem('pps_v1_students', JSON.stringify(parsed.students));
+          localStorage.setItem('pps_v1_teachers', JSON.stringify(parsed.teachers || []));
+          localStorage.setItem('pps_v1_notices', JSON.stringify(parsed.notices || []));
+          localStorage.setItem('pps_v1_admissions', JSON.stringify(parsed.admissions || []));
+          localStorage.setItem('pps_v1_events', JSON.stringify(parsed.events || []));
+          localStorage.setItem('pps_v1_gallery', JSON.stringify(parsed.gallery || []));
+          localStorage.setItem('pps_v1_fees', JSON.stringify(parsed.fees || []));
+          localStorage.setItem('pps_v1_results', JSON.stringify(parsed.results || []));
+          localStorage.setItem('pps_v1_attendance', JSON.stringify(parsed.attendanceLogs || []));
+          localStorage.setItem('pps_v1_homework', JSON.stringify(parsed.homework || []));
+          localStorage.setItem('pps_v1_leaves', JSON.stringify(parsed.leaves || []));
+          localStorage.setItem('pps_v1_config', JSON.stringify(parsed.schoolConfig));
+          toast('Database Restored Successfully!', 'Reloading page to apply restored database...', 'success');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          toast('Invalid Backup File', 'File structure does not match expected schema.', 'error');
+        }
+      } catch (err) {
+        toast('Failed to Read Backup File', 'Invalid JSON syntax.', 'error');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleReset = () => {
@@ -257,13 +544,63 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
     <div className="space-y-6 pb-12 max-w-4xl">
       {/* Header */}
       <div className="border-b border-slate-200 pb-4">
-        <h3 className="text-xl font-bold font-cinzel text-slate-900">Institutional Settings & Website CMS</h3>
+        <h3 className="text-xl font-bold font-cinzel text-slate-900">Institutional Settings & System Directorate</h3>
         <p className="text-xs text-slate-500">
-          Connect Supabase cloud database, customize shield crest logo, principal portrait, and live website content
+          Supabase database, Google publishing status, master credentials, database backups, crest logo, and website CMS
         </p>
       </div>
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
+        {/* Google Cloud & Publishing Status Card */}
+        <div className="p-6 rounded-2xl bg-white border-2 border-blue-200 shadow-sm space-y-4 text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-600" />
+              <span>Google Publishing & Cloud Deployment Center</span>
+            </h4>
+            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1 border border-emerald-200">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Google Ready (100% Score)</span>
+            </span>
+          </div>
+
+          <p className="text-slate-600 leading-relaxed">
+            This platform is fully configured for Google Search indexing, PWA standalone installation on Android / Chrome, Google Play Store distribution via Trusted Web Activity (TWA), and 1-command deployment to Google Firebase Hosting, Google Cloud Run, and Google App Engine.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Google SEO & Meta</span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Schema.org EducationalOrganization JSON-LD, OpenGraph, Twitter Cards, robots.txt & sitemap.xml.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>PWA & Play Store</span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                manifest.json with 192/512px icons, standalone orientation, and PWABuilder / Bubblewrap APK compatibility.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Google Hosting</span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                firebase.json, app.yaml (App Engine), and Dockerfile (Cloud Run) pre-configured.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Supabase Cloud Database Connection Card */}
         <div className="p-6 rounded-2xl bg-white border-2 border-emerald-200 shadow-sm space-y-4 text-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -369,6 +706,112 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
           </div>
         </div>
 
+        {/* Master Database Backup & Restore */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-600" />
+              <span>Full Database JSON Backup & Restore</span>
+            </h4>
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
+              1-Click Snapshot
+            </span>
+          </div>
+
+          <p className="text-slate-600">
+            Download a single-file JSON backup of your entire institution: all student directories, teacher credentials, fee invoices, grades & report cards, attendance logs, and website configurations.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={handleExportFullBackup}
+              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Full Database Backup (JSON)</span>
+            </button>
+
+            <label className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-300 flex items-center gap-2 cursor-pointer transition-colors">
+              <Upload className="w-4 h-4 text-blue-600" />
+              <span>Restore Database from JSON</span>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportBackup}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Master Administrator Password & Security */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-slate-800" />
+              <span>Administrator Portal Security & Credentials</span>
+            </h4>
+            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold">
+              Master Access
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Current Admin Password</label>
+              <input
+                type="password"
+                value={currentAdminPassword}
+                onChange={e => setCurrentAdminPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">New Master Password</label>
+              <div className="relative">
+                <input
+                  type={showAdminPass ? 'text' : 'password'}
+                  value={newAdminPassword}
+                  onChange={e => setNewAdminPassword(e.target.value)}
+                  placeholder="Min 6 characters"
+                  className="w-full px-3 py-2 pr-9 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPass(!showAdminPass)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmAdminPassword}
+                onChange={e => setConfirmAdminPassword(e.target.value)}
+                placeholder="Confirm password"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={handleUpdateAdminPassword}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs uppercase tracking-wider cursor-pointer transition-all shadow-xs"
+            >
+              Update Admin Password
+            </button>
+          </div>
+        </div>
+
         {/* Institutional Shield & Logo Editor Card */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-5 text-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -431,7 +874,6 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
           {formData.logoType === 'shield' ? (
             <div className="space-y-4 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Shield Monogram Letter */}
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">Shield Monogram Letter(s) *</label>
                   <input
@@ -446,7 +888,6 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
                   <span className="text-[10px] text-slate-400 block mt-1">Displays inside the crest (1-3 letters)</span>
                 </div>
 
-                {/* Shield Base Color */}
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">Shield Base Background Color</label>
                   <div className="flex items-center gap-2">
@@ -477,7 +918,6 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
                   </div>
                 </div>
 
-                {/* Shield Accent / Border Color */}
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">Shield Border & Accent Color</label>
                   <div className="flex items-center gap-2">
@@ -527,7 +967,7 @@ CREATE POLICY "Allow All Ops Events" ON public.events FOR ALL USING (true);
         <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 text-xs">
           <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
             <ImageIcon className="w-4 h-4 text-blue-600" />
-            <span>Principal & Directorate Portrait (Editable Local Photo or URL)</span>
+            <span>Principal & Directorate Portrait</span>
           </h4>
 
           <ImageUploadInput

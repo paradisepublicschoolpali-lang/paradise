@@ -1,30 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { CalendarCheck, BookOpen, Users, Clock, Award, CheckCircle2, ArrowRight } from 'lucide-react';
-import { Modal } from '../../components/common/Modal';
+import { CalendarCheck, BookOpen, Users, Clock, Award, CheckCircle2, ArrowRight, GraduationCap } from 'lucide-react';
 
 interface TeacherDashboardProps {
   setActiveTab: (tab: string) => void;
 }
 
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab }) => {
-  const { teachers, homework, submissions, gradeHomeworkSubmission } = useSchoolData();
+  const { teachers, students, results } = useSchoolData();
   const { currentUser } = useAuth();
   const teacher = teachers.find(t => t.id === currentUser.id || t.loginId === currentUser.loginId) || teachers[0];
-
-  const [selectedSub, setSelectedSub] = useState<any | null>(null);
-  const [score, setScore] = useState(45);
-  const [feedback, setFeedback] = useState('Excellent grasp of derivations.');
-
-  const pendingSubmissions = submissions.filter(s => s.status === 'Submitted');
-
-  const handleGrade = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSub) return;
-    gradeHomeworkSubmission(selectedSub.id, score, feedback);
-    setSelectedSub(null);
-  };
 
   const todayClasses = [
     { period: '01', time: '08:30 - 09:20', grade: 'Grade 8', section: 'A', subject: 'General Science', topic: 'Force, Pressure & Atmospheric Dynamics' },
@@ -55,18 +41,31 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           </div>
         </div>
 
-        <button
-          onClick={() => setActiveTab('attendance')}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
-        >
-          <CalendarCheck className="w-4 h-4" />
-          <span>Mark Class Roll Call</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setActiveTab('attendance')}
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+          >
+            <CalendarCheck className="w-4 h-4" />
+            <span>Mark Class Roll Call</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('results')}
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>Enter Unit Marks</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1 text-center">
+        <div
+          onClick={() => setActiveTab('classes')}
+          className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 shadow-xs cursor-pointer space-y-1 text-center transition-all"
+        >
           <span className="text-xs text-slate-500 font-semibold uppercase">Assigned Divisions</span>
           <div className="text-3xl font-bold font-cinzel text-slate-900">3 Classes</div>
           <span className="text-[11px] text-blue-600 font-medium">96 Total Scholars</span>
@@ -78,20 +77,23 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           <span className="text-[11px] text-emerald-700">Next: Period 1 at 08:30 AM</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
-          <span className="text-xs text-slate-500 font-semibold uppercase">Pending Grading</span>
-          <div className="text-3xl font-bold font-cinzel text-amber-600">{pendingSubmissions.length} Submissions</div>
-          <span className="text-[11px] text-amber-700">Requires evaluation</span>
+        <div
+          onClick={() => setActiveTab('results')}
+          className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 shadow-xs cursor-pointer text-center space-y-1 transition-all"
+        >
+          <span className="text-xs text-slate-500 font-semibold uppercase">Published Marks</span>
+          <div className="text-3xl font-bold font-cinzel text-blue-600">{results.length} Transcripts</div>
+          <span className="text-[11px] text-blue-700">Unit Tests & Mid-Terms</span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
           <span className="text-xs text-slate-500 font-semibold uppercase">Department Batch GPA</span>
-          <div className="text-3xl font-bold font-cinzel text-blue-600">3.88 / 4.0</div>
-          <span className="text-[11px] text-blue-700">Top in STEM Board</span>
+          <div className="text-3xl font-bold font-cinzel text-emerald-600">3.88 / 4.0</div>
+          <span className="text-[11px] text-emerald-700">Top in STEM Board</span>
         </div>
       </div>
 
-      {/* Grid: Schedule & Grading Queue */}
+      {/* Grid: Allocated Lectures & Allocated Class Syllabus */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Schedule */}
         <div className="lg:col-span-7 p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
@@ -125,90 +127,46 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           </div>
         </div>
 
-        {/* Pending Grading Queue */}
+        {/* Assigned Division Rosters Shortcut */}
         <div className="lg:col-span-5 p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600" />
-              <span>Pending Evaluations</span>
+              <span>Allocated Divisions</span>
             </h3>
-            <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
-              {pendingSubmissions.length} Pending
-            </span>
+            <button
+              onClick={() => setActiveTab('classes')}
+              className="text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
+            >
+              View Roster →
+            </button>
           </div>
 
           <div className="space-y-3">
-            {pendingSubmissions.map(sub => (
+            {(teacher?.assignedClasses || [
+              { grade: 'Grade 8', section: 'A', subject: 'General Science' },
+              { grade: 'Grade 7', section: 'A', subject: 'Physical Science' },
+              { grade: 'Grade 6', section: 'B', subject: 'Nature Science' }
+            ]).map((cls, idx) => (
               <div
-                key={sub.id}
-                className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2 text-xs"
+                key={idx}
+                className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs"
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900">{sub.studentName}</span>
-                  <span className="text-[10px] text-slate-400 font-mono">{sub.submissionDate}</span>
+                <div>
+                  <div className="font-bold text-slate-900">{cls.grade} - {cls.section}</div>
+                  <div className="text-[11px] text-blue-600 font-semibold">{cls.subject}</div>
                 </div>
-                <div className="text-slate-500 font-mono text-[11px] truncate">{sub.fileName}</div>
                 <button
-                  onClick={() => setSelectedSub(sub)}
-                  className="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase transition-colors"
+                  onClick={() => setActiveTab('attendance')}
+                  className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[10px] uppercase cursor-pointer"
                 >
-                  Grade Submission
+                  Roll Call
                 </button>
               </div>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Grade Modal */}
-      <Modal
-        isOpen={selectedSub !== null}
-        onClose={() => setSelectedSub(null)}
-        title="Grade Assignment Solution"
-        subtitle={selectedSub ? `Candidate: ${selectedSub.studentName} • ${selectedSub.fileName}` : ''}
-        maxWidth="lg"
-      >
-        <form onSubmit={handleGrade} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-slate-700 font-semibold mb-1">Score / Marks (out of 50) *</label>
-            <input
-              type="number"
-              required
-              min={0}
-              max={50}
-              value={score}
-              onChange={e => setScore(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-700 font-semibold mb-1">Faculty Feedback & Remarks</label>
-            <textarea
-              rows={3}
-              value={feedback}
-              onChange={e => setFeedback(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setSelectedSub(null)}
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider"
-            >
-              Commit Grade
-            </button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 };

@@ -1,0 +1,15 @@
+runtime: nodejs20
+instance_class: F1
+
+handlers:
+  # Serve all static assets in the dist directory
+  - url: /(.*\.(js|css|svg|png|jpg|jpeg|webp|ico|woff|woff2|json|xml|txt))$
+    static_files: dist/\1
+    upload: dist/(.*\.(js|css|svg|png|jpg|jpeg|webp|ico|woff|woff2|json|xml|txt))$
+    secure: always
+
+  # Single Page Application router fallback to index.html
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
+    secure: always

@@ -7,7 +7,6 @@ import { ToastProvider } from './context/ToastContext';
 import { PortalGateway } from './components/common/PortalGateway';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
-import { RoleSwitcher } from './components/common/RoleSwitcher';
 import { PortalLayout } from './components/portal-layout/PortalLayout';
 
 // Guest Pages
@@ -29,16 +28,18 @@ import { ParentHomework } from './pages/parent/ParentHomework';
 import { ParentNotices } from './pages/parent/ParentNotices';
 import { ParentFees } from './pages/parent/ParentFees';
 
-// Teacher Portal Pages
+// Teacher Portal Pages (Homework removed)
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { TeacherClasses } from './pages/teacher/TeacherClasses';
 import { TeacherAttendance } from './pages/teacher/TeacherAttendance';
-import { TeacherHomework } from './pages/teacher/TeacherHomework';
 import { TeacherResults } from './pages/teacher/TeacherResults';
 import { TeacherNotices } from './pages/teacher/TeacherNotices';
 
-// Admin Portal Pages
+// Admin Portal Pages (Maximum Power: Results Controller, Attendance Master, Homework Directorate, Directory, Fees, etc.)
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { AdminResults } from './pages/admin/AdminResults';
+import { AdminAttendance } from './pages/admin/AdminAttendance';
+import { AdminHomework } from './pages/admin/AdminHomework';
 import { AdminStudents } from './pages/admin/AdminStudents';
 import { AdminTeachers } from './pages/admin/AdminTeachers';
 import { AdminFees } from './pages/admin/AdminFees';
@@ -66,7 +67,7 @@ const getInitialGuestTab = () => {
 };
 
 const SchoolApp: React.FC = () => {
-  const { role, showGateway, switchRole, openGateway } = useAuth();
+  const { role, showGateway, openGateway } = useAuth();
 
   // Internal tab states for each portal - restored from URL hash on reload
   const [guestTab, setGuestTabState] = useState(getInitialGuestTab);
@@ -141,7 +142,7 @@ const SchoolApp: React.FC = () => {
     };
   }, [openGateway]);
 
-  // If initial entry gateway is open, render PortalGateway (4 options: Guest, Parent, Teacher, Admin)
+  // If initial entry gateway is open, render PortalGateway (Guest, Parent, Teacher, Admin login)
   if (showGateway) {
     return <PortalGateway />;
   }
@@ -164,7 +165,6 @@ const SchoolApp: React.FC = () => {
           </main>
         </div>
         <Footer setActiveTab={setGuestTab} />
-        <RoleSwitcher />
       </div>
     );
   }
@@ -184,33 +184,29 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[parentTab] || { title: 'Parent Portal', subtitle: '' };
 
     return (
-      <>
-        <PortalLayout
-          activeTab={parentTab}
-          setActiveTab={setParentTab}
-          title={activeInfo.title}
-          subtitle={activeInfo.subtitle}
-        >
-          {parentTab === 'dashboard' && <ParentDashboard setActiveTab={setParentTab} />}
-          {parentTab === 'profile' && <ParentProfile />}
-          {parentTab === 'attendance' && <ParentAttendance />}
-          {parentTab === 'results' && <ParentResults />}
-          {parentTab === 'homework' && <ParentHomework />}
-          {parentTab === 'notices' && <ParentNotices />}
-          {parentTab === 'fees' && <ParentFees />}
-        </PortalLayout>
-        <RoleSwitcher />
-      </>
+      <PortalLayout
+        activeTab={parentTab}
+        setActiveTab={setParentTab}
+        title={activeInfo.title}
+        subtitle={activeInfo.subtitle}
+      >
+        {parentTab === 'dashboard' && <ParentDashboard setActiveTab={setParentTab} />}
+        {parentTab === 'profile' && <ParentProfile />}
+        {parentTab === 'attendance' && <ParentAttendance />}
+        {parentTab === 'results' && <ParentResults />}
+        {parentTab === 'homework' && <ParentHomework />}
+        {parentTab === 'notices' && <ParentNotices />}
+        {parentTab === 'fees' && <ParentFees />}
+      </PortalLayout>
     );
   }
 
-  // TEACHER PORTAL RENDER
+  // TEACHER PORTAL RENDER (Homework removed)
   if (role === 'teacher') {
     const tabTitles: Record<string, { title: string; subtitle: string }> = {
-      dashboard: { title: 'Faculty Workstation', subtitle: 'Today’s Timetable & Pending Evaluation Queue' },
+      dashboard: { title: 'Faculty Workstation', subtitle: 'Today’s Timetable & Allocated Divisions' },
       classes: { title: 'Allocated Divisions', subtitle: 'Class Rosters, Contacts & Syllabus Tracking' },
       attendance: { title: 'Daily Roll Register', subtitle: 'Mark Classroom Attendance & Sync with Board' },
-      homework: { title: 'Homework Management', subtitle: 'Assign Tasks & Grade Student Submissions' },
       results: { title: 'Results & Marks Entry', subtitle: 'Unit Tests & Comprehensive Examinations Gradebook' },
       notices: { title: 'Broadcast Circulars', subtitle: 'Transmit Announcements to Scholars & Guardians' }
     };
@@ -218,29 +214,28 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[teacherTab] || { title: 'Teacher Portal', subtitle: '' };
 
     return (
-      <>
-        <PortalLayout
-          activeTab={teacherTab}
-          setActiveTab={setTeacherTab}
-          title={activeInfo.title}
-          subtitle={activeInfo.subtitle}
-        >
-          {teacherTab === 'dashboard' && <TeacherDashboard setActiveTab={setTeacherTab} />}
-          {teacherTab === 'classes' && <TeacherClasses />}
-          {teacherTab === 'attendance' && <TeacherAttendance />}
-          {teacherTab === 'homework' && <TeacherHomework />}
-          {teacherTab === 'results' && <TeacherResults />}
-          {teacherTab === 'notices' && <TeacherNotices />}
-        </PortalLayout>
-        <RoleSwitcher />
-      </>
+      <PortalLayout
+        activeTab={teacherTab}
+        setActiveTab={setTeacherTab}
+        title={activeInfo.title}
+        subtitle={activeInfo.subtitle}
+      >
+        {teacherTab === 'dashboard' && <TeacherDashboard setActiveTab={setTeacherTab} />}
+        {teacherTab === 'classes' && <TeacherClasses />}
+        {teacherTab === 'attendance' && <TeacherAttendance />}
+        {teacherTab === 'results' && <TeacherResults />}
+        {teacherTab === 'notices' && <TeacherNotices />}
+      </PortalLayout>
     );
   }
 
-  // ADMIN PORTAL RENDER
+  // ADMIN PORTAL RENDER (Empowered with Gradebook, Attendance Master, Homework Directorate, Directories, etc.)
   if (role === 'admin') {
     const tabTitles: Record<string, { title: string; subtitle: string }> = {
-      dashboard: { title: 'Principal Command Center', subtitle: 'Key Institutional Performance Indicators & Alerts' },
+      dashboard: { title: 'Principal Directorate Console', subtitle: 'Key Institutional Performance Indicators & Alerts' },
+      results: { title: 'Academic Gradebook & Exams', subtitle: 'Institution-wide Marksheets, GPA Calculator & Sealed Report Cards' },
+      attendance: { title: 'Attendance Ledger & Leave Desk', subtitle: 'Daily Presence Matrix, Leave Approvals & Absence Audit' },
+      homework: { title: 'Homework & Curriculum Directorate', subtitle: 'Central Task Assignment, Deadlines & Solution Evaluations' },
       students: { title: 'Student Body Directory', subtitle: 'Full Enrolment Registry & Credentials Manager' },
       teachers: { title: 'Faculty Directorate', subtitle: 'Staff Appointments, Credentials & Course Allocation' },
       fees: { title: 'Institutional Treasury', subtitle: 'Fee Collections, Dunning System & Invoicing' },
@@ -248,31 +243,31 @@ const SchoolApp: React.FC = () => {
       notices: { title: 'School Circulars Manager', subtitle: 'Publish & Pin Official Institutional Directives' },
       events: { title: 'Campus Events & Calendar', subtitle: 'Schedule Galas, Olympiads & Symposia' },
       gallery: { title: 'Media & Campus Gallery', subtitle: 'High-Resolution Photography Archives' },
-      settings: { title: 'System Configuration', subtitle: 'Institution Profile, Academic Dates & Database Reset' }
+      settings: { title: 'System Configuration & Cloud DB', subtitle: 'Institution Profile, Supabase DB & Google Publishing' }
     };
 
     const activeInfo = tabTitles[adminTab] || { title: 'Admin Portal', subtitle: '' };
 
     return (
-      <>
-        <PortalLayout
-          activeTab={adminTab}
-          setActiveTab={setAdminTab}
-          title={activeInfo.title}
-          subtitle={activeInfo.subtitle}
-        >
-          {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
-          {adminTab === 'students' && <AdminStudents />}
-          {adminTab === 'teachers' && <AdminTeachers />}
-          {adminTab === 'fees' && <AdminFees />}
-          {adminTab === 'admissions' && <AdminAdmissions />}
-          {adminTab === 'notices' && <AdminNotices />}
-          {adminTab === 'events' && <AdminEvents />}
-          {adminTab === 'gallery' && <AdminGallery />}
-          {adminTab === 'settings' && <AdminSettings />}
-        </PortalLayout>
-        <RoleSwitcher />
-      </>
+      <PortalLayout
+        activeTab={adminTab}
+        setActiveTab={setAdminTab}
+        title={activeInfo.title}
+        subtitle={activeInfo.subtitle}
+      >
+        {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
+        {adminTab === 'results' && <AdminResults />}
+        {adminTab === 'attendance' && <AdminAttendance />}
+        {adminTab === 'homework' && <AdminHomework />}
+        {adminTab === 'students' && <AdminStudents />}
+        {adminTab === 'teachers' && <AdminTeachers />}
+        {adminTab === 'fees' && <AdminFees />}
+        {adminTab === 'admissions' && <AdminAdmissions />}
+        {adminTab === 'notices' && <AdminNotices />}
+        {adminTab === 'events' && <AdminEvents />}
+        {adminTab === 'gallery' && <AdminGallery />}
+        {adminTab === 'settings' && <AdminSettings />}
+      </PortalLayout>
     );
   }
 

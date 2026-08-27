@@ -107,7 +107,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
                 onClick={logout}
                 className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border border-slate-700"
               >
-                <span>Switch Portal (Login)</span>
+                <span>School Portal Login</span>
                 <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
               </button>
             </div>

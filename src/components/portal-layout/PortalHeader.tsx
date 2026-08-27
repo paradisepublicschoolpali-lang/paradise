@@ -95,7 +95,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
 
               <button
                 onClick={logout}
-                title="Switch Portal / Sign Out"
+                title="Sign Out / Lock Portal"
                 className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />

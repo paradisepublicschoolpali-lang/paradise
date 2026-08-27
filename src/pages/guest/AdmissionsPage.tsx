@@ -89,7 +89,7 @@ export const AdmissionsPage: React.FC = () => {
                 Your application reference ID is: <strong className="font-mono text-base">{submittedAppNo}</strong>
               </p>
               <p className="text-xs text-emerald-700 max-w-md mx-auto">
-                An email confirmation with assessment guidelines has been sent to your registered email. The admissions bureau will contact you shortly.
+                An email confirmation with assessment guidelines has been sent from <strong>paradisepublicschool.pali@gmail.com</strong> to your registered email. The admissions bureau will contact you shortly.
               </p>
               <button
                 onClick={() => setSubmittedAppNo(null)}
@@ -192,7 +192,7 @@ export const AdmissionsPage: React.FC = () => {
                     required
                     value={formData.parentPhone}
                     onChange={e => setFormData({ ...formData, parentPhone: e.target.value })}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98110 00000"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   />
                 </div>

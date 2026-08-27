@@ -23,22 +23,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
 
   const leadership = [
     {
-      name: 'Dr. Robert Vance',
-      role: 'Principal & Executive Director',
-      credentials: 'Ph.D. Educational Leadership (Harvard), M.Sc. Physics (Oxford)',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600'
+      name: 'Dr. Renu Gupta',
+      role: 'Principal & Head of Institution',
+      credentials: 'Ph.D. Education (Delhi University), M.Sc. Physics, 28+ Yrs Leadership',
+      image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=600'
     },
     {
-      name: 'Dr. Eleanor Sterling-Roy',
-      role: 'Dean of International Academics',
-      credentials: 'Ph.D. Comparative Education (Cambridge), IBDP Lead Assessor',
+      name: 'Mrs. Sunita Verma',
+      role: 'Head of Sciences & Academic Dean',
+      credentials: 'M.Sc. Physics, B.Ed (Delhi University), CBSE Master Trainer',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600'
     },
     {
-      name: 'Prof. Alistair Montgomery',
-      role: 'Dean of Sciences & Technology',
-      credentials: 'M.Sc. Pure Mathematics (Cambridge), National Science Fellow',
-      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600'
+      name: 'Mr. Rajesh Iyer',
+      role: 'Dean of Mathematics & Technology',
+      credentials: 'M.Sc. Mathematics, B.Ed (CMI Chennai), National Olympiad Mentor',
+      image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600'
     }
   ];
 

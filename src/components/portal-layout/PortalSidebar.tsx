@@ -17,7 +17,6 @@ import {
   Image as ImageIcon,
   Settings,
   LogOut,
-  ExternalLink,
   ClipboardList
 } from 'lucide-react';
 
@@ -51,17 +50,17 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   const pendingAdmissionsCount = admissions.filter(a => a.status === 'Pending' || a.status === 'Under Review').length;
   const pendingLeavesCount = leaves.filter(l => l.status === 'Pending').length;
 
+  // Parent / Student portal navigation (Homework removed)
   const parentMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'profile', label: 'Student Profile', icon: <User className="w-4 h-4" /> },
     { id: 'attendance', label: 'Attendance & Leaves', icon: <CalendarCheck className="w-4 h-4" /> },
     { id: 'results', label: 'Results & Gradebook', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'homework', label: 'Homework & Tasks', icon: <BookOpen className="w-4 h-4" />, badge: activeHomeworkCount ? `${activeHomeworkCount}` : undefined },
     { id: 'notices', label: 'Notices & Circulars', icon: <Bell className="w-4 h-4" /> },
     { id: 'fees', label: 'Fees & Payment', icon: <CreditCard className="w-4 h-4" />, badge: pendingFeesCount > 0 ? 'Due' : undefined, badgeColor: 'bg-red-100 text-red-700' },
   ];
 
-  // Teacher portal with homework REMOVED
+  // Teacher portal navigation (Homework removed)
   const teacherMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'classes', label: 'Classes & Timetable', icon: <BookOpen className="w-4 h-4" /> },
@@ -70,7 +69,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     { id: 'notices', label: 'Notice Broadcaster', icon: <Bell className="w-4 h-4" /> },
   ];
 
-  // Admin portal with MAXIMUM POWER (Results Controller, Attendance Master, Homework Directorate, Directory, Fees, Admissions, etc.)
+  // Admin portal navigation (Full Directorate)
   const adminMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard & KPIs', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'results', label: 'Gradebook & Exams', icon: <GraduationCap className="w-4 h-4" /> },
@@ -78,7 +77,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     { id: 'homework', label: 'Homework Directorate', icon: <ClipboardList className="w-4 h-4" />, badge: activeHomeworkCount ? `${activeHomeworkCount}` : undefined },
     { id: 'students', label: 'Students Directory', icon: <Users className="w-4 h-4" /> },
     { id: 'teachers', label: 'Faculty Directory', icon: <UserCheck className="w-4 h-4" /> },
-    { id: 'fees', label: 'Fee Management', icon: <CreditCard className="w-4 h-4" /> },
+    { id: 'fees', label: 'Student Fee Management', icon: <CreditCard className="w-4 h-4" />, badge: pendingFeesCount ? `${pendingFeesCount}` : undefined, badgeColor: 'bg-amber-100 text-amber-800' },
     { id: 'admissions', label: 'Admissions Queue', icon: <FileCheck2 className="w-4 h-4" />, badge: pendingAdmissionsCount ? `${pendingAdmissionsCount}` : undefined, badgeColor: 'bg-blue-100 text-blue-700' },
     { id: 'notices', label: 'Notices & Circulars', icon: <Bell className="w-4 h-4" /> },
     { id: 'events', label: 'Events Manager', icon: <Calendar className="w-4 h-4" /> },
@@ -88,7 +87,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
 
   const menuItems: MenuItem[] = role === 'parent' ? parentMenuItems : role === 'teacher' ? teacherMenuItems : adminMenuItems;
 
-  const roleTitle = role === 'parent' ? 'Parent & Student' : role === 'teacher' ? 'Faculty' : 'Supreme Directorate';
+  const roleTitle = role === 'parent' ? 'Parent & Student' : role === 'teacher' ? 'Faculty' : 'Directorate';
   const roleBadgeColor = role === 'parent' ? 'bg-blue-100 text-blue-800' : role === 'teacher' ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800';
 
   const selectTab = (tabId: string) => {

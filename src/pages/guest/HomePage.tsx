@@ -59,19 +59,19 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
 
   const testimonials = [
     {
-      quote: "Paradise Public School provided the intellectual rigor and robotics lab mentorship that helped me earn a full scholarship to MIT.",
+      quote: "Paradise Public School provided the foundational rigor and robotics lab mentorship that inspired my journey into aerospace innovation.",
       author: "Aditya Roy",
-      role: "Class of 2023 • MIT Aerospace Engineering"
+      role: "Alumnus • IIT Delhi Aerospace"
     },
     {
       quote: "The personalized attention and values-driven faculty at Paradise shaped my daughter into a confident national debater and scholar.",
       author: "Dr. Meenakshi Sundaram",
-      role: "Parent of Rhea (Grade 11)"
+      role: "Parent of Rhea (Class 8)"
     },
     {
-      quote: "A world-class environment with unmatched sports infrastructure, elite faculties, and a culture of relentless excellence.",
-      author: "Col. Jason Vance",
-      role: "Parent of Marcus (Grade 10)"
+      quote: "A disciplined, values-centric environment with unmatched sports facilities, caring mentors, and a culture of holistic excellence.",
+      author: "Col. Rajesh Verma",
+      role: "Parent of Aryan (Class 8)"
     }
   ];
 

@@ -246,7 +246,7 @@ export const PortalGateway: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-700">Parent / Student</h3>
             <p className="text-sm text-slate-500 mt-1">
-              View results, attendance, fees & homework
+              View results, attendance & tuition fees
             </p>
           </button>
 

@@ -39,8 +39,8 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({ result, isOpen
               <span className="text-xs font-mono font-bold tracking-widest text-blue-700 uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                 Official Board Record
               </span>
-              <div className="text-xs text-slate-500 mt-2">Affiliation Code: <strong className="text-slate-900">PPS-CBSE-992140</strong></div>
-              <div className="text-xs text-slate-500">Accredited by International Baccalaureate & CBSE</div>
+              <div className="text-xs text-slate-500 mt-2">Affiliation: <strong className="text-slate-900">CBSE Affiliation No: 2130842</strong></div>
+              <div className="text-xs text-slate-500">Central Board of Secondary Education, New Delhi</div>
             </div>
           </div>
 
@@ -120,11 +120,11 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({ result, isOpen
           {/* Institutional Signatures */}
           <div className="pt-8 flex items-center justify-between border-t border-slate-200 text-center text-xs text-slate-500">
             <div>
-              <div className="font-serif italic text-slate-800 text-base">Dr. Sarah Jenkins</div>
-              <div className="border-t border-slate-300 pt-1 mt-1 font-semibold text-[11px]">Class Mentor & Grade Head</div>
+              <div className="font-serif italic text-slate-800 text-base">Mrs. Sunita Verma</div>
+              <div className="border-t border-slate-300 pt-1 mt-1 font-semibold text-[11px]">Class Teacher & Grade Head</div>
             </div>
             <div>
-              <div className="font-serif italic text-slate-800 text-base">Dr. Robert Vance</div>
+              <div className="font-serif italic text-slate-800 text-base">Dr. Renu Gupta</div>
               <div className="border-t border-slate-300 pt-1 mt-1 font-semibold text-[11px]">Principal & Directorate Seal</div>
             </div>
           </div>

@@ -176,10 +176,10 @@ export interface FeeItem {
   dueDate: string;
   breakdown: {
     tuition: number;
-    transport: number;
-    labAndLibrary: number;
-    sportsAndActivities: number;
-    developmentFund: number;
+    transport?: number;
+    labAndLibrary?: number;
+    sportsAndActivities?: number;
+    developmentFund?: number;
   };
   totalAmount: number;
   paidAmount: number;

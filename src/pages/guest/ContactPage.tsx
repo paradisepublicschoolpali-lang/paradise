@@ -20,7 +20,7 @@ export const ContactPage: React.FC = () => {
       return;
     }
     setSubmitted(true);
-    toast('Inquiry Dispatched', 'Our administrative desk will contact you within 24 hours.', 'success');
+    toast('Inquiry Dispatched!', 'Inquiry routed to paradisepublicschool.pali@gmail.com. Our administrative desk will contact you within 24 hours.', 'success');
   };
 
   return (
@@ -49,23 +49,23 @@ export const ContactPage: React.FC = () => {
                   <MapPin className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Main Campus Address</strong>
-                    <span className="text-slate-600">42 Heritage Avenue, North Campus Enclave, New Delhi, India</span>
+                    <span className="text-slate-600">42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-900 text-sm">Admissions Hotline</strong>
-                    <span className="text-slate-600">+1 (800) 842-PARADISE / +1 (555) 234-8000</span>
+                    <strong className="block text-slate-900 text-sm">Admissions Helpline</strong>
+                    <span className="text-slate-600">+91 11 2765 4321 / +91 98110 12345</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-900 text-sm">Official Inquiries</strong>
-                    <span className="text-slate-600">admissions@paradiseschool.edu / info@paradiseschool.edu</span>
+                    <strong className="block text-slate-900 text-sm">Official Email Desk</strong>
+                    <span className="text-slate-600 font-mono text-xs">paradisepublicschool.pali@gmail.com</span>
                   </div>
                 </div>
 
@@ -118,7 +118,7 @@ export const ContactPage: React.FC = () => {
                         required
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Eleanor Vance"
+                        placeholder="e.g. Rajesh Sharma"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                       />
                     </div>
@@ -129,7 +129,7 @@ export const ContactPage: React.FC = () => {
                         required
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="name@email.com"
+                        placeholder="name@gmail.com"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                       />
                     </div>
@@ -142,7 +142,7 @@ export const ContactPage: React.FC = () => {
                         type="tel"
                         value={formData.phone}
                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="+91 98110 00000"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                       />
                     </div>

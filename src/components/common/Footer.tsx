@@ -38,7 +38,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
               Empowering global leaders of tomorrow through holistic academic rigor, STEM innovation, and character building since 1994.
             </p>
             <div className="text-xs text-blue-400 font-semibold">
-              CBSE Affiliation No: 992140 • IB World School
+              CBSE Affiliation No: 2130842 • School Code: 71234
             </div>
           </div>
 
@@ -68,15 +68,15 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
             <div className="space-y-3 text-xs text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <span>42 Heritage Avenue, North Campus Enclave, New Delhi, India</span>
+                <span>42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>+1 (800) 842-PARADISE</span>
+                <span>+91 11 2765 4321 / +91 98110 12345</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>info@paradiseschool.edu</span>
+                <span>paradisepublicschool.pali@gmail.com</span>
               </div>
             </div>
           </div>

@@ -24,7 +24,6 @@ import { ParentDashboard } from './pages/parent/ParentDashboard';
 import { ParentProfile } from './pages/parent/ParentProfile';
 import { ParentAttendance } from './pages/parent/ParentAttendance';
 import { ParentResults } from './pages/parent/ParentResults';
-import { ParentHomework } from './pages/parent/ParentHomework';
 import { ParentNotices } from './pages/parent/ParentNotices';
 import { ParentFees } from './pages/parent/ParentFees';
 
@@ -176,7 +175,6 @@ const SchoolApp: React.FC = () => {
       profile: { title: 'Student Dossier', subtitle: 'Personal Biodata, Emergency Contacts & Route' },
       attendance: { title: 'Attendance Ledger', subtitle: 'Monthly Presence Log & Leave Filing' },
       results: { title: 'Examinations & Transcripts', subtitle: 'Academic Marks, Honors & Sealed Report Card' },
-      homework: { title: 'Homework & Assignments', subtitle: 'Daily Problem Sets & File Submissions' },
       notices: { title: 'Parent Circulars', subtitle: 'PTM Bookings & Official Announcements' },
       fees: { title: 'Tuition Ledger & Online Payment', subtitle: 'Quarterly Invoices & Instant Tax Receipts' }
     };
@@ -194,7 +192,6 @@ const SchoolApp: React.FC = () => {
         {parentTab === 'profile' && <ParentProfile />}
         {parentTab === 'attendance' && <ParentAttendance />}
         {parentTab === 'results' && <ParentResults />}
-        {parentTab === 'homework' && <ParentHomework />}
         {parentTab === 'notices' && <ParentNotices />}
         {parentTab === 'fees' && <ParentFees />}
       </PortalLayout>

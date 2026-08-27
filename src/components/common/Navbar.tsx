@@ -37,11 +37,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           <div className="flex items-center gap-6 text-[11px] text-slate-300">
             <span className="flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-blue-400" />
-              <span>+1 (800) 842-PARADISE</span>
+              <span>+91 11 2765 4321</span>
             </span>
             <span className="hidden md:flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-blue-400" />
-              <span>admissions@paradiseschool.edu</span>
+              <span>paradisepublicschool.pali@gmail.com</span>
             </span>
             <span className="hidden lg:flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-slate-400" />

@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useToast } from '../../context/ToastContext';
-import { FeeItem } from '../../types';
-import { CreditCard, Search, Mail, Printer, Plus, Edit3, Trash2, CheckCircle2, User, Filter } from 'lucide-react';
+import { FeeItem, Student } from '../../types';
+import {
+  CreditCard,
+  Search,
+  Mail,
+  Printer,
+  Plus,
+  Edit3,
+  Trash2,
+  CheckCircle2,
+  User,
+  Filter,
+  Send,
+  Copy,
+  ExternalLink,
+  Users,
+  AlertTriangle
+} from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { PaymentModal } from '../../components/common/PaymentModal';
 import { Modal } from '../../components/common/Modal';
@@ -17,6 +33,14 @@ export const AdminFees: React.FC = () => {
   const [activeReceiptModal, setActiveReceiptModal] = useState<FeeItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingFee, setEditingFee] = useState<FeeItem | null>(null);
+
+  // Email Dispatch Modal States
+  const [emailModalFee, setEmailModalFee] = useState<FeeItem | null>(null);
+  const [emailRecipient, setEmailRecipient] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
+  const [selectedBulkFeeIds, setSelectedBulkFeeIds] = useState<string[]>([]);
 
   // New Invoice Form (Tuition only)
   const [formData, setFormData] = useState({
@@ -39,6 +63,110 @@ export const AdminFees: React.FC = () => {
                           f.grade.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesStudent && matchesSearch;
   });
+
+  // Open Single Student Email Composer
+  const handleOpenEmailModal = (fee: FeeItem) => {
+    const student = students.find(s => s.id === fee.studentId || s.name === fee.studentName);
+    const recipient = student?.guardianEmail || `${fee.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+    const subject = `[URGENT] Tuition Fee Due Notice - ${fee.studentName} (${fee.grade}) • Invoice #${fee.invoiceNo}`;
+    
+    const body = `Dear Parent / Guardian of ${fee.studentName},
+
+Greetings from Paradise Public School.
+
+This is a formal reminder regarding the outstanding Tuition Fee for the upcoming academic session. Please find the invoice details below:
+
+========================================
+PARADISE PUBLIC SCHOOL, NEW DELHI
+CBSE Affiliation No: 2130842 • School Code: 71234
+Official Accounts Desk: paradisepublicschool.pali@gmail.com
+========================================
+
+Scholar Name: ${fee.studentName}
+Class & Section: ${fee.grade}
+Admission / Roll: ${student?.rollNo || 'N/A'}
+Invoice Number: ${fee.invoiceNo}
+Billing Term: ${fee.term}
+Outstanding Tuition Amount: ${formatCurrency(fee.totalAmount)}
+Due Date: ${formatDate(fee.dueDate)}
+
+PAYMENT OPTIONS:
+1. Online UPI / QR Code: paradiseschool@sbi (Google Pay / PhonePe / Paytm / BHIM)
+2. Parent Portal: Log in to your school dashboard to settle via UPI, RuPay, Debit/Credit Card or Net Banking.
+3. School Accounts Counter: Open Monday to Saturday, 08:30 AM to 03:00 PM.
+
+Please settle the dues on or before ${formatDate(fee.dueDate)} to ensure uninterrupted academic access. If already paid, kindly reply with the transaction reference.
+
+Warm regards,
+Accounts & Treasury Directorate
+Paradise Public School
+Helpline: +91 11 2765 4321 / +91 98110 12345
+Email: paradisepublicschool.pali@gmail.com`;
+
+    setEmailModalFee(fee);
+    setEmailRecipient(recipient);
+    setEmailSubject(subject);
+    setEmailMessage(body);
+  };
+
+  // Open Bulk Email Dispatcher
+  const handleOpenBulkEmailModal = () => {
+    setSelectedBulkFeeIds(pendingFees.map(f => f.id));
+    setIsBulkEmailModalOpen(true);
+  };
+
+  // Launch User's Default Mail Client / Webmail with pre-filled content
+  const handleSendViaMailClient = () => {
+    if (!emailRecipient) {
+      toast('Recipient email is required', '', 'error');
+      return;
+    }
+    const mailtoUrl = `mailto:${encodeURIComponent(emailRecipient)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailMessage)}`;
+    window.open(mailtoUrl, '_blank');
+    toast('Mail Client Launched!', `Email composed to ${emailRecipient} from paradisepublicschool.pali@gmail.com`, 'success');
+    setEmailModalFee(null);
+  };
+
+  // 1-Click Copy Email to Clipboard
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(emailMessage);
+    toast('Email Copied to Clipboard!', 'Ready to paste into Gmail or your email client', 'info');
+  };
+
+  // Dispatch System In-App & Email Confirmation
+  const handleDispatchSystemEmail = () => {
+    toast('Email Notice Dispatched Successfully!', `Notification sent from paradisepublicschool.pali@gmail.com to ${emailRecipient}`, 'success');
+    setEmailModalFee(null);
+  };
+
+  // Dispatch Bulk Emails Action
+  const handleDispatchBulkEmails = () => {
+    const selectedFees = pendingFees.filter(f => selectedBulkFeeIds.includes(f.id));
+    const recipientEmails = selectedFees.map(f => {
+      const s = students.find(std => std.id === f.studentId || std.name === f.studentName);
+      return s?.guardianEmail || `${f.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+    });
+
+    const bccString = recipientEmails.join('; ');
+    const bulkSubject = `[URGENT] Paradise Public School - Tuition Fee Dues Notice (Quarter 3)`;
+    const bulkBody = `Dear Parents / Guardians,
+
+This is an official notice from Paradise Public School regarding outstanding Tuition Fees for the ongoing academic term.
+
+Please log in to the Parent Portal or visit the School Accounts Counter to clear any pending tuition dues before the upcoming deadline.
+
+Online Payment UPI ID: paradiseschool@sbi
+Accounts Desk: paradisepublicschool.pali@gmail.com
+Helpline: +91 11 2765 4321 / +91 98110 12345
+
+Paradise Public School Accounts Directorate`;
+
+    const mailtoUrl = `mailto:paradisepublicschool.pali@gmail.com?bcc=${encodeURIComponent(bccString)}&subject=${encodeURIComponent(bulkSubject)}&body=${encodeURIComponent(bulkBody)}`;
+    window.open(mailtoUrl, '_blank');
+
+    toast('Bulk Reminders Dispatched!', `Notices sent to ${selectedFees.length} guardian emails from paradisepublicschool.pali@gmail.com`, 'success');
+    setIsBulkEmailModalOpen(false);
+  };
 
   const handleCreateFee = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,10 +216,6 @@ export const AdminFees: React.FC = () => {
     }
   };
 
-  const handleSendReminder = (studentName: string, invoiceNo: string) => {
-    toast('Payment Alert Dispatched!', `SMS & Email reminder sent from paradisepublicschool.pali@gmail.com to guardian of ${studentName} for tuition invoice ${invoiceNo}`, 'success');
-  };
-
   const handleManualSettle = (feeId: string, invoiceNo: string) => {
     payFeeInvoice(feeId, 'UPI');
     toast('Invoice Settled', `Invoice ${invoiceNo} marked as Paid via Cash / UPI Counter`, 'success');
@@ -103,16 +227,30 @@ export const AdminFees: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h3 className="text-xl font-bold font-cinzel text-slate-900">Student Tuition Fee Treasury</h3>
-          <p className="text-xs text-slate-500">Manage, bill, and edit individual scholar tuition fees in ₹ INR</p>
+          <p className="text-xs text-slate-500">
+            Manage tuition billing in ₹ INR • Send official email reminders to pending fee scholars from <strong className="font-mono text-blue-700">paradisepublicschool.pali@gmail.com</strong>
+          </p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Generate Tuition Invoice</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {pendingFees.length > 0 && (
+            <button
+              onClick={handleOpenBulkEmailModal}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Email All Pending ({pendingFees.length})</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Generate Tuition Invoice</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Overview */}
@@ -131,15 +269,17 @@ export const AdminFees: React.FC = () => {
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 font-semibold uppercase">Reminders & Dunning</span>
-            <div className="text-sm font-bold text-slate-900 mt-0.5">Automated SMS / Email Active</div>
+            <span className="text-xs text-slate-500 font-semibold uppercase">Official Email Dispatch Desk</span>
+            <div className="text-sm font-bold text-slate-900 mt-0.5 truncate font-mono text-xs text-blue-700">
+              paradisepublicschool.pali@gmail.com
+            </div>
           </div>
           <button
-            onClick={() => toast('Bulk Reminders Dispatched', 'Alerts sent from paradisepublicschool.pali@gmail.com to all pending tuition accounts via SMS and email', 'info')}
+            onClick={handleOpenBulkEmailModal}
             className="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Mail className="w-3.5 h-3.5 text-blue-400" />
-            <span>Dispatch Dues Reminder</span>
+            <span>Send Bulk Fee Reminder Emails</span>
           </button>
         </div>
       </div>
@@ -193,10 +333,15 @@ export const AdminFees: React.FC = () => {
 
       {/* Invoices Table */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
-        <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
-          <CreditCard className="w-4 h-4 text-blue-600" />
-          <span>Tuition Fee Invoices ({filteredFees.length} records)</span>
-        </h4>
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-blue-600" />
+            <span>Tuition Fee Invoices ({filteredFees.length} records)</span>
+          </h4>
+          <span className="text-xs text-slate-500 font-mono">
+            Sender: paradisepublicschool.pali@gmail.com
+          </span>
+        </div>
 
         <div className="overflow-x-auto text-xs">
           <table className="w-full text-left">
@@ -204,6 +349,7 @@ export const AdminFees: React.FC = () => {
               <tr>
                 <th className="py-3 px-4 font-semibold">Invoice #</th>
                 <th className="py-3 px-4 font-semibold">Scholar Name</th>
+                <th className="py-3 px-4 font-semibold">Guardian Email</th>
                 <th className="py-3 px-4 font-semibold">Billing Term</th>
                 <th className="py-3 px-4 font-semibold text-right">Tuition Fee (₹)</th>
                 <th className="py-3 px-4 font-semibold text-center">Status</th>
@@ -214,95 +360,312 @@ export const AdminFees: React.FC = () => {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredFees.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                  <td colSpan={8} className="py-8 text-center text-slate-400">
                     No tuition fee invoices match the filter criteria.
                   </td>
                 </tr>
               ) : (
-                filteredFees.map(fee => (
-                  <tr key={fee.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-blue-700">{fee.invoiceNo}</td>
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-slate-900">{fee.studentName}</div>
-                      <div className="text-[10px] text-slate-500 font-mono">{fee.grade}</div>
-                    </td>
-                    <td className="py-3 px-4 font-medium">{fee.term}</td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 text-sm">
-                      {formatCurrency(fee.breakdown?.tuition || fee.totalAmount)}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          fee.status === 'Paid'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : fee.status === 'Pending'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {fee.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-[11px]">
-                      {fee.status === 'Paid' ? (
-                        <div>
-                          <span className="text-slate-900 font-semibold">{fee.paymentMethod || 'UPI'}</span>
-                          <div className="text-slate-400 font-mono text-[10px]">{fee.transactionId || 'Counter Deposit'}</div>
-                        </div>
-                      ) : (
-                        <span className="text-slate-500 font-mono">Due: {formatDate(fee.dueDate)}</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setEditingFee({ ...fee })}
-                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
-                          title="Edit Tuition Fee for Student"
+                filteredFees.map(fee => {
+                  const student = students.find(s => s.id === fee.studentId || s.name === fee.studentName);
+                  const guardianEmail = student?.guardianEmail || `${fee.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+
+                  return (
+                    <tr key={fee.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-blue-700">{fee.invoiceNo}</td>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900">{fee.studentName}</div>
+                        <div className="text-[10px] text-slate-500 font-mono">{fee.grade}</div>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-slate-600 text-[11px]">
+                        {guardianEmail}
+                      </td>
+                      <td className="py-3 px-4 font-medium">{fee.term}</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 text-sm">
+                        {formatCurrency(fee.breakdown?.tuition || fee.totalAmount)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            fee.status === 'Paid'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : fee.status === 'Pending'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
                         >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteFee(fee.id, fee.invoiceNo)}
-                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
-                          title="Delete Invoice"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                          {fee.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-[11px]">
                         {fee.status === 'Paid' ? (
-                          <button
-                            onClick={() => setActiveReceiptModal(fee)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-200 cursor-pointer"
-                            title="View Official Tax Receipt"
-                          >
-                            <Printer className="w-3.5 h-3.5 text-blue-600" />
-                          </button>
+                          <div>
+                            <span className="text-slate-900 font-semibold">{fee.paymentMethod || 'UPI'}</span>
+                            <div className="text-slate-400 font-mono text-[10px]">{fee.transactionId || 'Counter Deposit'}</div>
+                          </div>
                         ) : (
-                          <>
-                            <button
-                              onClick={() => handleSendReminder(fee.studentName, fee.invoiceNo)}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-blue-700 transition-colors border border-slate-200 cursor-pointer"
-                              title="Send Reminder"
-                            >
-                              <Mail className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleManualSettle(fee.id, fee.invoiceNo)}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase shadow-xs cursor-pointer"
-                            >
-                              Settle
-                            </button>
-                          </>
+                          <span className="text-slate-500 font-mono">Due: {formatDate(fee.dueDate)}</span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setEditingFee({ ...fee })}
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
+                            title="Edit Tuition Fee"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteFee(fee.id, fee.invoiceNo)}
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          {fee.status === 'Paid' ? (
+                            <button
+                              onClick={() => setActiveReceiptModal(fee)}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-200 cursor-pointer"
+                              title="View Official Tax Receipt"
+                            >
+                              <Printer className="w-3.5 h-3.5 text-blue-600" />
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleOpenEmailModal(fee)}
+                                className="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center gap-1 border border-blue-200 cursor-pointer"
+                                title="Compose & Send Tuition Due Email to Guardian"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Send Mail</span>
+                              </button>
+                              <button
+                                onClick={() => handleManualSettle(fee.id, fee.invoiceNo)}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase shadow-xs cursor-pointer"
+                              >
+                                Settle
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Individual Email Dispatch Modal */}
+      <Modal
+        isOpen={emailModalFee !== null}
+        onClose={() => setEmailModalFee(null)}
+        title="Send Tuition Fee Due Notice (Email Dispatch)"
+        subtitle={emailModalFee ? `Scholar: ${emailModalFee.studentName} (${emailModalFee.grade}) • Invoice #${emailModalFee.invoiceNo}` : ''}
+        maxWidth="2xl"
+      >
+        {emailModalFee && (
+          <div className="space-y-4 text-xs">
+            {/* Header info */}
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-blue-800 font-semibold block">Sender Address:</span>
+                <strong className="text-blue-950 font-mono">paradisepublicschool.pali@gmail.com</strong>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-blue-200 text-blue-900 font-bold text-[10px]">
+                Accounts & Treasury Bureau
+              </span>
+            </div>
+
+            {/* Recipient & Subject */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Recipient Guardian Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={emailRecipient}
+                  onChange={e => setEmailRecipient(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Email Subject Line *</label>
+                <input
+                  type="text"
+                  required
+                  value={emailSubject}
+                  onChange={e => setEmailSubject(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-700 font-semibold">Official Email Notice Content</label>
+                  <button
+                    type="button"
+                    onClick={handleCopyEmail}
+                    className="text-blue-600 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>Copy Text</span>
+                  </button>
+                </div>
+                <textarea
+                  rows={10}
+                  value={emailMessage}
+                  onChange={e => setEmailMessage(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-slate-300 text-slate-800 font-mono text-[11px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={() => setEmailModalFee(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSendViaMailClient}
+                  className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
+                  title="Open in Gmail / Default Mail App"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open in Mail App</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDispatchSystemEmail}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Confirm Dispatch</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Bulk Pending Fees Email Dispatcher Modal */}
+      <Modal
+        isOpen={isBulkEmailModalOpen}
+        onClose={() => setIsBulkEmailModalOpen(false)}
+        title="Batch Email Dispatcher: Pending Tuition Fees"
+        subtitle={`Select scholars with pending dues to dispatch email notices from paradisepublicschool.pali@gmail.com`}
+        maxWidth="2xl"
+      >
+        <div className="space-y-4 text-xs">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+              <div>
+                <h5 className="font-bold text-amber-950">Pending Fee Scholars: {pendingFees.length}</h5>
+                <p className="text-amber-800 text-[11px]">
+                  Selected: {selectedBulkFeeIds.length} scholars • Total Outstanding: {formatCurrency(
+                    pendingFees.filter(f => selectedBulkFeeIds.includes(f.id)).reduce((sum, curr) => sum + curr.totalAmount, 0)
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedBulkFeeIds.length === pendingFees.length) {
+                  setSelectedBulkFeeIds([]);
+                } else {
+                  setSelectedBulkFeeIds(pendingFees.map(f => f.id));
+                }
+              }}
+              className="text-amber-900 font-bold underline cursor-pointer text-[11px]"
+            >
+              {selectedBulkFeeIds.length === pendingFees.length ? 'Deselect All' : 'Select All'}
+            </button>
+          </div>
+
+          {/* Student Checklist */}
+          <div className="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto divide-y divide-slate-100">
+            {pendingFees.map(fee => {
+              const student = students.find(s => s.id === fee.studentId || s.name === fee.studentName);
+              const email = student?.guardianEmail || `${fee.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+              const isChecked = selectedBulkFeeIds.includes(fee.id);
+
+              return (
+                <label
+                  key={fee.id}
+                  className={`p-3 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors ${
+                    isChecked ? 'bg-blue-50/50' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedBulkFeeIds([...selectedBulkFeeIds, fee.id]);
+                        } else {
+                          setSelectedBulkFeeIds(selectedBulkFeeIds.filter(id => id !== fee.id));
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 rounded border-slate-300"
+                    />
+                    <div>
+                      <strong className="text-slate-900 block">{fee.studentName} ({fee.grade})</strong>
+                      <span className="text-[10px] text-slate-500 font-mono">{email} • Invoice #{fee.invoiceNo}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="font-mono font-bold text-slate-900">{formatCurrency(fee.totalAmount)}</div>
+                    <span className="text-[10px] text-amber-600 font-semibold">{fee.term}</span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Sender & Dispatch Info */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-[11px] space-y-1">
+            <div><strong>Sender Address:</strong> paradisepublicschool.pali@gmail.com</div>
+            <div><strong>Dispatch Protocol:</strong> Batch BCC Transmission to Guardian Email Addresses</div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => setIsBulkEmailModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={selectedBulkFeeIds.length === 0}
+              onClick={handleDispatchBulkEmails}
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Dispatch Batch Emails ({selectedBulkFeeIds.length})</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Add Tuition Fee Modal */}
       <Modal

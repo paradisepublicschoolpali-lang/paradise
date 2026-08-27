@@ -61,8 +61,8 @@ export const AdminStudents: React.FC = () => {
 
   const handleCreateStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.guardianName || !formData.guardianPhone) {
-      toast('Please fill all mandatory fields', '', 'error');
+    if (!formData.name || !formData.guardianName || !formData.guardianPhone || !formData.guardianEmail) {
+      toast('Please fill all mandatory fields including Guardian / Student Email ID', '', 'error');
       return;
     }
 
@@ -102,6 +102,10 @@ export const AdminStudents: React.FC = () => {
   const handleUpdateStudent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingStudent) return;
+    if (!editingStudent.guardianEmail) {
+      toast('Guardian / Student Email ID is mandatory', '', 'error');
+      return;
+    }
     updateStudent(editingStudent.id, editingStudent);
     toast('Student Profile & Login Credentials Updated', `Saved changes for ${editingStudent.name}`, 'success');
     setEditingStudent(null);
@@ -475,14 +479,16 @@ export const AdminStudents: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Guardian Email</label>
+              <label className="block text-slate-700 font-semibold mb-1">Guardian / Student Email ID *</label>
               <input
                 type="email"
+                required
                 value={formData.guardianEmail}
                 onChange={e => setFormData({ ...formData, guardianEmail: e.target.value })}
-                placeholder="parent@gmail.com"
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                placeholder="e.g. parent@gmail.com"
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
               />
+              <span className="text-[10px] text-slate-500 font-medium">Required for digital fee receipts & email notices</span>
             </div>
           </div>
 
@@ -634,9 +640,9 @@ export const AdminStudents: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Phone</label>
+                <label className="block text-slate-700 font-semibold mb-1">Guardian Phone *</label>
                 <input
                   type="text"
                   required
@@ -646,14 +652,26 @@ export const AdminStudents: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Address</label>
+                <label className="block text-slate-700 font-semibold mb-1">Guardian / Student Email ID *</label>
                 <input
-                  type="text"
-                  value={editingStudent.address}
-                  onChange={e => setEditingStudent({ ...editingStudent, address: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                  type="email"
+                  required
+                  value={editingStudent.guardianEmail || ''}
+                  onChange={e => setEditingStudent({ ...editingStudent, guardianEmail: e.target.value })}
+                  placeholder="parent@gmail.com"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Residential Address</label>
+              <input
+                type="text"
+                value={editingStudent.address}
+                onChange={e => setEditingStudent({ ...editingStudent, address: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+              />
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">

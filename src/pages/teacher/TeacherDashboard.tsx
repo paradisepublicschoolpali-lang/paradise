@@ -11,7 +11,7 @@ interface TeacherDashboardProps {
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab }) => {
   const { teachers, homework, submissions, gradeHomeworkSubmission } = useSchoolData();
   const { currentUser } = useAuth();
-  const teacher = teachers[0];
+  const teacher = teachers.find(t => t.id === currentUser.id || t.loginId === currentUser.loginId) || teachers[0];
 
   const [selectedSub, setSelectedSub] = useState<any | null>(null);
   const [score, setScore] = useState(45);
@@ -27,9 +27,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
   };
 
   const todayClasses = [
-    { period: '01', time: '08:30 - 09:20', grade: 'Grade 10', section: 'A', subject: 'Advanced Physics', topic: 'Electromagnetic Flux & Faraday Laws' },
-    { period: '03', time: '10:30 - 11:20', grade: 'Grade 11', section: 'A', subject: 'Theoretical Physics', topic: 'Relativistic Velocity Addition' },
-    { period: '05', time: '01:00 - 01:50', grade: 'Grade 12', section: 'A', subject: 'Quantum Concepts', topic: 'Photoelectric Work Functions' },
+    { period: '01', time: '08:30 - 09:20', grade: 'Grade 8', section: 'A', subject: 'General Science', topic: 'Force, Pressure & Atmospheric Dynamics' },
+    { period: '03', time: '10:30 - 11:20', grade: 'Grade 7', section: 'A', subject: 'Physical Science', topic: 'Heat, Thermodynamics & Transfer' },
+    { period: '05', time: '01:00 - 01:50', grade: 'Grade 6', section: 'B', subject: 'Introduction to Physics', topic: 'Motion, Distances & Measurement' },
   ];
 
   return (

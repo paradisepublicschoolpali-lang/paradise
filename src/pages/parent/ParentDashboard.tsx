@@ -26,7 +26,7 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({ setActiveTab }
   const [activePaymentModal, setActivePaymentModal] = useState<FeeItem | null>(null);
   const [activeReportModal, setActiveReportModal] = useState<ExamResult | null>(null);
 
-  const student = students[0];
+  const student = students.find(s => s.id === currentUser.id || s.loginId === currentUser.loginId) || students[0];
   const pendingFees = fees.filter(f => f.status === 'Pending' || f.status === 'Overdue');
   const activeHomework = homework.filter(h => h.status === 'Active');
   const latestResult = results[0];

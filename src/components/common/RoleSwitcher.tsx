@@ -21,7 +21,7 @@ export const RoleSwitcher: React.FC = () => {
       key: 'parent',
       label: 'Parent / Student',
       icon: <GraduationCap className="w-4 h-4 text-blue-600" />,
-      desc: 'Aryan Sharma (Grade 10-A)',
+      desc: 'Aryan Sharma (Grade 8-A)',
       badge: 'Student ID'
     },
     {

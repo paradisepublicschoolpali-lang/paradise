@@ -6,7 +6,7 @@ import { User, Shield, Phone, Mail, MapPin, Bus, HeartPulse } from 'lucide-react
 export const ParentProfile: React.FC = () => {
   const { students } = useSchoolData();
   const { currentUser } = useAuth();
-  const student = students[0];
+  const student = students.find(s => s.id === currentUser.id || s.loginId === currentUser.loginId) || students[0];
 
   return (
     <div className="space-y-6 pb-12 max-w-5xl">

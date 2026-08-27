@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, Loader2, ExternalLink, Copy } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { emailService } from '../../services/emailService';
 
 export const ContactPage: React.FC = () => {
   const { toast } = useToast();
@@ -12,15 +13,61 @@ export const ContactPage: React.FC = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [dispatchResult, setDispatchResult] = useState<{ message: string; provider: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       toast('Please fill all mandatory fields', '', 'error');
       return;
     }
-    setSubmitted(true);
-    toast('Inquiry Dispatched!', 'Inquiry routed to paradisepublicschool.pali@gmail.com. Our administrative desk will contact you within 24 hours.', 'success');
+
+    setIsSending(true);
+    try {
+      const result = await emailService.sendContactInquiry({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message
+      });
+
+      setSubmitted(true);
+      setDispatchResult({ message: result.message, provider: result.providerUsed });
+      toast(
+        result.fallbackTriggered ? 'Webmail Opened!' : 'Inquiry Dispatched!',
+        result.message,
+        'success'
+      );
+    } catch (err: any) {
+      toast('Failed to dispatch', err?.message || 'Could not send email', 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleOpenGmail = () => {
+    emailService.openGmailComposer({
+      to: 'paradisepublicschool.pali@gmail.com',
+      subject: `[Website Inquiry] ${formData.subject} - from ${formData.name}`,
+      body: `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`
+    });
+  };
+
+  const handleOpenMailApp = () => {
+    emailService.openDefaultMailClient({
+      to: 'paradisepublicschool.pali@gmail.com',
+      subject: `[Website Inquiry] ${formData.subject} - from ${formData.name}`,
+      body: `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`
+    });
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(
+      `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`
+    );
+    toast('Inquiry Copied to Clipboard', '', 'info');
   };
 
   return (
@@ -97,16 +144,45 @@ export const ContactPage: React.FC = () => {
               </div>
 
               {submitted ? (
-                <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                  <h4 className="text-base font-bold text-emerald-900">Inquiry Transmitted Successfully</h4>
-                  <p className="text-xs text-emerald-700">Thank you. An admissions dean will contact you shortly.</p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="mt-2 text-xs font-bold text-emerald-800 underline"
-                  >
-                    Send another message
-                  </button>
+                <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                  <div>
+                    <h4 className="text-base font-bold text-emerald-900 font-cinzel">Inquiry Transmitted Successfully</h4>
+                    <p className="text-xs text-emerald-700 mt-1">
+                      {dispatchResult?.message || 'Inquiry sent to paradisepublicschool.pali@gmail.com. Our administrative desk will contact you within 24 hours.'}
+                    </p>
+                    {dispatchResult?.provider && (
+                      <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+                        Dispatched via: {dispatchResult.provider}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenGmail}
+                      className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold flex items-center gap-1.5 border border-slate-300 shadow-xs cursor-pointer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Open in Gmail</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold flex items-center gap-1.5 border border-slate-300 shadow-xs cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5 text-slate-600" />
+                      <span>Copy Details</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitted(false)}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+                    >
+                      Send Another Inquiry
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -174,13 +250,37 @@ export const ContactPage: React.FC = () => {
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send Message to Admissions</span>
-                  </button>
+                  <div className="space-y-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={isSending}
+                      className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isSending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Dispatching Email...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Send Message to Admissions (Live Email)</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1">
+                      <span>Recipient: <strong className="font-mono text-slate-700">paradisepublicschool.pali@gmail.com</strong></span>
+                      <button
+                        type="button"
+                        onClick={handleOpenGmail}
+                        className="text-blue-600 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Send directly in Gmail</span>
+                      </button>
+                    </div>
+                  </div>
                 </form>
               )}
             </div>

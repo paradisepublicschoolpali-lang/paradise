@@ -24,10 +24,16 @@ import {
   Lock,
   Key,
   Smartphone,
-  Share2
+  Share2,
+  Mail,
+  Send,
+  Loader2,
+  ExternalLink,
+  Check
 } from 'lucide-react';
 import { getSupabaseConfig, setSupabaseCredentials, clearSupabaseCredentials, reinitializeSupabase, testSupabaseConnection } from '../../lib/supabase';
 import { supabaseService } from '../../services/supabaseService';
+import { emailService, getEmailConfig, saveEmailConfig, EmailConfig } from '../../services/emailService';
 import { Logo } from '../../components/common/Logo';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
 
@@ -78,6 +84,12 @@ export const AdminSettings: React.FC = () => {
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
+
+  // Email service state
+  const [emailConfig, setEmailConfigState] = useState<EmailConfig>(() => getEmailConfig());
+  const [testEmailRecipient, setTestEmailRecipient] = useState('paradisepublicschool.pali@gmail.com');
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Supabase connection state
   const [supabaseUrl, setSupabaseUrl] = useState(() => getSupabaseConfig().url);
@@ -144,6 +156,39 @@ export const AdminSettings: React.FC = () => {
     setSupabaseKey('');
     setConnectionStatus({ connected: false, message: 'Switched to Local Storage Mode' });
     toast('Disconnected from Supabase', 'Now operating in offline local storage mode.', 'info');
+  };
+
+  const handleSaveEmailConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveEmailConfig(emailConfig);
+    toast('Email Service Config Saved!', 'Email dispatch gateway preferences updated successfully.', 'success');
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailRecipient) {
+      toast('Please enter a recipient email address', '', 'error');
+      return;
+    }
+
+    setIsTestingEmail(true);
+    setEmailTestResult(null);
+    try {
+      // Save config first to ensure latest values are tested
+      saveEmailConfig(emailConfig);
+      const result = await emailService.sendTestEmail(testEmailRecipient);
+      setEmailTestResult(result);
+      if (result.success) {
+        toast('Test Email Dispatched!', result.message, 'success');
+      } else {
+        toast('Test Email Notice', result.message, 'error');
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to dispatch test email';
+      setEmailTestResult({ success: false, message: msg });
+      toast('Test Email Failed', msg, 'error');
+    } finally {
+      setIsTestingEmail(false);
+    }
   };
 
   const handleSyncToSupabase = async () => {
@@ -598,6 +643,246 @@ CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
                 firebase.json, app.yaml (App Engine), and Dockerfile (Cloud Run) pre-configured.
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Automated Email Dispatch & Cloud SMTP Gateway Card */}
+        <div className="p-6 rounded-2xl bg-white border-2 border-blue-300 shadow-sm space-y-5 text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-blue-600" />
+              <span>Automated Email Dispatch & Cloud SMTP Gateway</span>
+            </h4>
+            <span
+              className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 ${
+                emailConfig.web3FormsKey || (emailConfig.emailJsServiceId && emailConfig.emailJsPublicKey) || emailConfig.customWebhookUrl
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  : 'bg-blue-50 text-blue-800 border border-blue-200'
+              }`}
+            >
+              {emailConfig.web3FormsKey || (emailConfig.emailJsServiceId && emailConfig.emailJsPublicKey) || emailConfig.customWebhookUrl ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>● Live Cloud API Gateway Active</span>
+                </>
+              ) : (
+                <>
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>○ Direct Webmail / Gmail Mode</span>
+                </>
+              )}
+            </span>
+          </div>
+
+          <p className="text-slate-600 leading-relaxed">
+            Configure how Paradise Public School dispatches fee reminder notices, admissions confirmations, and contact form inquiries.
+            Choose between <strong>Web3Forms Cloud API</strong> (instant delivery to inbox with zero backend), <strong>EmailJS</strong>, <strong>Custom Webhook / SMTP Endpoint</strong>, or <strong>Direct 1-Click Gmail Webmail</strong>.
+          </p>
+
+          {/* Provider Selector */}
+          <div className="space-y-3">
+            <label className="block text-slate-700 font-bold">Email Dispatch Provider *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              {[
+                { id: 'web3forms', label: 'Web3Forms API', desc: 'Free Cloud Email API (Instant delivery)' },
+                { id: 'gmail_web', label: 'Gmail Webmail', desc: '1-Click compose in browser' },
+                { id: 'emailjs', label: 'EmailJS Gateway', desc: 'Browser-to-Email SMTP Service' },
+                { id: 'custom_webhook', label: 'Custom API Webhook', desc: 'Your custom server or Resend API' }
+              ].map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setEmailConfigState({ ...emailConfig, provider: p.id as any })}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    emailConfig.provider === p.id
+                      ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-500'
+                      : 'border-slate-200 bg-slate-50 hover:bg-white'
+                  }`}
+                >
+                  <div className="font-bold text-slate-900 text-xs flex items-center justify-between">
+                    <span>{p.label}</span>
+                    {emailConfig.provider === p.id && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-1 leading-snug">{p.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Provider Credentials Form */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Official Sender Email *</label>
+                <input
+                  type="email"
+                  value={emailConfig.senderEmail}
+                  onChange={e => setEmailConfigState({ ...emailConfig, senderEmail: e.target.value })}
+                  placeholder="paradisepublicschool.pali@gmail.com"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Sender Display Name *</label>
+                <input
+                  type="text"
+                  value={emailConfig.senderName}
+                  onChange={e => setEmailConfigState({ ...emailConfig, senderName: e.target.value })}
+                  placeholder="Paradise Public School"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Provider specific inputs */}
+            {emailConfig.provider === 'web3forms' && (
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <label className="block text-slate-700 font-semibold">Web3Forms Access Key</label>
+                  <a
+                    href="https://web3forms.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-semibold"
+                  >
+                    <span>Get Free Key at web3forms.com</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <input
+                  type="text"
+                  value={emailConfig.web3FormsKey}
+                  onChange={e => setEmailConfigState({ ...emailConfig, web3FormsKey: e.target.value })}
+                  placeholder="e.g. 12345678-abcd-ef01-2345-6789abcdef01"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Web3Forms enables real emails to be sent straight to inboxes immediately without managing server backends or SMTP passwords.
+                </p>
+              </div>
+            )}
+
+            {emailConfig.provider === 'emailjs' && (
+              <div className="space-y-3 pt-2 border-t border-slate-200">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">Service ID</label>
+                    <input
+                      type="text"
+                      value={emailConfig.emailJsServiceId}
+                      onChange={e => setEmailConfigState({ ...emailConfig, emailJsServiceId: e.target.value })}
+                      placeholder="service_xxxxx"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">Template ID</label>
+                    <input
+                      type="text"
+                      value={emailConfig.emailJsTemplateId}
+                      onChange={e => setEmailConfigState({ ...emailConfig, emailJsTemplateId: e.target.value })}
+                      placeholder="template_xxxxx"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">Public Key</label>
+                    <input
+                      type="text"
+                      value={emailConfig.emailJsPublicKey}
+                      onChange={e => setEmailConfigState({ ...emailConfig, emailJsPublicKey: e.target.value })}
+                      placeholder="public_xxxxx"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {emailConfig.provider === 'custom_webhook' && (
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <label className="block text-slate-700 font-semibold">Custom API / Webhook Endpoint URL</label>
+                <input
+                  type="url"
+                  value={emailConfig.customWebhookUrl}
+                  onChange={e => setEmailConfigState({ ...emailConfig, customWebhookUrl: e.target.value })}
+                  placeholder="https://api.yourdomain.com/send-email"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none"
+                />
+              </div>
+            )}
+
+            {emailConfig.provider === 'gmail_web' && (
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900">
+                <strong>Gmail Webmail Mode:</strong> Clicking send will automatically open an official Google Mail compose window with recipient, subject, and pre-formatted institutional body ready for 1-click transmission.
+              </div>
+            )}
+
+            {/* Test Email Section */}
+            <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="w-full sm:w-80">
+                <label className="block text-slate-700 font-semibold mb-1">Test Email Delivery To:</label>
+                <input
+                  type="email"
+                  value={testEmailRecipient}
+                  onChange={e => setTestEmailRecipient(e.target.value)}
+                  placeholder="name@gmail.com"
+                  className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto self-end">
+                <button
+                  type="button"
+                  onClick={handleSendTestEmail}
+                  disabled={isTestingEmail}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  {isTestingEmail ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending Test...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send Live Test Email</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveEmailConfig}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Email Settings</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Test Result Message Banner */}
+            {emailTestResult && (
+              <div
+                className={`p-3 rounded-xl border text-xs flex items-start gap-2 ${
+                  emailTestResult.success
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-amber-50 border-amber-200 text-amber-900'
+                }`}
+              >
+                {emailTestResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <strong>{emailTestResult.success ? 'Dispatch Success:' : 'Notice:'}</strong>{' '}
+                  {emailTestResult.message}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

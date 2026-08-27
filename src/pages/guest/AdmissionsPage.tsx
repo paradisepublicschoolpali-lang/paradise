@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useToast } from '../../context/ToastContext';
-import { CheckCircle2, FileText, Send, Calendar, DollarSign, Sparkles, ArrowRight } from 'lucide-react';
+import { CheckCircle2, FileText, Send, Calendar, DollarSign, Sparkles, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';
+import { emailService } from '../../services/emailService';
 
 export const AdmissionsPage: React.FC = () => {
   const { submitAdmission } = useSchoolData();
@@ -21,17 +22,37 @@ export const AdmissionsPage: React.FC = () => {
   });
 
   const [submittedAppNo, setSubmittedAppNo] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.applicantName || !formData.parentName || !formData.parentEmail || !formData.parentPhone) {
       toast('Please fill all mandatory fields', '', 'error');
       return;
     }
 
-    const appNo = submitAdmission(formData);
-    setSubmittedAppNo(appNo);
-    toast('Application Submitted!', `Application reference: ${appNo}`, 'success');
+    setIsSubmitting(true);
+    try {
+      const appNo = submitAdmission(formData);
+      setSubmittedAppNo(appNo);
+
+      // Dispatch confirmation email
+      await emailService.sendAdmissionConfirmation({
+        applicationNo: appNo,
+        applicantName: formData.applicantName,
+        gradeApplying: formData.gradeApplying,
+        parentName: formData.parentName,
+        parentEmail: formData.parentEmail,
+        parentPhone: formData.parentPhone,
+        submissionDate: new Date().toISOString().split('T')[0]
+      });
+
+      toast('Application Registered & Confirmation Sent!', `Application reference: ${appNo}`, 'success');
+    } catch (err: any) {
+      toast('Submission Recorded', 'Application registered in database', 'info');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const steps = [
@@ -212,10 +233,20 @@ export const AdmissionsPage: React.FC = () => {
               <div className="pt-3">
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Submit Admission Dossier</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Registering & Sending Confirmation...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Submit Admission Dossier & Receive Confirmation</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

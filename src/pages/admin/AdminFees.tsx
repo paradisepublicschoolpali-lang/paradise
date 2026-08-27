@@ -17,11 +17,14 @@ import {
   Copy,
   ExternalLink,
   Users,
-  AlertTriangle
+  AlertTriangle,
+  Loader2,
+  Globe
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { PaymentModal } from '../../components/common/PaymentModal';
 import { Modal } from '../../components/common/Modal';
+import { emailService } from '../../services/emailService';
 
 export const AdminFees: React.FC = () => {
   const { fees, students, addFeeInvoice, updateFeeInvoice, deleteFeeInvoice, payFeeInvoice } = useSchoolData();
@@ -41,6 +44,7 @@ export const AdminFees: React.FC = () => {
   const [emailMessage, setEmailMessage] = useState('');
   const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
   const [selectedBulkFeeIds, setSelectedBulkFeeIds] = useState<string[]>([]);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // New Invoice Form (Tuition only)
   const [formData, setFormData] = useState({
@@ -115,16 +119,32 @@ Email: paradisepublicschool.pali@gmail.com`;
     setIsBulkEmailModalOpen(true);
   };
 
-  // Launch User's Default Mail Client / Webmail with pre-filled content
+  // 1-Click Send via Gmail Webmail in Browser
+  const handleSendViaGmailWeb = () => {
+    if (!emailRecipient) {
+      toast('Recipient email is required', '', 'error');
+      return;
+    }
+    emailService.openGmailComposer({
+      to: emailRecipient,
+      subject: emailSubject,
+      body: emailMessage
+    });
+    toast('Gmail Compose Window Opened!', `Pre-filled email to ${emailRecipient}`, 'success');
+  };
+
+  // Launch User's Default Desktop Mail Client
   const handleSendViaMailClient = () => {
     if (!emailRecipient) {
       toast('Recipient email is required', '', 'error');
       return;
     }
-    const mailtoUrl = `mailto:${encodeURIComponent(emailRecipient)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailMessage)}`;
-    window.open(mailtoUrl, '_blank');
-    toast('Mail Client Launched!', `Email composed to ${emailRecipient} from paradisepublicschool.pali@gmail.com`, 'success');
-    setEmailModalFee(null);
+    emailService.openDefaultMailClient({
+      to: emailRecipient,
+      subject: emailSubject,
+      body: emailMessage
+    });
+    toast('Mail Client Opened!', `Email composed to ${emailRecipient}`, 'info');
   };
 
   // 1-Click Copy Email to Clipboard
@@ -133,21 +153,47 @@ Email: paradisepublicschool.pali@gmail.com`;
     toast('Email Copied to Clipboard!', 'Ready to paste into Gmail or your email client', 'info');
   };
 
-  // Dispatch System In-App & Email Confirmation
-  const handleDispatchSystemEmail = () => {
-    toast('Email Notice Dispatched Successfully!', `Notification sent from paradisepublicschool.pali@gmail.com to ${emailRecipient}`, 'success');
-    setEmailModalFee(null);
+  // Dispatch System Automated Email (Cloud / API)
+  const handleDispatchSystemEmail = async () => {
+    if (!emailRecipient) {
+      toast('Recipient email is required', '', 'error');
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      const result = await emailService.sendEmail({
+        to: emailRecipient,
+        subject: emailSubject,
+        message: emailMessage,
+        fromName: 'Paradise Public School Accounts',
+        replyTo: 'paradisepublicschool.pali@gmail.com'
+      });
+
+      toast(
+        result.fallbackTriggered ? 'Webmail Opened!' : 'Email Dispatched!',
+        result.message,
+        'success'
+      );
+      if (!result.fallbackTriggered) {
+        setEmailModalFee(null);
+      }
+    } catch (err: any) {
+      toast('Dispatch Failed', err?.message || 'Unable to send email', 'error');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
-  // Dispatch Bulk Emails Action
-  const handleDispatchBulkEmails = () => {
+  // Dispatch Bulk Emails Action via Gmail Web / Cloud
+  const handleDispatchBulkEmails = async (mode: 'gmail' | 'mailapp' | 'cloud') => {
     const selectedFees = pendingFees.filter(f => selectedBulkFeeIds.includes(f.id));
     const recipientEmails = selectedFees.map(f => {
       const s = students.find(std => std.id === f.studentId || std.name === f.studentName);
       return s?.guardianEmail || `${f.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
     });
 
-    const bccString = recipientEmails.join('; ');
+    const bccString = recipientEmails.join(', ');
     const bulkSubject = `[URGENT] Paradise Public School - Tuition Fee Dues Notice (Quarter 3)`;
     const bulkBody = `Dear Parents / Guardians,
 
@@ -161,11 +207,56 @@ Helpline: +91 11 2765 4321 / +91 98110 12345
 
 Paradise Public School Accounts Directorate`;
 
-    const mailtoUrl = `mailto:paradisepublicschool.pali@gmail.com?bcc=${encodeURIComponent(bccString)}&subject=${encodeURIComponent(bulkSubject)}&body=${encodeURIComponent(bulkBody)}`;
-    window.open(mailtoUrl, '_blank');
+    if (mode === 'gmail') {
+      emailService.openGmailComposer({
+        to: 'paradisepublicschool.pali@gmail.com',
+        bcc: bccString,
+        subject: bulkSubject,
+        body: bulkBody
+      });
+      toast('Bulk Gmail Composer Opened!', `Pre-filled with ${recipientEmails.length} guardian BCC recipients`, 'success');
+      setIsBulkEmailModalOpen(false);
+      return;
+    }
 
-    toast('Bulk Reminders Dispatched!', `Notices sent to ${selectedFees.length} guardian emails from paradisepublicschool.pali@gmail.com`, 'success');
-    setIsBulkEmailModalOpen(false);
+    if (mode === 'mailapp') {
+      emailService.openDefaultMailClient({
+        to: 'paradisepublicschool.pali@gmail.com',
+        bcc: bccString,
+        subject: bulkSubject,
+        body: bulkBody
+      });
+      toast('Mail App Opened for Bulk Send!', `BCC populated with ${recipientEmails.length} recipients`, 'info');
+      setIsBulkEmailModalOpen(false);
+      return;
+    }
+
+    // Cloud Automated Batch Send
+    setIsSendingEmail(true);
+    try {
+      let sentCount = 0;
+      for (const fee of selectedFees) {
+        const s = students.find(std => std.id === fee.studentId || std.name === fee.studentName);
+        const email = s?.guardianEmail || `${fee.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+        await emailService.sendFeeReminder({
+          studentName: fee.studentName,
+          grade: fee.grade,
+          rollNo: s?.rollNo || 'N/A',
+          invoiceNo: fee.invoiceNo,
+          term: fee.term,
+          amount: fee.totalAmount,
+          dueDate: fee.dueDate,
+          recipientEmail: email
+        });
+        sentCount++;
+      }
+      toast('Bulk Dispatch Complete!', `Dispatched ${sentCount} notices to guardians`, 'success');
+      setIsBulkEmailModalOpen(false);
+    } catch (err: any) {
+      toast('Batch sending issue', err?.message || 'Some emails could not be sent', 'error');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleCreateFee = (e: React.FormEvent) => {
@@ -526,33 +617,53 @@ Paradise Public School Accounts Directorate`;
             </div>
 
             {/* Modal Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setEmailModalFee(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer text-xs"
               >
                 Cancel
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleSendViaMailClient}
-                  className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer"
-                  title="Open in Gmail / Default Mail App"
+                  onClick={handleSendViaGmailWeb}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold flex items-center gap-1.5 border border-slate-300 shadow-xs cursor-pointer text-xs"
+                  title="Open 1-Click Gmail Webmail with pre-filled content"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Open in Mail App</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Send with Gmail Web</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleDispatchSystemEmail}
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  onClick={handleSendViaMailClient}
+                  className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold flex items-center gap-1.5 border border-blue-200 cursor-pointer text-xs"
+                  title="Open Desktop Mail App"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Confirm Dispatch</span>
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Desktop Mail App</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSendingEmail}
+                  onClick={handleDispatchSystemEmail}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs text-xs"
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Dispatch Cloud Notice</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -642,27 +753,61 @@ Paradise Public School Accounts Directorate`;
           {/* Sender & Dispatch Info */}
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-[11px] space-y-1">
             <div><strong>Sender Address:</strong> paradisepublicschool.pali@gmail.com</div>
-            <div><strong>Dispatch Protocol:</strong> Batch BCC Transmission to Guardian Email Addresses</div>
+            <div><strong>Dispatch Protocol:</strong> Automated batch delivery or pre-filled Gmail Web BCC</div>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200">
             <button
               type="button"
               onClick={() => setIsBulkEmailModalOpen(false)}
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold cursor-pointer text-xs"
             >
               Cancel
             </button>
-            <button
-              type="button"
-              disabled={selectedBulkFeeIds.length === 0}
-              onClick={handleDispatchBulkEmails}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Dispatch Batch Emails ({selectedBulkFeeIds.length})</span>
-            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={selectedBulkFeeIds.length === 0}
+                onClick={() => handleDispatchBulkEmails('gmail')}
+                className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 disabled:opacity-50 text-slate-800 font-bold border border-slate-300 shadow-xs flex items-center gap-1.5 cursor-pointer text-xs"
+                title="Open Gmail in browser with all recipients in BCC"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                <span>Open in Gmail (BCC)</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={selectedBulkFeeIds.length === 0}
+                onClick={() => handleDispatchBulkEmails('mailapp')}
+                className="px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 disabled:opacity-50 text-blue-700 font-bold border border-blue-200 flex items-center gap-1.5 cursor-pointer text-xs"
+                title="Open default desktop mail client"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Desktop Mail (BCC)</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={selectedBulkFeeIds.length === 0 || isSendingEmail}
+                onClick={() => handleDispatchBulkEmails('cloud')}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs text-xs"
+              >
+                {isSendingEmail ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Dispatching {selectedBulkFeeIds.length}...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Dispatch Automated Cloud ({selectedBulkFeeIds.length})</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </Modal>

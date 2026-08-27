@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { CalendarCheck, Send, CheckCircle2, AlertCircle, Plus, Clock, FileText } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
@@ -7,6 +8,7 @@ import { Modal } from '../../components/common/Modal';
 
 export const ParentAttendance: React.FC = () => {
   const { attendanceLogs, leaves, applyLeave, students } = useSchoolData();
+  const { currentUser } = useAuth();
   const { toast } = useToast();
 
   const [fromDate, setFromDate] = useState('');
@@ -14,7 +16,7 @@ export const ParentAttendance: React.FC = () => {
   const [reason, setReason] = useState('');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
-  const student = students[0] || { id: 'std-1', name: 'Aryan Sharma', grade: 'Grade 10', section: 'A' };
+  const student = students.find(s => s.id === currentUser.id || s.loginId === currentUser.loginId) || students[0];
 
   const handleApplyLeave = (e: React.FormEvent) => {
     e.preventDefault();

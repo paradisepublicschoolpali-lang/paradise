@@ -4,10 +4,11 @@ import { useToast } from '../../context/ToastContext';
 import { GraduationCap, Save } from 'lucide-react';
 
 export const TeacherResults: React.FC = () => {
-  const { students } = useSchoolData();
+  const { students, saveExamResult, updateStudent } = useSchoolData();
   const { toast } = useToast();
 
-  const [examName, setExamName] = useState('Unit Test 2 (Physics & STEM)');
+  const [examName, setExamName] = useState('Unit Test 2 (Science & STEM)');
+  const [selectedClass, setSelectedClass] = useState('Grade 8-A');
   const [marks, setMarks] = useState<Record<string, number>>({
     'std-1': 96,
     'std-2': 98,
@@ -22,7 +23,42 @@ export const TeacherResults: React.FC = () => {
   };
 
   const handleSaveMarks = () => {
-    toast('Marks Register Committed!', `Saved scores for ${students.length} scholars in ${examName}`, 'success');
+    // Commit exam results to context
+    students.forEach((student, index) => {
+      const studentScore = marks[student.id] || 90;
+      const percentage = Math.round((studentScore / 100) * 100);
+      const calculatedGpa = parseFloat(((percentage / 100) * 4.0).toFixed(2));
+
+      // Update student GPA
+      updateStudent(student.id, { gpa: calculatedGpa });
+
+      // Save Exam Result for report card
+      saveExamResult({
+        id: `exam-${student.id}-${Date.now()}`,
+        studentId: student.id,
+        studentName: student.name,
+        grade: student.grade,
+        section: student.section,
+        examName,
+        academicYear: '2026-2027',
+        subjects: [
+          { subject: 'Science & Discovery', marksObtained: studentScore, maxMarks: 100, grade: getGrade(studentScore), remarks: 'Outstanding analytical capability' },
+          { subject: 'Mathematics & Logic', marksObtained: Math.min(100, studentScore + 2), maxMarks: 100, grade: getGrade(studentScore + 2), remarks: 'Strong algebraic reasoning' },
+          { subject: 'English & Literature', marksObtained: Math.max(70, studentScore - 4), maxMarks: 100, grade: getGrade(studentScore - 4), remarks: 'Expressive vocabulary' },
+          { subject: 'Social Studies & Civics', marksObtained: Math.max(75, studentScore - 3), maxMarks: 100, grade: getGrade(studentScore - 3), remarks: 'Active classroom contributor' },
+          { subject: 'Robotics & Python Coding', marksObtained: Math.min(100, studentScore + 3), maxMarks: 100, grade: getGrade(studentScore + 3), remarks: 'Innovative practical projects' },
+        ],
+        totalMarks: studentScore * 5 - 2,
+        maxTotal: 500,
+        percentage,
+        gpa: calculatedGpa,
+        rank: index + 1,
+        overallGrade: getGrade(percentage),
+        teacherRemarks: `Remarkable academic performance in ${examName}. Demonstrates strong leadership and inquisitiveness.`
+      });
+    });
+
+    toast('Marks & Report Cards Committed!', `Saved scores for ${students.length} scholars in ${examName}`, 'success');
   };
 
   const getGrade = (score: number) => {
@@ -38,7 +74,7 @@ export const TeacherResults: React.FC = () => {
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4 text-xs">
           <div>
-            <label className="block text-slate-500 font-semibold mb-1">Assessment Assessment</label>
+            <label className="block text-slate-500 font-semibold mb-1">Assessment Name</label>
             <input
               type="text"
               value={examName}
@@ -49,9 +85,15 @@ export const TeacherResults: React.FC = () => {
 
           <div>
             <label className="block text-slate-500 font-semibold mb-1">Class / Division</label>
-            <span className="block px-3 py-2 rounded-xl bg-slate-100 font-semibold text-slate-800 border border-slate-200">
-              Grade 10-A (Advanced Physics)
-            </span>
+            <select
+              value={selectedClass}
+              onChange={e => setSelectedClass(e.target.value)}
+              className="px-3 py-2 rounded-xl bg-slate-50 font-semibold text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Grade 8-A">Grade 8-A (General Science)</option>
+              <option value="Grade 7-A">Grade 7-A (Physical Science)</option>
+              <option value="Grade 6-A">Grade 6-A (Nature Science)</option>
+            </select>
           </div>
         </div>
 

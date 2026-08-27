@@ -5,7 +5,7 @@ import { CalendarCheck, Check, Save } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
 
 export const TeacherAttendance: React.FC = () => {
-  const { students, markAttendanceBulk } = useSchoolData();
+  const { students, markAttendanceBulk, leaves, updateLeaveStatus } = useSchoolData();
   const { toast } = useToast();
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -145,6 +145,81 @@ export const TeacherAttendance: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Leave Applications Queue (from Parents) */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+            <CalendarCheck className="w-4 h-4 text-blue-600" />
+            <span>Scholar Leave Applications ({leaves.length})</span>
+          </h3>
+          <span className="text-xs text-slate-500">Parent Requests & Medical Slips</span>
+        </div>
+
+        {leaves.length === 0 ? (
+          <div className="text-center py-6 text-slate-400 text-xs">No pending leave applications.</div>
+        ) : (
+          <div className="overflow-x-auto text-xs">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr>
+                  <th className="py-3 px-4 font-semibold">Scholar</th>
+                  <th className="py-3 px-4 font-semibold">Division</th>
+                  <th className="py-3 px-4 font-semibold">Leave Dates</th>
+                  <th className="py-3 px-4 font-semibold">Reason</th>
+                  <th className="py-3 px-4 font-semibold text-center">Status</th>
+                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {leaves.map(leave => (
+                  <tr key={leave.id} className="hover:bg-slate-50">
+                    <td className="py-3 px-4 font-bold text-slate-900">{leave.studentName}</td>
+                    <td className="py-3 px-4">{leave.grade}</td>
+                    <td className="py-3 px-4 font-mono">{leave.fromDate} to {leave.toDate}</td>
+                    <td className="py-3 px-4 text-slate-600">{leave.reason}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        leave.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+                        leave.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-amber-100 text-amber-800'
+                      }`}>
+                        {leave.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right space-x-2">
+                      {leave.status === 'Pending' ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              updateLeaveStatus(leave.id, 'Approved');
+                              toast('Leave Approved', `Approved leave for ${leave.studentName}`, 'success');
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] cursor-pointer"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => {
+                              updateLeaveStatus(leave.id, 'Rejected');
+                              toast('Leave Rejected', `Rejected leave for ${leave.studentName}`, 'error');
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-semibold text-[11px] cursor-pointer border border-slate-200"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">Decided</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

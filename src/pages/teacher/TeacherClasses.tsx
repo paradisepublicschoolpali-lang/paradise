@@ -74,18 +74,31 @@ export const TeacherClasses: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {students.map(student => (
-                <tr key={student.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900">{student.name}</td>
-                  <td className="py-3 px-4 font-mono">{student.rollNo}</td>
-                  <td className="py-3 px-4">
-                    <span className="text-blue-600 font-medium">{student.house}</span>
-                  </td>
-                  <td className="py-3 px-4 text-center font-bold text-emerald-600">{student.attendanceRate}%</td>
-                  <td className="py-3 px-4 text-center font-bold text-blue-600">{student.gpa}</td>
-                  <td className="py-3 px-4 font-mono text-slate-500">{student.guardianPhone}</td>
-                </tr>
-              ))}
+              {students
+                .filter(s => {
+                  const targetGrade = selectedClass.split('-')[0].trim();
+                  return s.grade === targetGrade || s.grade.includes(targetGrade.replace('Grade ', ''));
+                })
+                .map(student => (
+                  <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                      <img
+                        src={student.avatar}
+                        alt={student.name}
+                        className="w-7 h-7 rounded-full object-cover border border-slate-200"
+                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100'; }}
+                      />
+                      <span>{student.name}</span>
+                    </td>
+                    <td className="py-3 px-4 font-mono">{student.rollNo}</td>
+                    <td className="py-3 px-4">
+                      <span className="text-blue-600 font-medium">{student.house}</span>
+                    </td>
+                    <td className="py-3 px-4 text-center font-bold text-emerald-600">{student.attendanceRate}%</td>
+                    <td className="py-3 px-4 text-center font-bold text-blue-600">{student.gpa}</td>
+                    <td className="py-3 px-4 font-mono text-slate-500">{student.guardianPhone}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

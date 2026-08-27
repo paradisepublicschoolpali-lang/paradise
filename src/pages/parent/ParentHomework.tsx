@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { BookOpen, Upload, CheckCircle2, Clock, FileText, Send } from 'lucide-react';
 import { HomeworkItem } from '../../types';
@@ -7,12 +8,15 @@ import { formatDate } from '../../utils/helpers';
 import { Modal } from '../../components/common/Modal';
 
 export const ParentHomework: React.FC = () => {
-  const { homework, submitHomeworkSolution, submissions } = useSchoolData();
+  const { homework, submitHomeworkSolution, submissions, students } = useSchoolData();
+  const { currentUser } = useAuth();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [selectedHw, setSelectedHw] = useState<HomeworkItem | null>(null);
-  const [solutionFile, setSolutionFile] = useState('Aryan_Sharma_Physics_Electromagnetism.pdf');
+  const [solutionFile, setSolutionFile] = useState('Homework_Assignment_Solution.pdf');
+
+  const student = students.find(s => s.id === currentUser.id || s.loginId === currentUser.loginId) || students[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,8 +24,8 @@ export const ParentHomework: React.FC = () => {
 
     submitHomeworkSolution({
       homeworkId: selectedHw.id,
-      studentId: 'std-1',
-      studentName: 'Aryan Sharma',
+      studentId: student.id,
+      studentName: student.name,
       fileName: solutionFile
     });
     toast('Homework Solution Transmitted!', `Submitted for ${selectedHw.title}`, 'success');

@@ -42,6 +42,7 @@ export const AdminFees: React.FC = () => {
   const [emailRecipient, setEmailRecipient] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
+  const [previewHtmlMode, setPreviewHtmlMode] = useState(false);
   const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
   const [selectedBulkFeeIds, setSelectedBulkFeeIds] = useState<string[]>([]);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -68,49 +69,29 @@ export const AdminFees: React.FC = () => {
     return matchesStatus && matchesStudent && matchesSearch;
   });
 
-  // Open Single Student Email Composer
+  // Open Single Student Email Composer with Styled Format & Payment Link
   const handleOpenEmailModal = (fee: FeeItem) => {
     const student = students.find(s => s.id === fee.studentId || s.name === fee.studentName);
     const recipient = student?.guardianEmail || `${fee.studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
     const subject = `[URGENT] Tuition Fee Due Notice - ${fee.studentName} (${fee.grade}) • Invoice #${fee.invoiceNo}`;
-    
-    const body = `Dear Parent / Guardian of ${fee.studentName},
+    const paymentUrl = emailService.getPaymentUrl();
 
-Greetings from Paradise Public School.
-
-This is a formal reminder regarding the outstanding Tuition Fee for the upcoming academic session. Please find the invoice details below:
-
-========================================
-PARADISE PUBLIC SCHOOL, NEW DELHI
-CBSE Affiliation No: 2130842 • School Code: 71234
-Official Accounts Desk: paradisepublicschool.pali@gmail.com
-========================================
-
-Scholar Name: ${fee.studentName}
-Class & Section: ${fee.grade}
-Admission / Roll: ${student?.rollNo || 'N/A'}
-Invoice Number: ${fee.invoiceNo}
-Billing Term: ${fee.term}
-Outstanding Tuition Amount: ${formatCurrency(fee.totalAmount)}
-Due Date: ${formatDate(fee.dueDate)}
-
-PAYMENT OPTIONS:
-1. Online UPI / QR Code: paradiseschool@sbi (Google Pay / PhonePe / Paytm / BHIM)
-2. Parent Portal: Log in to your school dashboard to settle via UPI, RuPay, Debit/Credit Card or Net Banking.
-3. School Accounts Counter: Open Monday to Saturday, 08:30 AM to 03:00 PM.
-
-Please settle the dues on or before ${formatDate(fee.dueDate)} to ensure uninterrupted academic access. If already paid, kindly reply with the transaction reference.
-
-Warm regards,
-Accounts & Treasury Directorate
-Paradise Public School
-Helpline: +91 11 2765 4321 / +91 98110 12345
-Email: paradisepublicschool.pali@gmail.com`;
+    const body = emailService.generateFeeEmailText({
+      studentName: fee.studentName,
+      grade: fee.grade,
+      rollNo: student?.rollNo || 'N/A',
+      invoiceNo: fee.invoiceNo,
+      term: fee.term,
+      amountFormatted: formatCurrency(fee.totalAmount),
+      dueDateFormatted: formatDate(fee.dueDate),
+      paymentLink: paymentUrl
+    });
 
     setEmailModalFee(fee);
     setEmailRecipient(recipient);
     setEmailSubject(subject);
     setEmailMessage(body);
+    setPreviewHtmlMode(false);
   };
 
   // Open Bulk Email Dispatcher
@@ -195,17 +176,33 @@ Email: paradisepublicschool.pali@gmail.com`;
 
     const bccString = recipientEmails.join(', ');
     const bulkSubject = `[URGENT] Paradise Public School - Tuition Fee Dues Notice (Quarter 3)`;
-    const bulkBody = `Dear Parents / Guardians,
+    const paymentUrl = emailService.getPaymentUrl();
+    const bulkBody = `======================================================================
+           🏛️  PARADISE PUBLIC SCHOOL, NEW DELHI
+     CBSE Affiliation No: 2130842 • School Code: 71234
+======================================================================
+OFFICIAL TUITION FEE DUES NOTICE • ACADEMIC SESSION 2026-2027
 
-This is an official notice from Paradise Public School regarding outstanding Tuition Fees for the ongoing academic term.
+Dear Parents / Guardians,
 
-Please log in to the Parent Portal or visit the School Accounts Counter to clear any pending tuition dues before the upcoming deadline.
+Greetings from Paradise Public School.
 
-Online Payment UPI ID: paradiseschool@sbi
-Accounts Desk: paradisepublicschool.pali@gmail.com
+This is an official notice regarding outstanding Tuition Fees for the ongoing academic term.
+
+Please settle any pending tuition dues before the upcoming deadline to ensure uninterrupted academic and portal access.
+
+💳 1-CLICK ONLINE FEE PAYMENT LINK:
+👉 ${paymentUrl}
+
+(Log in to your Parent Portal to view your child's quarterly invoice and pay online via UPI, RuPay, Credit/Debit Card or Net Banking)
+
+⚡ OTHER PAYMENT OPTIONS:
+• Instant UPI ID  : paradiseschool@sbi (Google Pay / PhonePe / Paytm / BHIM)
+• Accounts Counter: Open Monday to Saturday, 08:30 AM to 03:00 PM
+
 Helpline: +91 11 2765 4321 / +91 98110 12345
-
-Paradise Public School Accounts Directorate`;
+Official Accounts Desk: paradisepublicschool.pali@gmail.com
+======================================================================`;
 
     if (mode === 'gmail') {
       emailService.openGmailComposer({
@@ -214,7 +211,7 @@ Paradise Public School Accounts Directorate`;
         subject: bulkSubject,
         body: bulkBody
       });
-      toast('Bulk Gmail Composer Opened!', `Pre-filled with ${recipientEmails.length} guardian BCC recipients`, 'success');
+      toast('Bulk Gmail Composer Opened!', `Pre-filled with ${recipientEmails.length} guardian BCC recipients & payment link`, 'success');
       setIsBulkEmailModalOpen(false);
       return;
     }
@@ -226,7 +223,7 @@ Paradise Public School Accounts Directorate`;
         subject: bulkSubject,
         body: bulkBody
       });
-      toast('Mail App Opened for Bulk Send!', `BCC populated with ${recipientEmails.length} recipients`, 'info');
+      toast('Mail App Opened for Bulk Send!', `BCC populated with ${recipientEmails.length} recipients & payment link`, 'info');
       setIsBulkEmailModalOpen(false);
       return;
     }
@@ -250,7 +247,7 @@ Paradise Public School Accounts Directorate`;
         });
         sentCount++;
       }
-      toast('Bulk Dispatch Complete!', `Dispatched ${sentCount} notices to guardians`, 'success');
+      toast('Bulk Dispatch Complete!', `Dispatched ${sentCount} notices with payment links to guardians`, 'success');
       setIsBulkEmailModalOpen(false);
     } catch (err: any) {
       toast('Batch sending issue', err?.message || 'Some emails could not be sent', 'error');
@@ -596,23 +593,114 @@ Paradise Public School Accounts Directorate`;
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-slate-700 font-semibold">Official Email Notice Content</label>
+                {/* View Mode Toggle */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1 p-0.5 bg-slate-200/80 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewHtmlMode(false)}
+                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        !previewHtmlMode ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Text / Mailto View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewHtmlMode(true)}
+                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        previewHtmlMode ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Executive HTML Card Preview
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     onClick={handleCopyEmail}
-                    className="text-blue-600 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                    className="text-blue-600 hover:underline flex items-center gap-1 font-semibold cursor-pointer text-xs"
                   >
                     <Copy className="w-3 h-3" />
                     <span>Copy Text</span>
                   </button>
                 </div>
-                <textarea
-                  rows={10}
-                  value={emailMessage}
-                  onChange={e => setEmailMessage(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-300 text-slate-800 font-mono text-[11px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
+
+                {!previewHtmlMode ? (
+                  <textarea
+                    rows={11}
+                    value={emailMessage}
+                    onChange={e => setEmailMessage(e.target.value)}
+                    className="w-full p-3.5 rounded-xl border border-slate-300 text-slate-800 font-mono text-[11px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                  />
+                ) : (
+                  /* Live HTML Email Preview Box */
+                  <div className="rounded-2xl border border-slate-300 overflow-hidden bg-slate-900 shadow-inner max-h-[380px] overflow-y-auto">
+                    <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 p-5 text-center text-white border-b-2 border-amber-500 space-y-1">
+                      <div className="inline-block bg-white text-blue-900 font-bold px-3 py-0.5 rounded-md text-xs tracking-widest font-serif">
+                        PARADISE
+                      </div>
+                      <h4 className="text-base font-bold font-cinzel text-white">PARADISE PUBLIC SCHOOL</h4>
+                      <p className="text-[10px] text-blue-200 uppercase tracking-wider">CBSE Affiliation No: 2130842 • School Code: 71234</p>
+                    </div>
+
+                    <div className="p-5 bg-white space-y-4 text-xs">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px]">
+                          ⚠️ Tuition Fee Notice
+                        </span>
+                        <span className="font-mono text-slate-500 text-[11px]">Invoice #{emailModalFee.invoiceNo}</span>
+                      </div>
+
+                      <p className="text-slate-700">
+                        Dear Parent / Guardian of <strong>{emailModalFee.studentName}</strong>,
+                        <br />
+                        <span className="text-slate-500 text-[11px]">
+                          This is a formal reminder regarding the outstanding tuition fees for {emailModalFee.term}.
+                        </span>
+                      </p>
+
+                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                        <div className="flex justify-between text-slate-600">
+                          <span>Scholar Name:</span>
+                          <strong className="text-slate-900">{emailModalFee.studentName} ({emailModalFee.grade})</strong>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                          <span>Billing Term:</span>
+                          <span className="text-slate-900 font-medium">{emailModalFee.term}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                          <span>Payment Due Date:</span>
+                          <span className="text-red-600 font-bold">{formatDate(emailModalFee.dueDate)}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-200 text-blue-900 font-bold">
+                          <span>Total Amount Due:</span>
+                          <span className="text-lg font-black font-mono text-blue-700">{formatCurrency(emailModalFee.totalAmount)}</span>
+                        </div>
+                      </div>
+
+                      {/* Prominent Payment Button */}
+                      <div className="text-center pt-2">
+                        <a
+                          href={emailService.getPaymentUrl()}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-xs uppercase tracking-wider shadow-md text-center transition-all cursor-pointer"
+                        >
+                          💳 Pay Tuition Fee Online (Parent Portal) &rarr;
+                        </a>
+                        <span className="block mt-1.5 text-[10px] text-slate-400">
+                          Direct Link: <span className="text-blue-600 underline font-mono">{emailService.getPaymentUrl()}</span>
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] text-blue-950 space-y-1">
+                        <strong>⚡ Quick UPI ID:</strong> <span className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-blue-200">paradiseschool@sbi</span>
+                        <div className="text-[10px] text-blue-700">Supported: Google Pay, PhonePe, Paytm, BHIM & Net Banking</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -631,7 +719,7 @@ Paradise Public School Accounts Directorate`;
                   type="button"
                   onClick={handleSendViaGmailWeb}
                   className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold flex items-center gap-1.5 border border-slate-300 shadow-xs cursor-pointer text-xs"
-                  title="Open 1-Click Gmail Webmail with pre-filled content"
+                  title="Open 1-Click Gmail Webmail with pre-filled content & payment link"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
                   <span>Send with Gmail Web</span>

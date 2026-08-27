@@ -48,14 +48,31 @@ import { AdminEvents } from './pages/admin/AdminEvents';
 import { AdminGallery } from './pages/admin/AdminGallery';
 import { AdminSettings } from './pages/admin/AdminSettings';
 
+const getInitialTab = (sectionPrefix: string, defaultTab: string) => {
+  const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  const parts = rawHash.split('/');
+  if (parts[0] === sectionPrefix && parts[1]) {
+    return parts[1];
+  }
+  return defaultTab;
+};
+
+const getInitialGuestTab = () => {
+  const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  if (rawHash && !['admin', 'parent', 'teacher', 'gateway', 'select'].includes(rawHash.split('/')[0])) {
+    return rawHash.split('/')[0];
+  }
+  return 'home';
+};
+
 const SchoolApp: React.FC = () => {
   const { role, showGateway, switchRole, openGateway } = useAuth();
 
-  // Internal tab states for each portal
-  const [guestTab, setGuestTabState] = useState('home');
-  const [parentTab, setParentTabState] = useState('dashboard');
-  const [teacherTab, setTeacherTabState] = useState('dashboard');
-  const [adminTab, setAdminTabState] = useState('dashboard');
+  // Internal tab states for each portal - restored from URL hash on reload
+  const [guestTab, setGuestTabState] = useState(getInitialGuestTab);
+  const [parentTab, setParentTabState] = useState(() => getInitialTab('parent', 'dashboard'));
+  const [teacherTab, setTeacherTabState] = useState(() => getInitialTab('teacher', 'dashboard'));
+  const [adminTab, setAdminTabState] = useState(() => getInitialTab('admin', 'dashboard'));
 
   // Push history on tab changes
   const setGuestTab = (tab: string) => {

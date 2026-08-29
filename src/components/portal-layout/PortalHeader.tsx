@@ -28,16 +28,17 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5">
-        <div className="flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-8 py-3.5">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Mobile Trigger + Back Button + Titles */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={onOpenMobileMenu}
-              className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 lg:hidden"
+              className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 text-slate-800 lg:hidden shrink-0 cursor-pointer flex items-center justify-center"
               title="Open Navigation Menu"
+              aria-label="Open Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-slate-900" />
             </button>
 
             <button
@@ -49,23 +50,23 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                   window.location.hash = '#/dashboard';
                 }
               }}
-              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors border border-slate-200 cursor-pointer flex items-center gap-1 text-xs font-semibold"
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors border border-slate-200 cursor-pointer flex items-center gap-1 text-xs font-semibold shrink-0"
               title="Go to Previous Page"
             >
               <span className="text-base leading-none">←</span>
               <span className="hidden sm:inline text-xs">Back</span>
             </button>
 
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 font-cinzel tracking-wide">
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-xl font-bold text-slate-900 font-cinzel tracking-wide truncate">
                 {title}
               </h2>
-              {subtitle && <p className="text-xs text-slate-500 hidden sm:block mt-0.5">{subtitle}</p>}
+              {subtitle && <p className="text-xs text-slate-500 hidden sm:block mt-0.5 truncate">{subtitle}</p>}
             </div>
           </div>
 
           {/* Right: Date, Notifications, User */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Date Pill */}
             <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-xs text-slate-600 font-medium">
               <Calendar className="w-3.5 h-3.5 text-blue-600" />
@@ -75,18 +76,19 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
             {/* Notification Bell */}
             <button
               onClick={() => setIsNotifOpen(true)}
-              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer border border-slate-200"
+              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer border border-slate-200 shrink-0"
+              aria-label="Notifications"
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-600" />
             </button>
 
             {/* User Info & Logout */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+            <div className="flex items-center gap-2 sm:gap-2.5 pl-1.5 sm:pl-2 border-l border-slate-200">
               <img
                 src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'}
                 alt={currentUser.name}
-                className="w-8 h-8 rounded-lg object-cover border border-slate-200"
+                className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
               />
               <div className="hidden sm:block text-left">
                 <div className="text-xs font-bold text-slate-900 truncate max-w-[130px]">{currentUser.name}</div>
@@ -96,7 +98,8 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
               <button
                 onClick={logout}
                 title="Sign Out / Lock Portal"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                aria-label="Sign Out"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
               >
                 <LogOut className="w-4 h-4" />
               </button>

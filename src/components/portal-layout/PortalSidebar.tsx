@@ -77,6 +77,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     { id: 'homework', label: 'Homework Directorate', icon: <ClipboardList className="w-4 h-4" />, badge: activeHomeworkCount ? `${activeHomeworkCount}` : undefined },
     { id: 'students', label: 'Students Directory', icon: <Users className="w-4 h-4" /> },
     { id: 'teachers', label: 'Faculty Directory', icon: <UserCheck className="w-4 h-4" /> },
+    { id: 'subjects', label: 'School Subjects', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'fees', label: 'Student Fee Management', icon: <CreditCard className="w-4 h-4" />, badge: pendingFeesCount ? `${pendingFeesCount}` : undefined, badgeColor: 'bg-amber-100 text-amber-800' },
     { id: 'admissions', label: 'Admissions Queue', icon: <FileCheck2 className="w-4 h-4" />, badge: pendingAdmissionsCount ? `${pendingAdmissionsCount}` : undefined, badgeColor: 'bg-blue-100 text-blue-700' },
     { id: 'notices', label: 'Notices & Circulars', icon: <Bell className="w-4 h-4" /> },

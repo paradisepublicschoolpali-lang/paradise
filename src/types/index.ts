@@ -231,3 +231,37 @@ export interface SchoolConfig {
   logoAccentColor: string;
   logoImageUrl: string;
 }
+
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'All Days';
+
+export interface TeacherPeriod {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  periodNumber: string; // e.g. '01', '02', 'Period 1'
+  startTime: string; // e.g. '08:30 AM'
+  endTime: string; // e.g. '09:20 AM'
+  grade: string; // e.g. 'Class 8'
+  section: string; // e.g. 'A'
+  subject: string; // e.g. 'General & Physical Science'
+  room: string; // e.g. 'Science Lab 1'
+  topic?: string;
+  scheduleType: 'permanent' | 'day_only'; // Permanent (Recurring weekly) or For a Day (Specific date)
+  dayOfWeek?: DayOfWeek; // For permanent
+  date?: string; // For day_only (YYYY-MM-DD)
+  notes?: string;
+}
+
+export interface SchoolSubject {
+  id: string;
+  name: string; // e.g. 'Advanced Mathematics & Computing'
+  code: string; // e.g. 'MATH-08'
+  department: string; // e.g. 'Mathematics & Computing'
+  category: 'Core Academic' | 'STEM & Sciences' | 'Languages & Literature' | 'Arts & Culture' | 'Physical Education' | 'Vocational & Tech';
+  grades: string[]; // e.g. ['Class 6', 'Class 7', 'Class 8']
+  weeklyPeriods: number; // e.g. 5
+  description?: string;
+  headTeacher?: string;
+  status: 'Active' | 'Elective' | 'Archived';
+}
+

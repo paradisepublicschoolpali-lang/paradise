@@ -11,7 +11,9 @@ import {
   FeeItem,
   SchoolEvent,
   GalleryItem,
-  UserProfile
+  UserProfile,
+  TeacherPeriod,
+  SchoolSubject
 } from '../types';
 
 export const DEMO_USERS: Record<string, UserProfile> = {
@@ -766,3 +768,206 @@ export const INITIAL_GALLERY: GalleryItem[] = [
     date: '2026-07-05'
   }
 ];
+
+export const INITIAL_SUBJECTS: SchoolSubject[] = [
+  {
+    id: 'sub-1',
+    name: 'General & Physical Science',
+    code: 'SCI-08',
+    department: 'Physics & STEM Labs',
+    category: 'STEM & Sciences',
+    grades: ['Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 6,
+    description: 'Experimental physics, basic chemistry reactions, plant and animal biology, and laboratory observations.',
+    headTeacher: 'Mrs. Sunita Verma',
+    status: 'Active'
+  },
+  {
+    id: 'sub-2',
+    name: 'Algebra, Geometry & Statistics',
+    code: 'MATH-08',
+    department: 'Mathematics & Computing',
+    category: 'Core Academic',
+    grades: ['Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 7,
+    description: 'CBSE mathematics syllabus, algebraical proofs, linear equations, Euclidean geometry, and data interpretation.',
+    headTeacher: 'Mr. Rajesh Iyer',
+    status: 'Active'
+  },
+  {
+    id: 'sub-3',
+    name: 'English Literature & Rhetoric',
+    code: 'ENG-08',
+    department: 'English Literature & Rhetoric',
+    category: 'Languages & Literature',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 6,
+    description: 'Classical & contemporary prose, poetry recitation, creative storytelling, formal essays, and elocution.',
+    headTeacher: 'Mrs. Anjali Sharma',
+    status: 'Active'
+  },
+  {
+    id: 'sub-4',
+    name: 'Python Programming & Junior Robotics',
+    code: 'CS-08',
+    department: 'Computer Science',
+    category: 'Vocational & Tech',
+    grades: ['Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 4,
+    description: 'Algorithmic reasoning, Scratch visual coding, Python scripting, sensor electronics, and junior maker robotics.',
+    headTeacher: 'Dr. Vikramaditya Sen',
+    status: 'Active'
+  },
+  {
+    id: 'sub-5',
+    name: 'Social Sciences & Heritage Studies',
+    code: 'SST-08',
+    department: 'Humanities & Social Sciences',
+    category: 'Core Academic',
+    grades: ['Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 5,
+    description: 'Medieval and modern Indian history, civics and constitution, physical geography, and environmental stewardship.',
+    headTeacher: 'Dr. Renu Gupta',
+    status: 'Active'
+  },
+  {
+    id: 'sub-6',
+    name: 'Hindi Language & Sahitya',
+    code: 'HIN-08',
+    department: 'Languages & Literature',
+    category: 'Languages & Literature',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 5,
+    description: 'Hindi grammar, kavita path, comprehension, rashtrabhasha literature, and creative composition.',
+    headTeacher: 'Mrs. Anjali Sharma',
+    status: 'Active'
+  },
+  {
+    id: 'sub-7',
+    name: 'Physical Education & Athletics',
+    code: 'PED-08',
+    department: 'Physical Education & Sports',
+    category: 'Physical Education',
+    grades: ['Nursery', 'Kindergarten', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 3,
+    description: 'Track and field athletics, swimming drills, yoga postures, basketball, football, and sportsmanship.',
+    headTeacher: 'Director of Physical Education',
+    status: 'Active'
+  },
+  {
+    id: 'sub-8',
+    name: 'Visual Arts, Craft & Pottery',
+    code: 'ART-08',
+    department: 'Fine Arts & Culture',
+    category: 'Arts & Culture',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 2,
+    description: 'Watercolor painting, origami, clay sculpting, sketching techniques, and inter-house exhibition showcase.',
+    headTeacher: 'Fine Arts Faculty',
+    status: 'Elective'
+  }
+];
+
+export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
+  // Sunita Verma (tch-1) - Permanent weekly periods
+  {
+    id: 'prd-1',
+    teacherId: 'tch-1',
+    teacherName: 'Mrs. Sunita Verma',
+    periodNumber: '01',
+    startTime: '08:30 AM',
+    endTime: '09:20 AM',
+    grade: 'Class 8',
+    section: 'A',
+    subject: 'General & Physical Science',
+    room: 'Science Lab 1',
+    topic: 'Force, Pressure & Atmospheric Dynamics',
+    scheduleType: 'permanent',
+    dayOfWeek: 'All Days',
+    notes: 'Practical demonstration of barometer and manometer.'
+  },
+  {
+    id: 'prd-2',
+    teacherId: 'tch-1',
+    teacherName: 'Mrs. Sunita Verma',
+    periodNumber: '03',
+    startTime: '10:30 AM',
+    endTime: '11:20 AM',
+    grade: 'Class 7',
+    section: 'A',
+    subject: 'Integrated Science & Discovery',
+    room: 'Room 104',
+    topic: 'Heat, Thermodynamics & Thermal Transfer',
+    scheduleType: 'permanent',
+    dayOfWeek: 'All Days',
+    notes: 'Conduction and convection in liquids experiment.'
+  },
+  {
+    id: 'prd-3',
+    teacherId: 'tch-1',
+    teacherName: 'Mrs. Sunita Verma',
+    periodNumber: '05',
+    startTime: '01:00 PM',
+    endTime: '01:50 PM',
+    grade: 'Class 6',
+    section: 'A',
+    subject: 'Environmental & Nature Science',
+    room: 'Room 102',
+    topic: 'Motion, Distances & Standard Measurements',
+    scheduleType: 'permanent',
+    dayOfWeek: 'All Days',
+    notes: 'Vernier calliper and measuring tape introduction.'
+  },
+  // Day-Specific Lecture (Special Olympiad Workshop for Saturday / specific date)
+  {
+    id: 'prd-4',
+    teacherId: 'tch-1',
+    teacherName: 'Mrs. Sunita Verma',
+    periodNumber: '06',
+    startTime: '02:00 PM',
+    endTime: '02:50 PM',
+    grade: 'Class 8',
+    section: 'A',
+    subject: 'General & Physical Science',
+    room: 'Junior STEM Studio',
+    topic: 'National Science Olympiad Problem Solving',
+    scheduleType: 'day_only',
+    date: '2026-08-29',
+    notes: 'Intensive mock questions for senior middle school science scholars.'
+  },
+
+  // Rajesh Iyer (tch-2) - Permanent weekly periods
+  {
+    id: 'prd-5',
+    teacherId: 'tch-2',
+    teacherName: 'Mr. Rajesh Iyer',
+    periodNumber: '02',
+    startTime: '09:30 AM',
+    endTime: '10:20 AM',
+    grade: 'Class 8',
+    section: 'A',
+    subject: 'Algebra, Geometry & Statistics',
+    room: 'Room 108',
+    topic: 'Linear Equations & Graphical Intersections',
+    scheduleType: 'permanent',
+    dayOfWeek: 'All Days',
+    notes: 'Solving simultaneous balance equations.'
+  },
+  {
+    id: 'prd-6',
+    teacherId: 'tch-2',
+    teacherName: 'Mr. Rajesh Iyer',
+    periodNumber: '04',
+    startTime: '11:30 AM',
+    endTime: '12:20 PM',
+    grade: 'Class 7',
+    section: 'B',
+    subject: 'Practical Mathematics',
+    room: 'Room 106',
+    topic: 'Fractions, Decimals & Rational Operations',
+    scheduleType: 'permanent',
+    dayOfWeek: 'All Days',
+    notes: 'Group worksheet exercise.'
+  }
+];
+

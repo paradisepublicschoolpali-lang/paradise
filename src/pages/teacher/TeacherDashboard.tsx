@@ -8,15 +8,26 @@ interface TeacherDashboardProps {
 }
 
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab }) => {
-  const { teachers, students, results } = useSchoolData();
+  const { teachers, students, results, teacherPeriods } = useSchoolData();
   const { currentUser } = useAuth();
   const teacher = teachers.find(t => t.id === currentUser.id || t.loginId === currentUser.loginId) || teachers[0];
 
-  const todayClasses = [
-    { period: '01', time: '08:30 - 09:20', grade: 'Grade 8', section: 'A', subject: 'General Science', topic: 'Force, Pressure & Atmospheric Dynamics' },
-    { period: '03', time: '10:30 - 11:20', grade: 'Grade 7', section: 'A', subject: 'Physical Science', topic: 'Heat, Thermodynamics & Transfer' },
-    { period: '05', time: '01:00 - 01:50', grade: 'Grade 6', section: 'B', subject: 'Introduction to Physics', topic: 'Motion, Distances & Measurement' },
-  ];
+  const today = new Date();
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const currentDayName = days[today.getDay()];
+  const currentDateStr = today.toISOString().split('T')[0];
+
+  const todayLectures = teacherPeriods.filter(p => {
+    const isThisTeacher = p.teacherId === teacher?.id || p.teacherName === teacher?.name;
+    if (!isThisTeacher) return false;
+    if (p.scheduleType === 'permanent') {
+      return p.dayOfWeek === 'All Days' || p.dayOfWeek === currentDayName;
+    }
+    if (p.scheduleType === 'day_only') {
+      return p.date === currentDateStr;
+    }
+    return false;
+  }).sort((a, b) => a.periodNumber.localeCompare(b.periodNumber));
 
   return (
     <div className="space-y-6 pb-12">
@@ -71,10 +82,15 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           <span className="text-[11px] text-blue-600 font-medium">96 Total Scholars</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
+        <div
+          onClick={() => setActiveTab('classes')}
+          className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 shadow-xs cursor-pointer text-center space-y-1 transition-all"
+        >
           <span className="text-xs text-slate-500 font-semibold uppercase">Today's Lectures</span>
-          <div className="text-3xl font-bold font-cinzel text-emerald-600">3 Periods</div>
-          <span className="text-[11px] text-emerald-700">Next: Period 1 at 08:30 AM</span>
+          <div className="text-3xl font-bold font-cinzel text-emerald-600">{todayLectures.length} Periods</div>
+          <span className="text-[11px] text-emerald-700">
+            {todayLectures.length > 0 ? `Next: Period ${todayLectures[0].periodNumber} (${todayLectures[0].startTime})` : 'No lectures scheduled today'}
+          </span>
         </div>
 
         <div
@@ -100,30 +116,42 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
               <Clock className="w-4 h-4 text-emerald-600" />
-              <span>Today's Allocated Lectures</span>
+              <span>Today's Allocated Lectures ({currentDayName})</span>
             </h3>
-            <span className="text-xs text-slate-500 font-mono">3 Batches</span>
+            <button
+              onClick={() => setActiveTab('classes')}
+              className="text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
+            >
+              Manage Timetable →
+            </button>
           </div>
 
           <div className="space-y-3">
-            {todayClasses.map(cls => (
-              <div
-                key={cls.period}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono font-bold text-[10px]">
-                      Period {cls.period}
-                    </span>
-                    <strong className="text-slate-900 text-sm">{cls.grade}-{cls.section}</strong>
-                    <span className="text-blue-600 font-semibold">({cls.subject})</span>
-                  </div>
-                  <p className="text-slate-500 mt-1 text-[11px]">Topic: {cls.topic}</p>
-                </div>
-                <div className="font-mono text-slate-700 font-semibold shrink-0">{cls.time}</div>
+            {todayLectures.length === 0 ? (
+              <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl border border-slate-100">
+                No lecture periods scheduled for today ({currentDayName}). Go to "Classes & Timetable" to add permanent or day-specific periods.
               </div>
-            ))}
+            ) : (
+              todayLectures.map(cls => (
+                <div
+                  key={cls.id}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono font-bold text-[10px]">
+                        Period {cls.periodNumber}
+                      </span>
+                      <strong className="text-slate-900 text-sm">{cls.grade}-{cls.section}</strong>
+                      <span className="text-blue-600 font-semibold">({cls.subject})</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-medium">{cls.room}</span>
+                    </div>
+                    {cls.topic && <p className="text-slate-500 mt-1 text-[11px]">Topic: {cls.topic}</p>}
+                  </div>
+                  <div className="font-mono text-slate-700 font-semibold shrink-0">{cls.startTime} - {cls.endTime}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

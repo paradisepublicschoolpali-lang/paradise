@@ -8,7 +8,7 @@ import { ImageUploadInput } from '../../components/common/ImageUploadInput';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 export const AdminStudents: React.FC = () => {
-  const { students, addStudent, updateStudent, deleteStudent, fees, addFeeInvoice } = useSchoolData();
+  const { students, addStudent, updateStudent, deleteStudent, fees, addFeeInvoice, enrollStudentWithFee } = useSchoolData();
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +41,14 @@ export const AdminStudents: React.FC = () => {
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
   });
 
+  // Initial Tuition Fee Form when Enrolling Student
+  const [initialFeeData, setInitialFeeData] = useState({
+    term: 'Quarter 3 (Oct - Dec 2026)',
+    dueDate: '2026-10-15',
+    tuition: 35000,
+    status: 'Pending' as FeeItem['status']
+  });
+
   // Student Fee Quick Generation Form (Tuition only)
   const [studentFeeForm, setStudentFeeForm] = useState({
     term: 'Quarter 3 (Oct - Dec 2026)',
@@ -68,13 +76,20 @@ export const AdminStudents: React.FC = () => {
 
     const assignedLoginId = formData.loginId || formData.name.toLowerCase().split(' ')[0] + Math.floor(10 + Math.random() * 90);
 
-    addStudent({
-      ...formData,
-      loginId: assignedLoginId,
-      password: formData.password || 'password123'
-    });
+    const { student, fee } = enrollStudentWithFee(
+      {
+        ...formData,
+        loginId: assignedLoginId,
+        password: formData.password || 'password123'
+      },
+      initialFeeData
+    );
 
-    toast('Student Enrolled & ID Created!', `Student Login ID: ${assignedLoginId} | Password: ${formData.password || 'password123'}`, 'success');
+    toast(
+      'Scholar Enrolled & Initial Fee Invoice Issued!',
+      `Login ID: ${assignedLoginId} | Tuition Fee: ${formatCurrency(initialFeeData.tuition)} (${initialFeeData.status})`,
+      'success'
+    );
     setIsAddModalOpen(false);
     setFormData({
       name: '',
@@ -96,6 +111,12 @@ export const AdminStudents: React.FC = () => {
       busNumber: 'DL-1PB-0418',
       lockerNumber: 'LK-08A-99',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
+    });
+    setInitialFeeData({
+      term: 'Quarter 3 (Oct - Dec 2026)',
+      dueDate: '2026-10-15',
+      tuition: 35000,
+      status: 'Pending'
     });
   };
 
@@ -489,6 +510,69 @@ export const AdminStudents: React.FC = () => {
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
               />
               <span className="text-[10px] text-slate-500 font-medium">Required for digital fee receipts & email notices</span>
+            </div>
+          </div>
+
+          {/* Initial Fee Structure Configuration (Mandatory) */}
+          <div className="p-4 bg-emerald-50/90 border-2 border-emerald-200 rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-950 font-bold text-sm">
+                <CreditCard className="w-4 h-4 text-emerald-600" />
+                <span>Initial Tuition Fee Invoicing (Mandatory Setup)</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 font-bold text-[10px]">
+                Auto-Created With Student
+              </span>
+            </div>
+            <p className="text-[11px] text-emerald-800 leading-snug">
+              Every enrolled scholar is automatically assigned their initial tuition fee invoice in the school treasury upon creation.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Billing Term *</label>
+                <input
+                  type="text"
+                  required
+                  value={initialFeeData.term}
+                  onChange={e => setInitialFeeData({ ...initialFeeData, term: e.target.value })}
+                  placeholder="e.g. Quarter 3 (Oct - Dec 2026)"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Fee Due Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={initialFeeData.dueDate}
+                  onChange={e => setInitialFeeData({ ...initialFeeData, dueDate: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Tuition Fee Amount (₹) *</label>
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  value={initialFeeData.tuition}
+                  onChange={e => setInitialFeeData({ ...initialFeeData, tuition: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono font-bold text-slate-900 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Initial Payment Status</label>
+              <select
+                value={initialFeeData.status}
+                onChange={e => setInitialFeeData({ ...initialFeeData, status: e.target.value as any })}
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-emerald-500"
+              >
+                <option value="Pending">Pending (Awaiting Payment)</option>
+                <option value="Paid">Paid (Pre-collected at Admission)</option>
+              </select>
             </div>
           </div>
 

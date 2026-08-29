@@ -12,7 +12,9 @@ import {
   FeeItem,
   SchoolEvent,
   GalleryItem,
-  SchoolConfig
+  SchoolConfig,
+  TeacherPeriod,
+  SchoolSubject
 } from '../types';
 import {
   INITIAL_STUDENTS,
@@ -26,7 +28,9 @@ import {
   INITIAL_EXAM_RESULTS,
   INITIAL_FEES,
   INITIAL_EVENTS,
-  INITIAL_GALLERY
+  INITIAL_GALLERY,
+  INITIAL_SUBJECTS,
+  INITIAL_TEACHER_PERIODS
 } from '../data/mockData';
 import { supabaseService } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
@@ -66,12 +70,18 @@ interface SchoolDataContextType {
   events: SchoolEvent[];
   gallery: GalleryItem[];
   schoolConfig: SchoolConfig;
+  subjects: SchoolSubject[];
+  teacherPeriods: TeacherPeriod[];
 
   // Cloud Sync
   refreshFromSupabase: () => Promise<void>;
 
   // Student Actions
   addStudent: (student: Omit<Student, 'id' | 'attendanceRate' | 'gpa' | 'feeStatus'>) => void;
+  enrollStudentWithFee: (
+    studentData: Omit<Student, 'id' | 'attendanceRate' | 'gpa' | 'feeStatus'>,
+    feeData: { term: string; dueDate: string; tuition: number; status: FeeItem['status'] }
+  ) => { student: Student; fee: FeeItem };
   updateStudent: (id: string, updated: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
 
@@ -113,6 +123,16 @@ interface SchoolDataContextType {
   updateFeeInvoice: (id: string, updated: Partial<FeeItem>) => void;
   deleteFeeInvoice: (id: string) => void;
   payFeeInvoice: (invoiceId: string, paymentMethod: FeeItem['paymentMethod']) => void;
+
+  // School Subjects (Admin Directorate)
+  addSubject: (subject: Omit<SchoolSubject, 'id'>) => void;
+  updateSubject: (id: string, updated: Partial<SchoolSubject>) => void;
+  deleteSubject: (id: string) => void;
+
+  // Teacher Periods / Timetable (Permanent & Day-Only)
+  addTeacherPeriod: (period: Omit<TeacherPeriod, 'id'>) => void;
+  updateTeacherPeriod: (id: string, updated: Partial<TeacherPeriod>) => void;
+  deleteTeacherPeriod: (id: string) => void;
 
   // Events & Gallery
   addEvent: (event: Omit<SchoolEvent, 'id' | 'rsvpCount' | 'isUpcoming'>) => void;
@@ -157,6 +177,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [events, setEvents] = useState<SchoolEvent[]>(() => getStoredOrDefault('events', INITIAL_EVENTS));
   const [gallery, setGallery] = useState<GalleryItem[]>(() => getStoredOrDefault('gallery', INITIAL_GALLERY));
   const [schoolConfig, setSchoolConfig] = useState<SchoolConfig>(() => getStoredOrDefault('config', INITIAL_SCHOOL_CONFIG));
+  const [subjects, setSubjects] = useState<SchoolSubject[]>(() => getStoredOrDefault('subjects', INITIAL_SUBJECTS));
+  const [teacherPeriods, setTeacherPeriods] = useState<TeacherPeriod[]>(() => getStoredOrDefault('periods', INITIAL_TEACHER_PERIODS));
 
   // Local storage persistence
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'students', JSON.stringify(students)); }, [students]);
@@ -172,6 +194,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'events', JSON.stringify(events)); }, [events]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'gallery', JSON.stringify(gallery)); }, [gallery]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'config', JSON.stringify(schoolConfig)); }, [schoolConfig]);
+  useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'subjects', JSON.stringify(subjects)); }, [subjects]);
+  useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'periods', JSON.stringify(teacherPeriods)); }, [teacherPeriods]);
 
   // Full Refresh from Supabase
   const refreshFromSupabase = useCallback(async () => {
@@ -254,6 +278,46 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
     setStudents(prev => [newStudent, ...prev]);
     supabaseService.upsertStudent(newStudent);
+  };
+
+  const enrollStudentWithFee = (
+    studentData: Omit<Student, 'id' | 'attendanceRate' | 'gpa' | 'feeStatus'>,
+    feeData: { term: string; dueDate: string; tuition: number; status: FeeItem['status'] }
+  ) => {
+    const studentId = `std-${Date.now()}`;
+    const newStudent: Student = {
+      ...studentData,
+      id: studentId,
+      attendanceRate: 100,
+      gpa: 4.0,
+      feeStatus: feeData.status === 'Paid' ? 'Paid' : 'Pending'
+    };
+
+    const tuitionAmount = Number(feeData.tuition);
+    const newFee: FeeItem = {
+      id: `fee-${Date.now()}`,
+      invoiceNo: `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      studentId: studentId,
+      studentName: studentData.name,
+      grade: `${studentData.grade}-${studentData.section}`,
+      term: feeData.term || 'Quarter 3 (Oct - Dec 2026)',
+      dueDate: feeData.dueDate || new Date().toISOString().split('T')[0],
+      breakdown: {
+        tuition: tuitionAmount
+      },
+      totalAmount: tuitionAmount,
+      paidAmount: feeData.status === 'Paid' ? tuitionAmount : 0,
+      status: feeData.status || 'Pending',
+      paymentDate: feeData.status === 'Paid' ? new Date().toISOString().split('T')[0] : undefined,
+      paymentMethod: feeData.status === 'Paid' ? 'UPI' : undefined
+    };
+
+    setStudents(prev => [newStudent, ...prev]);
+    supabaseService.upsertStudent(newStudent);
+    setFees(prev => [newFee, ...prev]);
+    supabaseService.upsertFee(newFee);
+
+    return { student: newStudent, fee: newFee };
   };
 
   const updateStudent = (id: string, updated: Partial<Student>) => {
@@ -643,6 +707,44 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   // ==========================================
+  // SCHOOL SUBJECTS (ADMIN DIRECTORATE)
+  // ==========================================
+  const addSubject = (subData: Omit<SchoolSubject, 'id'>) => {
+    const newSub: SchoolSubject = {
+      ...subData,
+      id: `sub-${Date.now()}`
+    };
+    setSubjects(prev => [newSub, ...prev]);
+  };
+
+  const updateSubject = (id: string, updated: Partial<SchoolSubject>) => {
+    setSubjects(prev => prev.map(s => (s.id === id ? { ...s, ...updated } : s)));
+  };
+
+  const deleteSubject = (id: string) => {
+    setSubjects(prev => prev.filter(s => s.id !== id));
+  };
+
+  // ==========================================
+  // TEACHER PERIODS & TIMETABLE (PERMANENT & DAY-ONLY)
+  // ==========================================
+  const addTeacherPeriod = (periodData: Omit<TeacherPeriod, 'id'>) => {
+    const newPeriod: TeacherPeriod = {
+      ...periodData,
+      id: `prd-${Date.now()}`
+    };
+    setTeacherPeriods(prev => [newPeriod, ...prev]);
+  };
+
+  const updateTeacherPeriod = (id: string, updated: Partial<TeacherPeriod>) => {
+    setTeacherPeriods(prev => prev.map(p => (p.id === id ? { ...p, ...updated } : p)));
+  };
+
+  const deleteTeacherPeriod = (id: string) => {
+    setTeacherPeriods(prev => prev.filter(p => p.id !== id));
+  };
+
+  // ==========================================
   // CONFIG
   // ==========================================
   const updateSchoolConfig = (updated: Partial<SchoolConfig>) => {
@@ -664,6 +766,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setEvents(INITIAL_EVENTS);
     setGallery(INITIAL_GALLERY);
     setSchoolConfig(INITIAL_SCHOOL_CONFIG);
+    setSubjects(INITIAL_SUBJECTS);
+    setTeacherPeriods(INITIAL_TEACHER_PERIODS);
   };
 
   return (
@@ -682,8 +786,11 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         events,
         gallery,
         schoolConfig,
+        subjects,
+        teacherPeriods,
         refreshFromSupabase,
         addStudent,
+        enrollStudentWithFee,
         updateStudent,
         deleteStudent,
         addTeacher,
@@ -711,6 +818,12 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateFeeInvoice,
         deleteFeeInvoice,
         payFeeInvoice,
+        addSubject,
+        updateSubject,
+        deleteSubject,
+        addTeacherPeriod,
+        updateTeacherPeriod,
+        deleteTeacherPeriod,
         addEvent,
         updateEvent,
         deleteEvent,

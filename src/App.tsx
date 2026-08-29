@@ -41,6 +41,7 @@ import { AdminAttendance } from './pages/admin/AdminAttendance';
 import { AdminHomework } from './pages/admin/AdminHomework';
 import { AdminStudents } from './pages/admin/AdminStudents';
 import { AdminTeachers } from './pages/admin/AdminTeachers';
+import { AdminSubjects } from './pages/admin/AdminSubjects';
 import { AdminFees } from './pages/admin/AdminFees';
 import { AdminAdmissions } from './pages/admin/AdminAdmissions';
 import { AdminNotices } from './pages/admin/AdminNotices';
@@ -235,6 +236,7 @@ const SchoolApp: React.FC = () => {
       homework: { title: 'Homework & Curriculum Directorate', subtitle: 'Central Task Assignment, Deadlines & Solution Evaluations' },
       students: { title: 'Student Body Directory', subtitle: 'Full Enrolment Registry & Credentials Manager' },
       teachers: { title: 'Faculty Directorate', subtitle: 'Staff Appointments, Credentials & Course Allocation' },
+      subjects: { title: 'School Subjects Directorate', subtitle: 'Curriculum Management, Subject Codes & Grade Allocations' },
       fees: { title: 'Institutional Treasury', subtitle: 'Fee Collections, Dunning System & Invoicing' },
       admissions: { title: 'Admissions Bureau', subtitle: 'Online Application Review & Candidate Interviews' },
       notices: { title: 'School Circulars Manager', subtitle: 'Publish & Pin Official Institutional Directives' },
@@ -258,6 +260,7 @@ const SchoolApp: React.FC = () => {
         {adminTab === 'homework' && <AdminHomework />}
         {adminTab === 'students' && <AdminStudents />}
         {adminTab === 'teachers' && <AdminTeachers />}
+        {adminTab === 'subjects' && <AdminSubjects />}
         {adminTab === 'fees' && <AdminFees />}
         {adminTab === 'admissions' && <AdminAdmissions />}
         {adminTab === 'notices' && <AdminNotices />}

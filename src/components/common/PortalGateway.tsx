@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { GraduationCap, UserCheck, Shield, Globe, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import { Logo } from './Logo';
+import {
+  GraduationCap,
+  UserCheck,
+  Shield,
+  Globe,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  AlertCircle,
+  Phone,
+  Mail,
+  Clock,
+  Sparkles,
+  KeyRound,
+  CheckCircle2,
+  HelpCircle
+} from 'lucide-react';
 
 type GatewayView = 'select' | 'parent-login' | 'teacher-login' | 'admin-login';
 
@@ -26,95 +43,139 @@ export const PortalGateway: React.FC = () => {
     setView('select');
   };
 
+  const handleDemoFill = (demoId: string, demoPass: string) => {
+    setLoginId(demoId);
+    setPassword(demoPass);
+    setError('');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Small delay for UX
-    await new Promise(r => setTimeout(r, 400));
+    // Small brief delay for realistic smooth transition
+    await new Promise(r => setTimeout(r, 350));
 
     let result: { success: boolean; error?: string };
 
     if (view === 'parent-login') {
-      result = loginAsParent(loginId, password);
+      result = loginAsParent(loginId.trim(), password);
     } else if (view === 'teacher-login') {
-      result = loginAsTeacher(loginId, password);
+      result = loginAsTeacher(loginId.trim(), password);
     } else {
-      result = loginAsAdmin(loginId, password);
+      result = loginAsAdmin(loginId.trim(), password);
     }
 
     if (!result.success) {
-      setError(result.error || 'Login failed');
+      setError(result.error || 'Login failed. Please check your credentials.');
     }
     setIsLoading(false);
   };
 
-  // Login form for a specific role
-  const renderLoginForm = (title: string, subtitle: string, icon: React.ReactNode, accentColor: string) => (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+  // Render Role-specific Login Form
+  const renderLoginForm = (
+    title: string,
+    titleHindi: string,
+    subtitle: string,
+    icon: React.ReactNode,
+    accentBg: string,
+    demoId: string,
+    demoPass: string,
+    idLabel: string,
+    idPlaceholder: string
+  ) => (
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-blue-50/40 to-slate-100 flex flex-col justify-between p-4 sm:p-6">
+      <div className="w-full max-w-md mx-auto my-auto space-y-4">
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="mb-6 text-sm text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 hover:text-blue-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all cursor-pointer"
         >
-          ← Back to Portal Selection
+          ← Back to Portal Selection (वापस जाएं)
         </button>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          {/* Header */}
-          <div className={`px-8 py-6 ${accentColor} text-white`}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+          {/* Card Header */}
+          <div className={`px-6 py-5 ${accentBg} text-white space-y-2`}>
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-xs rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
                 {icon}
               </div>
               <div>
-                <h2 className="text-xl font-bold font-cinzel">{title}</h2>
-                <p className="text-sm opacity-90">{subtitle}</p>
+                <h2 className="text-xl font-bold font-cinzel leading-snug">{title}</h2>
+                <span className="text-xs text-white/80 font-medium">{titleHindi}</span>
               </div>
             </div>
+            <p className="text-xs text-white/90 leading-relaxed pt-1 border-t border-white/20">
+              {subtitle}
+            </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="p-8 space-y-5">
+          {/* Form Body */}
+          <form onSubmit={handleLogin} className="p-6 sm:p-7 space-y-4.5">
+            {/* Quick Demo Credentials Pill */}
+            <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-center justify-between gap-2 text-xs">
+              <div>
+                <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">Sample Test Account:</span>
+                <span className="font-mono text-slate-800 font-semibold text-[11px]">
+                  ID: <strong className="text-blue-900">{demoId}</strong> | Pass: <strong className="text-blue-900">{demoPass}</strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDemoFill(demoId, demoPass)}
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider shrink-0 cursor-pointer shadow-2xs transition-all"
+              >
+                Auto Fill
+              </button>
+            </div>
+
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs leading-snug animate-shake">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block">Login Unsuccessful</span>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                {view === 'parent-login' ? 'Student ID' : view === 'teacher-login' ? 'Teacher ID' : 'Admin ID'}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                {idLabel} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={loginId}
                 onChange={e => { setLoginId(e.target.value); setError(''); }}
-                placeholder={view === 'parent-login' ? 'e.g. aryan10' : view === 'teacher-login' ? 'e.g. sarah.physics' : 'e.g. admin'}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                placeholder={idPlaceholder}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs font-semibold"
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  Password (पासवर्ड) <span className="text-red-500">*</span>
+                </label>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError(''); }}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  placeholder="Enter your secret password"
+                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+                  title={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -124,165 +185,293 @@ export const PortalGateway: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 ${accentColor} hover:opacity-90 shadow-md`}
+              className={`w-full py-3 rounded-xl text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 ${accentBg} hover:brightness-110 shadow-md`}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Verifying...
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Verifying Credentials...</span>
                 </span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Sign In to School Portal</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
+
+            <div className="pt-2 text-center text-[11px] text-slate-500">
+              Forgot ID or Password? Contact School Reception: <strong className="text-slate-700">+91 11 2765 4321</strong>
+            </div>
           </form>
         </div>
 
-        {/* School Branding */}
-        <div className="text-center mt-6 text-xs text-slate-400">
-          Paradise Public School • Established 1994
+        {/* School Branding Footer */}
+        <div className="text-center text-xs text-slate-500 space-y-0.5">
+          <p className="font-semibold text-slate-700">Paradise Public School • CBSE Affiliated (Estd. 1994)</p>
+          <p className="text-[11px] text-slate-400">Pali, Rajasthan • Empowering Future Leaders</p>
         </div>
       </div>
     </div>
   );
 
-  // Login views
+  // Login View Routing
   if (view === 'parent-login') {
     return renderLoginForm(
-      'Parent / Student Login',
-      'Access results, attendance & fees',
-      <GraduationCap className="w-6 h-6" />,
-      'bg-blue-600'
+      'Student & Parent Portal',
+      'विद्यार्थी एवं अभिभावक लॉगिन',
+      'View daily attendance, unit test marks, school notices & pay fees online',
+      <GraduationCap className="w-6 h-6 text-white" />,
+      'bg-blue-600',
+      'aryan10',
+      'password123',
+      'Student ID / Admission No. (छात्र आईडी)',
+      'e.g. aryan10 or PPS-2026-0842'
     );
   }
+
   if (view === 'teacher-login') {
     return renderLoginForm(
-      'Teacher Login',
-      'Manage classes, grades & attendance',
-      <UserCheck className="w-6 h-6" />,
-      'bg-emerald-600'
+      'Teacher & Staff Portal',
+      'अध्यापक एवं फैकल्टी लॉगिन',
+      'Mark daily classroom roll call, enter exam marks, and manage period timetable',
+      <UserCheck className="w-6 h-6 text-white" />,
+      'bg-emerald-600',
+      'sarah.physics',
+      'teacher123',
+      'Teacher ID / Employee ID (शिक्षक आईडी)',
+      'e.g. sarah.physics or PPS-FAC-014'
     );
   }
+
   if (view === 'admin-login') {
     return renderLoginForm(
-      'Admin Login',
-      'Full school management access',
-      <Shield className="w-6 h-6" />,
-      'bg-slate-800'
+      'Principal & Admin Portal',
+      'प्रधानाचार्य एवं प्रबंधन लॉगिन',
+      'Central institutional operations, fee treasury, staff records & admissions',
+      <Shield className="w-6 h-6 text-white" />,
+      'bg-slate-800',
+      'admin',
+      'renugupta@19',
+      'Admin / Principal Login ID (प्रशासन आईडी)',
+      'e.g. admin or principal'
     );
   }
 
-  // Main 4-option gateway
+  // ==========================================
+  // MAIN 4-PORTAL GATEWAY SELECTION SCREEN
+  // ==========================================
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* School Header */}
-        <div className="text-center mb-10">
-          {/* Shield Logo */}
-          <div className="flex justify-center mb-4">
-            <div className="relative w-20 h-20">
-              <svg viewBox="0 0 100 110" className="w-full h-full drop-shadow-lg">
-                <path
-                  d="M 50 5 L 90 22 C 90 68 50 102 50 102 C 50 102 10 68 10 22 Z"
-                  fill="#1E40AF"
-                  stroke="#2563EB"
-                  strokeWidth="3"
-                />
-                <path
-                  d="M 50 14 L 82 28 C 82 63 50 92 50 92 C 50 92 18 63 18 28 Z"
-                  fill="none"
-                  stroke="#93C5FD"
-                  strokeWidth="1"
-                  strokeDasharray="2 1"
-                  opacity="0.6"
-                />
-                <text
-                  x="50" y="65"
-                  fontFamily="'Cinzel', serif"
-                  fontSize="34" fontWeight="900"
-                  fill="white"
-                  textAnchor="middle"
-                >
-                  P
-                </text>
-                <polygon points="50,22 52,27 57,27 53,30 55,35 50,32 45,35 47,30 43,27 48,27" fill="#93C5FD" />
-              </svg>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-blue-50/30 to-slate-100 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+      {/* Top Bar for School Info */}
+      <div className="max-w-5xl w-full mx-auto flex items-center justify-between text-xs text-slate-500 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">
+            CBSE Affiliated Senior Secondary School
+          </span>
+          <span className="hidden sm:inline text-slate-400">•</span>
+          <span className="hidden sm:inline font-medium">Affiliation No. 1730248</span>
+        </div>
+        <div className="flex items-center gap-4 text-[11px]">
+          <span className="hidden md:flex items-center gap-1">
+            <Phone className="w-3.5 h-3.5 text-blue-600" />
+            <span>+91 11 2765 4321</span>
+          </span>
+          <span className="flex items-center gap-1 text-emerald-700 font-bold">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Session 2026-27 Active</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Main Center Content */}
+      <div className="max-w-4xl w-full mx-auto my-auto py-6 sm:py-8 space-y-8">
+        {/* School Logo & Hero Header */}
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <Logo size="xl" showSubtitle={false} className="justify-center" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold font-cinzel text-slate-900 tracking-wide">
-            Paradise Public School
-          </h1>
-          <p className="text-sm text-slate-500 mt-2 font-medium tracking-wider uppercase">
-            Estd. 1994 • Excellence • Integrity • Leadership
-          </p>
+
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-cinzel text-slate-900 tracking-wide">
+              Paradise Public School
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 font-semibold tracking-wider uppercase">
+              पैराडाइज पब्लिक स्कूल • Estd. 1994 • Excellence • Integrity • Leadership
+            </p>
+          </div>
+
+          <div className="inline-block px-4 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold">
+            Choose your login portal below / कृपया अपना पोर्टल चुनें:
+          </div>
         </div>
 
-        {/* 4 Portal Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Guest */}
+        {/* 4 Clean Portal Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          {/* 1. Public School Website */}
           <button
             onClick={enterAsGuest}
-            className="group p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all text-left cursor-pointer"
+            className="group p-6 bg-white rounded-3xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-xl hover:-translate-y-0.5 transition-all text-left cursor-pointer flex flex-col justify-between space-y-4"
           >
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white text-blue-600 transition-colors">
-              <Globe className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-xs">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  No Login Required
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-blue-700 flex items-center gap-2">
+                  <span>School Website & Admissions</span>
+                </h3>
+                <span className="text-xs text-slate-500 font-medium block">
+                  विद्यालय मुख्य वेबसाइट एवं प्रवेश जानकारी
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Explore school overview, CBSE curriculum, online admission enquiry, campus photo gallery, and latest event circulars.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-700">Guest</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              Browse school information, admissions, events & gallery
-            </p>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
+              <span>Enter School Website →</span>
+              <span className="text-[10px] font-normal text-slate-400">Open to All</span>
+            </div>
           </button>
 
-          {/* Parent / Student */}
+          {/* 2. Parent / Student Portal */}
           <button
             onClick={() => { resetForm(); setView('parent-login'); }}
-            className="group p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all text-left cursor-pointer"
+            className="group p-6 bg-white rounded-3xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-xl hover:-translate-y-0.5 transition-all text-left cursor-pointer flex flex-col justify-between space-y-4"
           >
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white text-blue-600 transition-colors">
-              <GraduationCap className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-xs">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">
+                  For Parents & Students
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-blue-700 flex items-center gap-2">
+                  <span>Student & Parent Portal</span>
+                </h3>
+                <span className="text-xs text-slate-500 font-medium block">
+                  विद्यार्थी एवं अभिभावक लॉगिन
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Check monthly attendance ledger, exam report cards, quarterly tuition fee invoices, online payment, and teacher notices.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-700">Parent / Student</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              View results, attendance & tuition fees
-            </p>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
+              <span>Parent / Student Sign In →</span>
+              <span className="text-[10px] font-mono text-slate-400">Sample: aryan10</span>
+            </div>
           </button>
 
-          {/* Teacher */}
+          {/* 3. Teacher Portal */}
           <button
             onClick={() => { resetForm(); setView('teacher-login'); }}
-            className="group p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all text-left cursor-pointer"
+            className="group p-6 bg-white rounded-3xl border-2 border-slate-200 hover:border-emerald-500 hover:shadow-xl hover:-translate-y-0.5 transition-all text-left cursor-pointer flex flex-col justify-between space-y-4"
           >
-            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-emerald-600 group-hover:text-white text-emerald-600 transition-colors">
-              <UserCheck className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-xs">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  Faculty & Staff
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-emerald-700 flex items-center gap-2">
+                  <span>Teacher & Staff Portal</span>
+                </h3>
+                <span className="text-xs text-slate-500 font-medium block">
+                  शिक्षक एवं अध्यापिका लॉगिन
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Mark daily classroom roll call, enter unit test marks, enroll new scholars with initial fees, and view weekly timetable periods.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700">Teacher</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              Manage classes, attendance & grade students
-            </p>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
+              <span>Teacher Workstation Login →</span>
+              <span className="text-[10px] font-mono text-slate-400">Sample: sarah.physics</span>
+            </div>
           </button>
 
-          {/* Admin */}
+          {/* 4. Principal & Admin Portal */}
           <button
             onClick={() => { resetForm(); setView('admin-login'); }}
-            className="group p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-700 hover:shadow-lg transition-all text-left cursor-pointer"
+            className="group p-6 bg-white rounded-3xl border-2 border-slate-200 hover:border-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all text-left cursor-pointer flex flex-col justify-between space-y-4"
           >
-            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-slate-800 group-hover:text-white text-slate-600 transition-colors">
-              <Shield className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-colors shadow-xs">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold">
+                  School Directorate
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-slate-900 flex items-center gap-2">
+                  <span>Principal & Admin Directorate</span>
+                </h3>
+                <span className="text-xs text-slate-500 font-medium block">
+                  प्रधानाचार्य एवं प्रबंधन लॉगिन
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Full school management, admission queue approvals, fee accounts & treasury, curriculum subjects, and faculty appointments.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 group-hover:text-slate-800">Admin</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              Full school management, students, teachers & settings
-            </p>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-900">
+              <span>Admin Console Sign In →</span>
+              <span className="text-[10px] font-mono text-slate-400">Master: admin</span>
+            </div>
           </button>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8 text-xs text-slate-400">
-          © 2026 Paradise Public School. All rights reserved.
+      {/* Bottom Helpdesk & Indian School Footer */}
+      <div className="max-w-5xl w-full mx-auto pt-6 border-t border-slate-200/80 text-center space-y-2">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-medium">
+          <span className="flex items-center gap-1.5">
+            <Phone className="w-3.5 h-3.5 text-blue-600" />
+            <span>School Helpline: <strong>+91 11 2765 4321</strong></span>
+          </span>
+          <span className="hidden sm:inline text-slate-300">•</span>
+          <span className="flex items-center gap-1.5">
+            <Mail className="w-3.5 h-3.5 text-blue-600" />
+            <span>paradisepublicschool.pali@gmail.com</span>
+          </span>
+          <span className="hidden sm:inline text-slate-300">•</span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
+            <span>Mon - Sat: 08:00 AM - 04:30 PM</span>
+          </span>
         </div>
+
+        <p className="text-[11px] text-slate-400">
+          © 2026 Paradise Public School, Pali (Rajasthan). All rights reserved. Recognized by Government of Rajasthan & Affiliated with CBSE, New Delhi.
+        </p>
       </div>
     </div>
   );

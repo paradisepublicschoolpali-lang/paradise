@@ -30,6 +30,7 @@ export const TeacherClasses: React.FC = () => {
     teachers,
     subjects,
     teacherPeriods,
+    periodSlots,
     enrollStudentWithFee,
     addTeacherPeriod,
     updateTeacherPeriod,
@@ -88,7 +89,7 @@ export const TeacherClasses: React.FC = () => {
     endTime: '09:20 AM',
     grade: 'Class 8',
     section: 'A',
-    subject: 'General & Physical Science',
+    subject: subjects[0]?.name || 'Hindi',
     room: 'Science Lab 1',
     topic: '',
     scheduleType: 'permanent' as 'permanent' | 'day_only',
@@ -919,17 +920,23 @@ export const TeacherClasses: React.FC = () => {
               <label className="block text-slate-700 font-semibold mb-1">Period # *</label>
               <select
                 value={periodForm.periodNumber}
-                onChange={e => setPeriodForm({ ...periodForm, periodNumber: e.target.value })}
+                onChange={e => {
+                  const selectedNum = e.target.value;
+                  const matchedSlot = periodSlots.find(slot => slot.periodNumber === selectedNum);
+                  setPeriodForm(prev => ({
+                    ...prev,
+                    periodNumber: selectedNum,
+                    startTime: matchedSlot ? matchedSlot.startTime : prev.startTime,
+                    endTime: matchedSlot ? matchedSlot.endTime : prev.endTime
+                  }));
+                }}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono font-bold focus:outline-none"
               >
-                <option value="01">Period 01</option>
-                <option value="02">Period 02</option>
-                <option value="03">Period 03</option>
-                <option value="04">Period 04</option>
-                <option value="05">Period 05</option>
-                <option value="06">Period 06</option>
-                <option value="07">Period 07</option>
-                <option value="08">Period 08</option>
+                {periodSlots.map(slot => (
+                  <option key={slot.id} value={slot.periodNumber}>
+                    {slot.name} ({slot.startTime} - {slot.endTime})
+                  </option>
+                ))}
               </select>
             </div>
             <div>

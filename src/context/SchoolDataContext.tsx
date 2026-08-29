@@ -14,7 +14,8 @@ import {
   GalleryItem,
   SchoolConfig,
   TeacherPeriod,
-  SchoolSubject
+  SchoolSubject,
+  PeriodSlot
 } from '../types';
 import {
   INITIAL_STUDENTS,
@@ -30,7 +31,8 @@ import {
   INITIAL_EVENTS,
   INITIAL_GALLERY,
   INITIAL_SUBJECTS,
-  INITIAL_TEACHER_PERIODS
+  INITIAL_TEACHER_PERIODS,
+  INITIAL_PERIOD_SLOTS
 } from '../data/mockData';
 import { supabaseService } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
@@ -72,6 +74,7 @@ interface SchoolDataContextType {
   schoolConfig: SchoolConfig;
   subjects: SchoolSubject[];
   teacherPeriods: TeacherPeriod[];
+  periodSlots: PeriodSlot[];
 
   // Cloud Sync
   refreshFromSupabase: () => Promise<void>;
@@ -134,6 +137,11 @@ interface SchoolDataContextType {
   updateTeacherPeriod: (id: string, updated: Partial<TeacherPeriod>) => void;
   deleteTeacherPeriod: (id: string) => void;
 
+  // Master Period Slots & Timings Directorate
+  addPeriodSlot: (slot: Omit<PeriodSlot, 'id'>) => void;
+  updatePeriodSlot: (id: string, updated: Partial<PeriodSlot>) => void;
+  deletePeriodSlot: (id: string) => void;
+
   // Events & Gallery
   addEvent: (event: Omit<SchoolEvent, 'id' | 'rsvpCount' | 'isUpcoming'>) => void;
   updateEvent: (id: string, updated: Partial<SchoolEvent>) => void;
@@ -179,6 +187,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [schoolConfig, setSchoolConfig] = useState<SchoolConfig>(() => getStoredOrDefault('config', INITIAL_SCHOOL_CONFIG));
   const [subjects, setSubjects] = useState<SchoolSubject[]>(() => getStoredOrDefault('subjects', INITIAL_SUBJECTS));
   const [teacherPeriods, setTeacherPeriods] = useState<TeacherPeriod[]>(() => getStoredOrDefault('periods', INITIAL_TEACHER_PERIODS));
+  const [periodSlots, setPeriodSlots] = useState<PeriodSlot[]>(() => getStoredOrDefault('period_slots', INITIAL_PERIOD_SLOTS));
 
   // Local storage persistence
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'students', JSON.stringify(students)); }, [students]);
@@ -196,6 +205,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'config', JSON.stringify(schoolConfig)); }, [schoolConfig]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'subjects', JSON.stringify(subjects)); }, [subjects]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'periods', JSON.stringify(teacherPeriods)); }, [teacherPeriods]);
+  useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'period_slots', JSON.stringify(periodSlots)); }, [periodSlots]);
 
   // Full Refresh from Supabase
   const refreshFromSupabase = useCallback(async () => {
@@ -745,6 +755,25 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   // ==========================================
+  // MASTER PERIOD SLOTS & TIMINGS DIRECTORATE
+  // ==========================================
+  const addPeriodSlot = (slotData: Omit<PeriodSlot, 'id'>) => {
+    const newSlot: PeriodSlot = {
+      ...slotData,
+      id: `slot-${Date.now()}`
+    };
+    setPeriodSlots(prev => [...prev, newSlot]);
+  };
+
+  const updatePeriodSlot = (id: string, updated: Partial<PeriodSlot>) => {
+    setPeriodSlots(prev => prev.map(p => (p.id === id ? { ...p, ...updated } : p)));
+  };
+
+  const deletePeriodSlot = (id: string) => {
+    setPeriodSlots(prev => prev.filter(p => p.id !== id));
+  };
+
+  // ==========================================
   // CONFIG
   // ==========================================
   const updateSchoolConfig = (updated: Partial<SchoolConfig>) => {
@@ -768,6 +797,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSchoolConfig(INITIAL_SCHOOL_CONFIG);
     setSubjects(INITIAL_SUBJECTS);
     setTeacherPeriods(INITIAL_TEACHER_PERIODS);
+    setPeriodSlots(INITIAL_PERIOD_SLOTS);
   };
 
   return (
@@ -788,6 +818,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         schoolConfig,
         subjects,
         teacherPeriods,
+        periodSlots,
         refreshFromSupabase,
         addStudent,
         enrollStudentWithFee,
@@ -824,6 +855,9 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         addTeacherPeriod,
         updateTeacherPeriod,
         deleteTeacherPeriod,
+        addPeriodSlot,
+        updatePeriodSlot,
+        deletePeriodSlot,
         addEvent,
         updateEvent,
         deleteEvent,

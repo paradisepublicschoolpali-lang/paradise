@@ -13,7 +13,8 @@ import {
   GalleryItem,
   UserProfile,
   TeacherPeriod,
-  SchoolSubject
+  SchoolSubject,
+  PeriodSlot
 } from '../types';
 
 export const DEMO_USERS: Record<string, UserProfile> = {
@@ -220,9 +221,9 @@ export const INITIAL_TEACHERS: Teacher[] = [
     qualification: 'M.Sc. Physics, B.Ed (Delhi University)',
     experienceYears: 14,
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'General & Physical Science' },
-      { grade: 'Class 7', section: 'A', subject: 'Integrated Science & Discovery' },
-      { grade: 'Class 6', section: 'A', subject: 'Environmental & Nature Science' }
+      { grade: 'Class 8', section: 'A', subject: 'Science' },
+      { grade: 'Class 7', section: 'A', subject: 'Science' },
+      { grade: 'Class 6', section: 'A', subject: 'Science' }
     ],
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
     joiningDate: '2016-07-01'
@@ -240,9 +241,9 @@ export const INITIAL_TEACHERS: Teacher[] = [
     qualification: 'M.Sc. Mathematics, B.Ed (Chennai Mathematical Institute)',
     experienceYears: 16,
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'Algebra, Geometry & Statistics' },
-      { grade: 'Class 7', section: 'B', subject: 'Practical Mathematics' },
-      { grade: 'Class 6', section: 'A', subject: 'Foundational Numbers' }
+      { grade: 'Class 8', section: 'A', subject: 'Maths' },
+      { grade: 'Class 7', section: 'B', subject: 'Maths' },
+      { grade: 'Class 6', section: 'A', subject: 'Maths' }
     ],
     avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=300',
     joiningDate: '2014-08-15'
@@ -256,13 +257,13 @@ export const INITIAL_TEACHERS: Teacher[] = [
     email: 'a.sharma@paradiseschool.edu',
     phone: '+91 98114 56789',
     designation: 'Head of Languages & Literature',
-    department: 'English Literature & Rhetoric',
+    department: 'Languages & Literature',
     qualification: 'M.A. English, B.Ed (Jawaharlal Nehru University)',
     experienceYears: 12,
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'English Literature & Public Speaking' },
-      { grade: 'Class 7', section: 'A', subject: 'Creative Writing & Grammar' },
-      { grade: 'Class 5', section: 'B', subject: 'Reading & Phonics' }
+      { grade: 'Class 8', section: 'A', subject: 'English' },
+      { grade: 'Class 7', section: 'A', subject: 'English' },
+      { grade: 'Class 5', section: 'B', subject: 'English' }
     ],
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=300',
     joiningDate: '2018-06-20'
@@ -276,12 +277,12 @@ export const INITIAL_TEACHERS: Teacher[] = [
     email: 'v.sen@paradiseschool.edu',
     phone: '+91 98311 98765',
     designation: 'Director of Junior Coding & Robotics',
-    department: 'Computer Science',
+    department: 'General Knowledge',
     qualification: 'M.Tech / Ph.D. in Computer Science (IIT Delhi)',
     experienceYears: 10,
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'Python Programming & Robotics' },
-      { grade: 'Class 6', section: 'A', subject: 'Scratch Coding & Logical Games' }
+      { grade: 'Class 8', section: 'A', subject: 'GK' },
+      { grade: 'Class 6', section: 'A', subject: 'GK' }
     ],
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
     joiningDate: '2021-04-10'
@@ -434,7 +435,7 @@ export const INITIAL_HOMEWORK: HomeworkItem[] = [
   {
     id: 'hw-2',
     title: 'Linear Equations in One Variable - NCERT Exercise 3.2',
-    subject: 'Mathematics',
+    subject: 'Maths',
     grade: 'Class 8',
     section: 'A',
     teacherName: 'Mr. Rajesh Iyer',
@@ -447,7 +448,7 @@ export const INITIAL_HOMEWORK: HomeworkItem[] = [
   {
     id: 'hw-3',
     title: 'Descriptive Story Writing & Essay Composition',
-    subject: 'English Literature',
+    subject: 'English',
     grade: 'Class 8',
     section: 'A',
     teacherName: 'Mrs. Anjali Sharma',
@@ -498,16 +499,17 @@ export const INITIAL_EXAM_RESULTS: ExamResult[] = [
     examName: 'CBSE Term 1 Comprehensive Assessment 2026',
     academicYear: '2026-2027',
     subjects: [
-      { subject: 'Science (Physics, Chem, Bio)', marksObtained: 96, maxMarks: 100, grade: 'A1', remarks: 'Distinction in lab practicals' },
-      { subject: 'Mathematics', marksObtained: 98, maxMarks: 100, grade: 'A1', remarks: 'Flawless algebraic proofs' },
-      { subject: 'English Language & Literature', marksObtained: 92, maxMarks: 100, grade: 'A1', remarks: 'High vocabulary and essay composition' },
-      { subject: 'Social Science (Hist, Civ, Geo)', marksObtained: 90, maxMarks: 100, grade: 'A1', remarks: 'Good grasp of Indian constitution' },
-      { subject: 'Computer Applications & AI', marksObtained: 99, maxMarks: 100, grade: 'A1', remarks: 'Top in class for Python coding' },
-      { subject: 'Hindi / Second Language', marksObtained: 91, maxMarks: 100, grade: 'A1', remarks: 'Excellent grammar and literature' }
+      { subject: 'Hindi', marksObtained: 91, maxMarks: 100, grade: 'A1', remarks: 'Excellent grammar and literature' },
+      { subject: 'Maths', marksObtained: 98, maxMarks: 100, grade: 'A1', remarks: 'Flawless algebraic proofs' },
+      { subject: 'Science', marksObtained: 96, maxMarks: 100, grade: 'A1', remarks: 'Distinction in lab practicals' },
+      { subject: 'English', marksObtained: 92, maxMarks: 100, grade: 'A1', remarks: 'High vocabulary and essay composition' },
+      { subject: 'Social Science', marksObtained: 90, maxMarks: 100, grade: 'A1', remarks: 'Good grasp of Indian constitution' },
+      { subject: 'GK', marksObtained: 95, maxMarks: 100, grade: 'A1', remarks: 'Excellent awareness of current affairs' },
+      { subject: 'Sanskrit', marksObtained: 88, maxMarks: 100, grade: 'A2', remarks: 'Good shloka recitation and grammar' }
     ],
-    totalMarks: 566,
-    maxTotal: 600,
-    percentage: 94.33,
+    totalMarks: 650,
+    maxTotal: 700,
+    percentage: 92.86,
     gpa: 3.92,
     rank: 2,
     overallGrade: 'A1 (Gold Honors)',
@@ -772,99 +774,87 @@ export const INITIAL_GALLERY: GalleryItem[] = [
 export const INITIAL_SUBJECTS: SchoolSubject[] = [
   {
     id: 'sub-1',
-    name: 'General & Physical Science',
-    code: 'SCI-08',
-    department: 'Physics & STEM Labs',
-    category: 'STEM & Sciences',
-    grades: ['Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 6,
-    description: 'Experimental physics, basic chemistry reactions, plant and animal biology, and laboratory observations.',
-    headTeacher: 'Mrs. Sunita Verma',
-    status: 'Active'
-  },
-  {
-    id: 'sub-2',
-    name: 'Algebra, Geometry & Statistics',
-    code: 'MATH-08',
-    department: 'Mathematics & Computing',
-    category: 'Core Academic',
-    grades: ['Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 7,
-    description: 'CBSE mathematics syllabus, algebraical proofs, linear equations, Euclidean geometry, and data interpretation.',
-    headTeacher: 'Mr. Rajesh Iyer',
-    status: 'Active'
-  },
-  {
-    id: 'sub-3',
-    name: 'English Literature & Rhetoric',
-    code: 'ENG-08',
-    department: 'English Literature & Rhetoric',
-    category: 'Languages & Literature',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 6,
-    description: 'Classical & contemporary prose, poetry recitation, creative storytelling, formal essays, and elocution.',
-    headTeacher: 'Mrs. Anjali Sharma',
-    status: 'Active'
-  },
-  {
-    id: 'sub-4',
-    name: 'Python Programming & Junior Robotics',
-    code: 'CS-08',
-    department: 'Computer Science',
-    category: 'Vocational & Tech',
-    grades: ['Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 4,
-    description: 'Algorithmic reasoning, Scratch visual coding, Python scripting, sensor electronics, and junior maker robotics.',
-    headTeacher: 'Dr. Vikramaditya Sen',
-    status: 'Active'
-  },
-  {
-    id: 'sub-5',
-    name: 'Social Sciences & Heritage Studies',
-    code: 'SST-08',
-    department: 'Humanities & Social Sciences',
-    category: 'Core Academic',
-    grades: ['Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 5,
-    description: 'Medieval and modern Indian history, civics and constitution, physical geography, and environmental stewardship.',
-    headTeacher: 'Dr. Renu Gupta',
-    status: 'Active'
-  },
-  {
-    id: 'sub-6',
-    name: 'Hindi Language & Sahitya',
+    name: 'Hindi',
     code: 'HIN-08',
     department: 'Languages & Literature',
     category: 'Languages & Literature',
     grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 5,
+    weeklyPeriods: 6,
     description: 'Hindi grammar, kavita path, comprehension, rashtrabhasha literature, and creative composition.',
     headTeacher: 'Mrs. Anjali Sharma',
     status: 'Active'
   },
   {
-    id: 'sub-7',
-    name: 'Physical Education & Athletics',
-    code: 'PED-08',
-    department: 'Physical Education & Sports',
-    category: 'Physical Education',
-    grades: ['Nursery', 'Kindergarten', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 3,
-    description: 'Track and field athletics, swimming drills, yoga postures, basketball, football, and sportsmanship.',
-    headTeacher: 'Director of Physical Education',
+    id: 'sub-2',
+    name: 'Maths',
+    code: 'MATH-08',
+    department: 'Mathematics',
+    category: 'Core Academic',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 7,
+    description: 'CBSE mathematics syllabus covering arithmetic, algebra, geometry, mensuration, and data handling.',
+    headTeacher: 'Mr. Rajesh Iyer',
     status: 'Active'
   },
   {
-    id: 'sub-8',
-    name: 'Visual Arts, Craft & Pottery',
-    code: 'ART-08',
-    department: 'Fine Arts & Culture',
-    category: 'Arts & Culture',
+    id: 'sub-3',
+    name: 'Science',
+    code: 'SCI-08',
+    department: 'Science',
+    category: 'Core Academic',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 6,
+    description: 'Physics, chemistry, and biology fundamentals with laboratory practicals and scientific observations.',
+    headTeacher: 'Mrs. Sunita Verma',
+    status: 'Active'
+  },
+  {
+    id: 'sub-4',
+    name: 'English',
+    code: 'ENG-08',
+    department: 'Languages & Literature',
+    category: 'Languages & Literature',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 6,
+    description: 'English language, grammar, prose, poetry, creative writing, comprehension, and communication skills.',
+    headTeacher: 'Mrs. Anjali Sharma',
+    status: 'Active'
+  },
+  {
+    id: 'sub-5',
+    name: 'Social Science',
+    code: 'SST-08',
+    department: 'Humanities & Social Sciences',
+    category: 'Core Academic',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 5,
+    description: 'History, civics, geography, and economics covering Indian heritage, constitution, and environmental studies.',
+    headTeacher: 'Dr. Renu Gupta',
+    status: 'Active'
+  },
+  {
+    id: 'sub-6',
+    name: 'GK',
+    code: 'GK-08',
+    department: 'General Knowledge',
+    category: 'Core Academic',
     grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
     weeklyPeriods: 2,
-    description: 'Watercolor painting, origami, clay sculpting, sketching techniques, and inter-house exhibition showcase.',
-    headTeacher: 'Fine Arts Faculty',
-    status: 'Elective'
+    description: 'General knowledge covering current affairs, sports, science facts, famous personalities, and world awareness.',
+    headTeacher: 'Dr. Vikramaditya Sen',
+    status: 'Active'
+  },
+  {
+    id: 'sub-7',
+    name: 'Sanskrit',
+    code: 'SKT-08',
+    department: 'Languages & Literature',
+    category: 'Languages & Literature',
+    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
+    weeklyPeriods: 4,
+    description: 'Sanskrit grammar, shloka recitation, vocabulary building, translation, and classical literature.',
+    headTeacher: 'Mrs. Anjali Sharma',
+    status: 'Active'
   }
 ];
 
@@ -879,7 +869,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '09:20 AM',
     grade: 'Class 8',
     section: 'A',
-    subject: 'General & Physical Science',
+    subject: 'Science',
     room: 'Science Lab 1',
     topic: 'Force, Pressure & Atmospheric Dynamics',
     scheduleType: 'permanent',
@@ -895,7 +885,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '11:20 AM',
     grade: 'Class 7',
     section: 'A',
-    subject: 'Integrated Science & Discovery',
+    subject: 'Science',
     room: 'Room 104',
     topic: 'Heat, Thermodynamics & Thermal Transfer',
     scheduleType: 'permanent',
@@ -911,7 +901,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '01:50 PM',
     grade: 'Class 6',
     section: 'A',
-    subject: 'Environmental & Nature Science',
+    subject: 'Science',
     room: 'Room 102',
     topic: 'Motion, Distances & Standard Measurements',
     scheduleType: 'permanent',
@@ -928,7 +918,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '02:50 PM',
     grade: 'Class 8',
     section: 'A',
-    subject: 'General & Physical Science',
+    subject: 'Science',
     room: 'Junior STEM Studio',
     topic: 'National Science Olympiad Problem Solving',
     scheduleType: 'day_only',
@@ -946,7 +936,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '10:20 AM',
     grade: 'Class 8',
     section: 'A',
-    subject: 'Algebra, Geometry & Statistics',
+    subject: 'Maths',
     room: 'Room 108',
     topic: 'Linear Equations & Graphical Intersections',
     scheduleType: 'permanent',
@@ -962,7 +952,7 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     endTime: '12:20 PM',
     grade: 'Class 7',
     section: 'B',
-    subject: 'Practical Mathematics',
+    subject: 'Maths',
     room: 'Room 106',
     topic: 'Fractions, Decimals & Rational Operations',
     scheduleType: 'permanent',
@@ -970,4 +960,15 @@ export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [
     notes: 'Group worksheet exercise.'
   }
 ];
+
+export const INITIAL_PERIOD_SLOTS: PeriodSlot[] = [
+  { id: 'slot-1', periodNumber: '01', name: 'Period 01', startTime: '08:30 AM', endTime: '09:20 AM', type: 'lecture' },
+  { id: 'slot-2', periodNumber: '02', name: 'Period 02', startTime: '09:30 AM', endTime: '10:20 AM', type: 'lecture' },
+  { id: 'slot-3', periodNumber: '03', name: 'Period 03', startTime: '10:30 AM', endTime: '11:20 AM', type: 'lecture' },
+  { id: 'slot-4', periodNumber: '04', name: 'Period 04', startTime: '11:30 AM', endTime: '12:20 PM', type: 'lecture' },
+  { id: 'slot-5', periodNumber: '05', name: 'Period 05', startTime: '01:00 PM', endTime: '01:50 PM', type: 'lecture' },
+  { id: 'slot-6', periodNumber: '06', name: 'Period 06', startTime: '02:00 PM', endTime: '02:50 PM', type: 'lecture' },
+  { id: 'slot-7', periodNumber: '07', name: 'Period 07', startTime: '03:00 PM', endTime: '03:50 PM', type: 'lecture' }
+];
+
 

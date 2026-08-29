@@ -243,7 +243,7 @@ export interface TeacherPeriod {
   endTime: string; // e.g. '09:20 AM'
   grade: string; // e.g. 'Class 8'
   section: string; // e.g. 'A'
-  subject: string; // e.g. 'General & Physical Science'
+  subject: string; // e.g. 'Science'
   room: string; // e.g. 'Science Lab 1'
   topic?: string;
   scheduleType: 'permanent' | 'day_only'; // Permanent (Recurring weekly) or For a Day (Specific date)
@@ -264,4 +264,14 @@ export interface SchoolSubject {
   headTeacher?: string;
   status: 'Active' | 'Elective' | 'Archived';
 }
+
+export interface PeriodSlot {
+  id: string;
+  periodNumber: string; // e.g. '01', '02', '08'
+  name: string; // e.g. 'Period 01'
+  startTime: string; // e.g. '08:30 AM'
+  endTime: string; // e.g. '09:20 AM'
+  type?: 'lecture' | 'assembly' | 'break' | 'remedial';
+}
+
 

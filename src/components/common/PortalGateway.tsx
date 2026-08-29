@@ -43,12 +43,6 @@ export const PortalGateway: React.FC = () => {
     setView('select');
   };
 
-  const handleDemoFill = (demoId: string, demoPass: string) => {
-    setLoginId(demoId);
-    setPassword(demoPass);
-    setError('');
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -80,8 +74,6 @@ export const PortalGateway: React.FC = () => {
     subtitle: string,
     icon: React.ReactNode,
     accentBg: string,
-    demoId: string,
-    demoPass: string,
     idLabel: string,
     idPlaceholder: string
   ) => (
@@ -114,23 +106,6 @@ export const PortalGateway: React.FC = () => {
 
           {/* Form Body */}
           <form onSubmit={handleLogin} className="p-6 sm:p-7 space-y-4.5">
-            {/* Quick Demo Credentials Pill */}
-            <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-center justify-between gap-2 text-xs">
-              <div>
-                <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">Sample Test Account:</span>
-                <span className="font-mono text-slate-800 font-semibold text-[11px]">
-                  ID: <strong className="text-blue-900">{demoId}</strong> | Pass: <strong className="text-blue-900">{demoPass}</strong>
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleDemoFill(demoId, demoPass)}
-                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider shrink-0 cursor-pointer shadow-2xs transition-all"
-              >
-                Auto Fill
-              </button>
-            </div>
-
             {error && (
               <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs leading-snug animate-shake">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -223,10 +198,8 @@ export const PortalGateway: React.FC = () => {
       'View daily attendance, unit test marks, school notices & pay fees online',
       <GraduationCap className="w-6 h-6 text-white" />,
       'bg-blue-600',
-      'aryan10',
-      'password123',
       'Student ID / Admission No. (छात्र आईडी)',
-      'e.g. aryan10 or PPS-2026-0842'
+      'e.g. PPS-2026-0842'
     );
   }
 
@@ -237,10 +210,8 @@ export const PortalGateway: React.FC = () => {
       'Mark daily classroom roll call, enter exam marks, and manage period timetable',
       <UserCheck className="w-6 h-6 text-white" />,
       'bg-emerald-600',
-      'sarah.physics',
-      'teacher123',
       'Teacher ID / Employee ID (शिक्षक आईडी)',
-      'e.g. sarah.physics or PPS-FAC-014'
+      'e.g. PPS-FAC-014'
     );
   }
 
@@ -251,8 +222,6 @@ export const PortalGateway: React.FC = () => {
       'Central institutional operations, fee treasury, staff records & admissions',
       <Shield className="w-6 h-6 text-white" />,
       'bg-slate-800',
-      'admin',
-      'renugupta@19',
       'Admin / Principal Login ID (प्रशासन आईडी)',
       'e.g. admin or principal'
     );
@@ -374,7 +343,7 @@ export const PortalGateway: React.FC = () => {
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
               <span>Parent / Student Sign In →</span>
-              <span className="text-[10px] font-mono text-slate-400">Sample: aryan10</span>
+              <span className="text-[10px] font-mono text-slate-400">Secure Sign In</span>
             </div>
           </button>
 
@@ -409,7 +378,7 @@ export const PortalGateway: React.FC = () => {
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
               <span>Teacher Workstation Login →</span>
-              <span className="text-[10px] font-mono text-slate-400">Sample: sarah.physics</span>
+              <span className="text-[10px] font-mono text-slate-400">Faculty Sign In</span>
             </div>
           </button>
 
@@ -444,7 +413,7 @@ export const PortalGateway: React.FC = () => {
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-900">
               <span>Admin Console Sign In →</span>
-              <span className="text-[10px] font-mono text-slate-400">Master: admin</span>
+              <span className="text-[10px] font-mono text-slate-400">Authorized Sign In</span>
             </div>
           </button>
         </div>

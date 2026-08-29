@@ -13,10 +13,7 @@ import {
   Phone,
   Mail,
   Clock,
-  Sparkles,
-  KeyRound,
-  CheckCircle2,
-  HelpCircle
+  CheckCircle2
 } from 'lucide-react';
 
 type GatewayView = 'select' | 'parent-login' | 'teacher-login' | 'admin-login';
@@ -70,7 +67,6 @@ export const PortalGateway: React.FC = () => {
   // Render Role-specific Login Form
   const renderLoginForm = (
     title: string,
-    titleHindi: string,
     subtitle: string,
     icon: React.ReactNode,
     accentBg: string,
@@ -84,7 +80,7 @@ export const PortalGateway: React.FC = () => {
           onClick={handleBack}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 hover:text-blue-700 text-xs font-bold border border-slate-200 shadow-2xs transition-all cursor-pointer"
         >
-          ← Back to Portal Selection (वापस जाएं)
+          ← Back to Portal Selection
         </button>
 
         <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
@@ -96,7 +92,6 @@ export const PortalGateway: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold font-cinzel leading-snug">{title}</h2>
-                <span className="text-xs text-white/80 font-medium">{titleHindi}</span>
               </div>
             </div>
             <p className="text-xs text-white/90 leading-relaxed pt-1 border-t border-white/20">
@@ -134,7 +129,7 @@ export const PortalGateway: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  Password (पासवर्ड) <span className="text-red-500">*</span>
+                  Password <span className="text-red-500">*</span>
                 </label>
               </div>
               <div className="relative">
@@ -143,7 +138,7 @@ export const PortalGateway: React.FC = () => {
                   required
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError(''); }}
-                  placeholder="Enter your secret password"
+                  placeholder="Enter your password"
                   className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs"
                 />
                 <button
@@ -194,11 +189,10 @@ export const PortalGateway: React.FC = () => {
   if (view === 'parent-login') {
     return renderLoginForm(
       'Student & Parent Portal',
-      'विद्यार्थी एवं अभिभावक लॉगिन',
       'View daily attendance, unit test marks, school notices & pay fees online',
       <GraduationCap className="w-6 h-6 text-white" />,
       'bg-blue-600',
-      'Student ID / Admission No. (छात्र आईडी)',
+      'Student ID / Admission No.',
       'e.g. PPS-2026-0842'
     );
   }
@@ -206,11 +200,10 @@ export const PortalGateway: React.FC = () => {
   if (view === 'teacher-login') {
     return renderLoginForm(
       'Teacher & Staff Portal',
-      'अध्यापक एवं फैकल्टी लॉगिन',
       'Mark daily classroom roll call, enter exam marks, and manage period timetable',
       <UserCheck className="w-6 h-6 text-white" />,
       'bg-emerald-600',
-      'Teacher ID / Employee ID (शिक्षक आईडी)',
+      'Teacher ID / Employee ID',
       'e.g. PPS-FAC-014'
     );
   }
@@ -218,11 +211,10 @@ export const PortalGateway: React.FC = () => {
   if (view === 'admin-login') {
     return renderLoginForm(
       'Principal & Admin Portal',
-      'प्रधानाचार्य एवं प्रबंधन लॉगिन',
       'Central institutional operations, fee treasury, staff records & admissions',
       <Shield className="w-6 h-6 text-white" />,
       'bg-slate-800',
-      'Admin / Principal Login ID (प्रशासन आईडी)',
+      'Admin / Principal Login ID',
       'e.g. admin or principal'
     );
   }
@@ -266,12 +258,12 @@ export const PortalGateway: React.FC = () => {
               Paradise Public School
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 font-semibold tracking-wider uppercase">
-              पैराडाइज पब्लिक स्कूल • Estd. 1994 • Excellence • Integrity • Leadership
+              Estd. 1994 • Excellence • Integrity • Leadership
             </p>
           </div>
 
           <div className="inline-block px-4 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold">
-            Choose your login portal below / कृपया अपना पोर्टल चुनें:
+            Choose your login portal below:
           </div>
         </div>
 
@@ -296,9 +288,6 @@ export const PortalGateway: React.FC = () => {
                 <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-blue-700 flex items-center gap-2">
                   <span>School Website & Admissions</span>
                 </h3>
-                <span className="text-xs text-slate-500 font-medium block">
-                  विद्यालय मुख्य वेबसाइट एवं प्रवेश जानकारी
-                </span>
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed">
@@ -331,9 +320,6 @@ export const PortalGateway: React.FC = () => {
                 <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-blue-700 flex items-center gap-2">
                   <span>Student & Parent Portal</span>
                 </h3>
-                <span className="text-xs text-slate-500 font-medium block">
-                  विद्यार्थी एवं अभिभावक लॉगिन
-                </span>
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed">
@@ -366,9 +352,6 @@ export const PortalGateway: React.FC = () => {
                 <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-emerald-700 flex items-center gap-2">
                   <span>Teacher & Staff Portal</span>
                 </h3>
-                <span className="text-xs text-slate-500 font-medium block">
-                  शिक्षक एवं अध्यापिका लॉगिन
-                </span>
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed">
@@ -401,9 +384,6 @@ export const PortalGateway: React.FC = () => {
                 <h3 className="text-lg font-bold font-cinzel text-slate-900 group-hover:text-slate-900 flex items-center gap-2">
                   <span>Principal & Admin Directorate</span>
                 </h3>
-                <span className="text-xs text-slate-500 font-medium block">
-                  प्रधानाचार्य एवं प्रबंधन लॉगिन
-                </span>
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed">

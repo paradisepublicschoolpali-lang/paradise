@@ -254,15 +254,7 @@ export interface TeacherPeriod {
 
 export interface SchoolSubject {
   id: string;
-  name: string; // e.g. 'Advanced Mathematics & Computing'
-  code: string; // e.g. 'MATH-08'
-  department: string; // e.g. 'Mathematics & Computing'
-  category: 'Core Academic' | 'STEM & Sciences' | 'Languages & Literature' | 'Arts & Culture' | 'Physical Education' | 'Vocational & Tech';
-  grades: string[]; // e.g. ['Class 6', 'Class 7', 'Class 8']
-  weeklyPeriods: number; // e.g. 5
-  description?: string;
-  headTeacher?: string;
-  status: 'Active' | 'Elective' | 'Archived';
+  name: string;
 }
 
 export interface PeriodSlot {

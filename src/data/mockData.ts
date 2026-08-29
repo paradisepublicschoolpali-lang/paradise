@@ -772,90 +772,13 @@ export const INITIAL_GALLERY: GalleryItem[] = [
 ];
 
 export const INITIAL_SUBJECTS: SchoolSubject[] = [
-  {
-    id: 'sub-1',
-    name: 'Hindi',
-    code: 'HIN-08',
-    department: 'Languages & Literature',
-    category: 'Languages & Literature',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 6,
-    description: 'Hindi grammar, kavita path, comprehension, rashtrabhasha literature, and creative composition.',
-    headTeacher: 'Mrs. Anjali Sharma',
-    status: 'Active'
-  },
-  {
-    id: 'sub-2',
-    name: 'Maths',
-    code: 'MATH-08',
-    department: 'Mathematics',
-    category: 'Core Academic',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 7,
-    description: 'CBSE mathematics syllabus covering arithmetic, algebra, geometry, mensuration, and data handling.',
-    headTeacher: 'Mr. Rajesh Iyer',
-    status: 'Active'
-  },
-  {
-    id: 'sub-3',
-    name: 'Science',
-    code: 'SCI-08',
-    department: 'Science',
-    category: 'Core Academic',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 6,
-    description: 'Physics, chemistry, and biology fundamentals with laboratory practicals and scientific observations.',
-    headTeacher: 'Mrs. Sunita Verma',
-    status: 'Active'
-  },
-  {
-    id: 'sub-4',
-    name: 'English',
-    code: 'ENG-08',
-    department: 'Languages & Literature',
-    category: 'Languages & Literature',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 6,
-    description: 'English language, grammar, prose, poetry, creative writing, comprehension, and communication skills.',
-    headTeacher: 'Mrs. Anjali Sharma',
-    status: 'Active'
-  },
-  {
-    id: 'sub-5',
-    name: 'Social Science',
-    code: 'SST-08',
-    department: 'Humanities & Social Sciences',
-    category: 'Core Academic',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 5,
-    description: 'History, civics, geography, and economics covering Indian heritage, constitution, and environmental studies.',
-    headTeacher: 'Dr. Renu Gupta',
-    status: 'Active'
-  },
-  {
-    id: 'sub-6',
-    name: 'GK',
-    code: 'GK-08',
-    department: 'General Knowledge',
-    category: 'Core Academic',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 2,
-    description: 'General knowledge covering current affairs, sports, science facts, famous personalities, and world awareness.',
-    headTeacher: 'Dr. Vikramaditya Sen',
-    status: 'Active'
-  },
-  {
-    id: 'sub-7',
-    name: 'Sanskrit',
-    code: 'SKT-08',
-    department: 'Languages & Literature',
-    category: 'Languages & Literature',
-    grades: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'],
-    weeklyPeriods: 4,
-    description: 'Sanskrit grammar, shloka recitation, vocabulary building, translation, and classical literature.',
-    headTeacher: 'Mrs. Anjali Sharma',
-    status: 'Active'
-  }
+  { id: 'sub-1', name: 'Hindi' },
+  { id: 'sub-2', name: 'Maths' },
+  { id: 'sub-3', name: 'Science' },
+  { id: 'sub-4', name: 'English' },
+  { id: 'sub-5', name: 'Social Science' },
+  { id: 'sub-6', name: 'GK' },
+  { id: 'sub-7', name: 'Sanskrit' }
 ];
 
 export const INITIAL_TEACHER_PERIODS: TeacherPeriod[] = [

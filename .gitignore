@@ -25,3 +25,26 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+# Node
+node_modules/
+.expo/
+dist/
+
+# Android build (except release APK)
+android/app/build/
+android/.gradle/
+android/build/
+!android/app/build/outputs/apk/debug/app-debug.apk
+
+# iOS build
+ios/App/Pods/
+ios/DerivedData/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp

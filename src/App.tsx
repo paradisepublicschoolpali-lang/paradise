@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SchoolDataProvider } from './context/SchoolDataContext';
 import { ToastProvider } from './context/ToastContext';
+
+// Native Mobile & App Preview Components
+import { initializeMobileApp } from './services/mobileApp';
+import { MobileBottomNav } from './components/mobile/MobileBottomNav';
+import { MobilePreviewWrapper } from './components/mobile/MobilePreviewWrapper';
 
 // Gateway & Common Components
 import { PortalGateway } from './components/common/PortalGateway';
@@ -27,14 +32,14 @@ import { ParentResults } from './pages/parent/ParentResults';
 import { ParentNotices } from './pages/parent/ParentNotices';
 import { ParentFees } from './pages/parent/ParentFees';
 
-// Teacher Portal Pages (Homework removed)
+// Teacher Portal Pages
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { TeacherClasses } from './pages/teacher/TeacherClasses';
 import { TeacherAttendance } from './pages/teacher/TeacherAttendance';
 import { TeacherResults } from './pages/teacher/TeacherResults';
 import { TeacherNotices } from './pages/teacher/TeacherNotices';
 
-// Admin Portal Pages (Maximum Power: Results Controller, Attendance Master, Homework Directorate, Directory, Fees, etc.)
+// Admin Portal Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminResults } from './pages/admin/AdminResults';
 import { AdminAttendance } from './pages/admin/AdminAttendance';
@@ -75,6 +80,11 @@ const SchoolApp: React.FC = () => {
   const [teacherTab, setTeacherTabState] = useState(() => getInitialTab('teacher', 'dashboard'));
   const [adminTab, setAdminTabState] = useState(() => getInitialTab('admin', 'dashboard'));
 
+  // Initialize native mobile app hardware handlers & status bar
+  useEffect(() => {
+    initializeMobileApp();
+  }, []);
+
   // Push history on tab changes
   const setGuestTab = (tab: string) => {
     setGuestTabState(tab);
@@ -105,7 +115,7 @@ const SchoolApp: React.FC = () => {
   };
 
   // Sync with browser back/forward buttons (popstate & hashchange)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleUrlNavigation = () => {
       const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
       
@@ -151,7 +161,7 @@ const SchoolApp: React.FC = () => {
   // GUEST PORTAL RENDER
   if (role === 'guest') {
     return (
-      <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between selection:bg-blue-600 selection:text-white pb-16">
         <div>
           <Navbar activeTab={guestTab} setActiveTab={setGuestTab} />
           <main className="pt-2">
@@ -166,6 +176,7 @@ const SchoolApp: React.FC = () => {
           </main>
         </div>
         <Footer setActiveTab={setGuestTab} />
+        <MobileBottomNav role="guest" activeTab={guestTab} setActiveTab={setGuestTab} />
       </div>
     );
   }
@@ -184,23 +195,26 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[parentTab] || { title: 'Parent Portal', subtitle: '' };
 
     return (
-      <PortalLayout
-        activeTab={parentTab}
-        setActiveTab={setParentTab}
-        title={activeInfo.title}
-        subtitle={activeInfo.subtitle}
-      >
-        {parentTab === 'dashboard' && <ParentDashboard setActiveTab={setParentTab} />}
-        {parentTab === 'profile' && <ParentProfile />}
-        {parentTab === 'attendance' && <ParentAttendance />}
-        {parentTab === 'results' && <ParentResults />}
-        {parentTab === 'notices' && <ParentNotices />}
-        {parentTab === 'fees' && <ParentFees />}
-      </PortalLayout>
+      <div className="min-h-screen flex flex-col pb-16">
+        <PortalLayout
+          activeTab={parentTab}
+          setActiveTab={setParentTab}
+          title={activeInfo.title}
+          subtitle={activeInfo.subtitle}
+        >
+          {parentTab === 'dashboard' && <ParentDashboard setActiveTab={setParentTab} />}
+          {parentTab === 'profile' && <ParentProfile />}
+          {parentTab === 'attendance' && <ParentAttendance />}
+          {parentTab === 'results' && <ParentResults />}
+          {parentTab === 'notices' && <ParentNotices />}
+          {parentTab === 'fees' && <ParentFees />}
+        </PortalLayout>
+        <MobileBottomNav role="parent" activeTab={parentTab} setActiveTab={setParentTab} />
+      </div>
     );
   }
 
-  // TEACHER PORTAL RENDER (Homework removed)
+  // TEACHER PORTAL RENDER
   if (role === 'teacher') {
     const tabTitles: Record<string, { title: string; subtitle: string }> = {
       dashboard: { title: 'Faculty Workstation', subtitle: 'Today’s Timetable & Allocated Divisions' },
@@ -213,22 +227,25 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[teacherTab] || { title: 'Teacher Portal', subtitle: '' };
 
     return (
-      <PortalLayout
-        activeTab={teacherTab}
-        setActiveTab={setTeacherTab}
-        title={activeInfo.title}
-        subtitle={activeInfo.subtitle}
-      >
-        {teacherTab === 'dashboard' && <TeacherDashboard setActiveTab={setTeacherTab} />}
-        {teacherTab === 'classes' && <TeacherClasses />}
-        {teacherTab === 'attendance' && <TeacherAttendance />}
-        {teacherTab === 'results' && <TeacherResults />}
-        {teacherTab === 'notices' && <TeacherNotices />}
-      </PortalLayout>
+      <div className="min-h-screen flex flex-col pb-16">
+        <PortalLayout
+          activeTab={teacherTab}
+          setActiveTab={setTeacherTab}
+          title={activeInfo.title}
+          subtitle={activeInfo.subtitle}
+        >
+          {teacherTab === 'dashboard' && <TeacherDashboard setActiveTab={setTeacherTab} />}
+          {teacherTab === 'classes' && <TeacherClasses />}
+          {teacherTab === 'attendance' && <TeacherAttendance />}
+          {teacherTab === 'results' && <TeacherResults />}
+          {teacherTab === 'notices' && <TeacherNotices />}
+        </PortalLayout>
+        <MobileBottomNav role="teacher" activeTab={teacherTab} setActiveTab={setTeacherTab} />
+      </div>
     );
   }
 
-  // ADMIN PORTAL RENDER (Empowered with Gradebook, Attendance Master, Homework Directorate, Directories, etc.)
+  // ADMIN PORTAL RENDER
   if (role === 'admin') {
     const tabTitles: Record<string, { title: string; subtitle: string }> = {
       dashboard: { title: 'Principal Directorate Console', subtitle: 'Key Institutional Performance Indicators & Alerts' },
@@ -249,26 +266,29 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[adminTab] || { title: 'Admin Portal', subtitle: '' };
 
     return (
-      <PortalLayout
-        activeTab={adminTab}
-        setActiveTab={setAdminTab}
-        title={activeInfo.title}
-        subtitle={activeInfo.subtitle}
-      >
-        {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
-        {adminTab === 'results' && <AdminResults />}
-        {adminTab === 'attendance' && <AdminAttendance />}
-        {adminTab === 'homework' && <AdminHomework />}
-        {adminTab === 'students' && <AdminStudents />}
-        {adminTab === 'teachers' && <AdminTeachers />}
-        {adminTab === 'subjects' && <AdminSubjects />}
-        {adminTab === 'fees' && <AdminFees />}
-        {adminTab === 'admissions' && <AdminAdmissions />}
-        {adminTab === 'notices' && <AdminNotices />}
-        {adminTab === 'events' && <AdminEvents />}
-        {adminTab === 'gallery' && <AdminGallery />}
-        {adminTab === 'settings' && <AdminSettings />}
-      </PortalLayout>
+      <div className="min-h-screen flex flex-col pb-16">
+        <PortalLayout
+          activeTab={adminTab}
+          setActiveTab={setAdminTab}
+          title={activeInfo.title}
+          subtitle={activeInfo.subtitle}
+        >
+          {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
+          {adminTab === 'results' && <AdminResults />}
+          {adminTab === 'attendance' && <AdminAttendance />}
+          {adminTab === 'homework' && <AdminHomework />}
+          {adminTab === 'students' && <AdminStudents />}
+          {adminTab === 'teachers' && <AdminTeachers />}
+          {adminTab === 'subjects' && <AdminSubjects />}
+          {adminTab === 'fees' && <AdminFees />}
+          {adminTab === 'admissions' && <AdminAdmissions />}
+          {adminTab === 'notices' && <AdminNotices />}
+          {adminTab === 'events' && <AdminEvents />}
+          {adminTab === 'gallery' && <AdminGallery />}
+          {adminTab === 'settings' && <AdminSettings />}
+        </PortalLayout>
+        <MobileBottomNav role="admin" activeTab={adminTab} setActiveTab={setAdminTab} />
+      </div>
     );
   }
 
@@ -280,7 +300,9 @@ export function App() {
     <AuthProvider>
       <SchoolDataProvider>
         <ToastProvider>
-          <SchoolApp />
+          <MobilePreviewWrapper>
+            <SchoolApp />
+          </MobilePreviewWrapper>
         </ToastProvider>
       </SchoolDataProvider>
     </AuthProvider>

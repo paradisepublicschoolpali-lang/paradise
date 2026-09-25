@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Paradise Public School",
+    "slug": "paradise-public-school",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "paradisepublicschool",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E3A8A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.paradisepublicschool.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.paradisepublicschool.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1E3A8A",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "predictiveBackGestureEnabled": true,
+      "permissions": ["INTERNET"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1E3A8A",
+          "image": "./assets/icon.png",
+          "imageWidth": 180
+        }
+      ]
+    ]
+  }
+}

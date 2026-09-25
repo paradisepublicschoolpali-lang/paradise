@@ -25,14 +25,33 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     role: 'guest',
   },
   parent: {
+    id: 'par-1',
+    loginId: 'vikram.sharma',
+    name: 'Mr. Vikram Sharma',
+    email: 'vikram.sharma@gmail.com',
+    role: 'parent',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
+    grade: 'Class 8 / Class 1',
+    section: 'A'
+  },
+  student: {
     id: 'std-1',
     loginId: 'aryan10',
-    name: 'Aryan Sharma (Parent: Vikram Sharma)',
-    email: 'vikram.sharma@gmail.com',
+    name: 'Aryan Sharma',
+    email: 'aryan.sharma@student.paradise.edu',
     role: 'parent',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300',
     grade: 'Class 8',
     section: 'A'
+  },
+  accountant: {
+    id: 'usr-acc-1',
+    loginId: 'accountant',
+    name: 'Mr. Naresh Agarwal',
+    email: 'accounts@paradiseschool.edu',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=300',
+    designation: 'Bursar & Treasury Accounts'
   },
   teacher: {
     id: 'tch-1',
@@ -82,6 +101,31 @@ export const INITIAL_STUDENTS: Student[] = [
   },
   {
     id: 'std-2',
+    loginId: 'anvi1',
+    password: 'password123',
+    admissionNo: 'PPS-2025-1104',
+    rollNo: '01A-06',
+    name: 'Anvi Sharma',
+    grade: 'Class 1',
+    section: 'A',
+    house: 'Tagore House',
+    dob: '2019-10-11',
+    gender: 'Female',
+    bloodGroup: 'B+',
+    guardianName: 'Vikram Sharma',
+    guardianPhone: '+91 98290 34567',
+    guardianEmail: 'vikram.sharma@gmail.com',
+    address: 'Flat 402, Golden Heights, Station Road, Pali, Rajasthan - 306401',
+    busRoute: 'Route 1 - Sumerpur Road & Housing Board',
+    busNumber: 'RJ-22-PA-0418',
+    lockerNumber: 'LK-01A-06',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300',
+    attendanceRate: 98.8,
+    gpa: 10.0,
+    feeStatus: 'Paid'
+  },
+  {
+    id: 'std-3',
     loginId: 'ananya10',
     password: 'password123',
     admissionNo: 'PPS-2022-0711',
@@ -100,13 +144,13 @@ export const INITIAL_STUDENTS: Student[] = [
     busRoute: 'Route 2 - Suraj Pole & Mandiya Road',
     busNumber: 'RJ-22-PA-0210',
     lockerNumber: 'LK-08A-04',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
     attendanceRate: 98.2,
     gpa: 9.9,
     feeStatus: 'Paid'
   },
   {
-    id: 'std-3',
+    id: 'std-4',
     loginId: 'aarav7',
     password: 'password123',
     admissionNo: 'PPS-2023-0912',
@@ -131,7 +175,7 @@ export const INITIAL_STUDENTS: Student[] = [
     feeStatus: 'Paid'
   },
   {
-    id: 'std-4',
+    id: 'std-5',
     loginId: 'ishaan6',
     password: 'password123',
     admissionNo: 'PPS-2021-0624',
@@ -156,7 +200,7 @@ export const INITIAL_STUDENTS: Student[] = [
     feeStatus: 'Paid'
   },
   {
-    id: 'std-5',
+    id: 'std-6',
     loginId: 'riya5',
     password: 'password123',
     admissionNo: 'PPS-2023-1102',
@@ -181,7 +225,7 @@ export const INITIAL_STUDENTS: Student[] = [
     feeStatus: 'Overdue'
   },
   {
-    id: 'std-6',
+    id: 'std-7',
     loginId: 'kavya3',
     password: 'password123',
     admissionNo: 'PPS-2024-1290',
@@ -449,6 +493,32 @@ export const INITIAL_HOMEWORK: HomeworkItem[] = [
     description: 'Write an imaginative narrative about discovering a hidden botanical garden behind campus. Focus on sensory imagery, metaphors, and rich vocabulary (500-700 words).',
     maxPoints: 100,
     status: 'Active'
+  },
+  {
+    id: 'hw-4',
+    title: 'Phonics & Sight Words Coloring Worksheet',
+    subject: 'English',
+    grade: 'Class 1',
+    section: 'A',
+    teacherName: 'Ms. Pooja Trivedi',
+    assignedDate: '2026-08-26',
+    dueDate: '2026-08-29',
+    description: 'Read the 10 sight words aloud and color the matching picture squares on page 24 of your English activity book.',
+    maxPoints: 20,
+    status: 'Active'
+  },
+  {
+    id: 'hw-5',
+    title: 'Counting by 5s & Number Line Jump Practice',
+    subject: 'Maths',
+    grade: 'Class 1',
+    section: 'A',
+    teacherName: 'Ms. Pooja Trivedi',
+    assignedDate: '2026-08-25',
+    dueDate: '2026-08-28',
+    description: 'Complete the number caterpillars by skip counting in steps of 5 up to 50.',
+    maxPoints: 20,
+    status: 'Active'
   }
 ];
 
@@ -465,6 +535,11 @@ export const INITIAL_ATTENDANCE_LOGS: AttendanceRecord[] = [
   { id: 'att-8', studentId: 'std-1', studentName: 'Aryan Sharma', grade: 'Class 8', section: 'A', date: '2026-08-18', status: 'Absent', remarks: 'Medical Leave - Viral Flu' },
   { id: 'att-9', studentId: 'std-1', studentName: 'Aryan Sharma', grade: 'Class 8', section: 'A', date: '2026-08-15', status: 'Present' },
   { id: 'att-10', studentId: 'std-1', studentName: 'Aryan Sharma', grade: 'Class 8', section: 'A', date: '2026-08-14', status: 'Present' },
+  { id: 'att-11', studentId: 'std-2', studentName: 'Anvi Sharma', grade: 'Class 1', section: 'A', date: '2026-08-27', status: 'Present' },
+  { id: 'att-12', studentId: 'std-2', studentName: 'Anvi Sharma', grade: 'Class 1', section: 'A', date: '2026-08-26', status: 'Present' },
+  { id: 'att-13', studentId: 'std-2', studentName: 'Anvi Sharma', grade: 'Class 1', section: 'A', date: '2026-08-25', status: 'Present' },
+  { id: 'att-14', studentId: 'std-2', studentName: 'Anvi Sharma', grade: 'Class 1', section: 'A', date: '2026-08-24', status: 'Present' },
+  { id: 'att-15', studentId: 'std-2', studentName: 'Anvi Sharma', grade: 'Class 1', section: 'A', date: '2026-08-22', status: 'Present' },
 ];
 
 export const INITIAL_LEAVES: LeaveApplication[] = [
@@ -482,6 +557,28 @@ export const INITIAL_LEAVES: LeaveApplication[] = [
 ];
 
 export const INITIAL_EXAM_RESULTS: ExamResult[] = [
+  {
+    id: 'res-2',
+    studentId: 'std-2',
+    studentName: 'Anvi Sharma',
+    grade: 'Class 1',
+    section: 'A',
+    examName: 'Foundational Stage Term 1 Evaluation 2026',
+    academicYear: '2026-2027',
+    subjects: [
+      { subject: 'English Reading & Phonics', marksObtained: 48, maxMarks: 50, grade: 'A1', remarks: 'Fluent sentence reading' },
+      { subject: 'Mathematics & Number Fun', marksObtained: 50, maxMarks: 50, grade: 'A1', remarks: 'Quick mental math' },
+      { subject: 'Environmental Studies', marksObtained: 49, maxMarks: 50, grade: 'A1', remarks: 'Active classroom curiosity' },
+      { subject: 'Arts & Creative Craft', marksObtained: 50, maxMarks: 50, grade: 'A1', remarks: 'Vibrant drawing skill' }
+    ],
+    totalMarks: 197,
+    maxTotal: 200,
+    percentage: 98.5,
+    gpa: 10.0,
+    rank: 1,
+    overallGrade: 'A1+ (Star Scholar)',
+    teacherRemarks: 'Anvi is an enthusiastic, cheerful, and extraordinarily sharp learner in Class 1-A.'
+  },
   {
     id: 'res-1',
     studentId: 'std-1',
@@ -563,11 +660,32 @@ export const INITIAL_FEES: FeeItem[] = [
     transactionId: 'TXN-UPI-77192034'
   },
 
+  // Anvi Sharma (Class 1-A) - Tuition fee
+  {
+    id: 'fee-anvi-1',
+    invoiceNo: 'INV-2026-Q3-104',
+    studentId: 'std-2',
+    studentName: 'Anvi Sharma',
+    grade: 'Class 1-A',
+    term: 'Quarter 3 (Oct - Dec 2026)',
+    dueDate: '2026-10-15',
+    breakdown: {
+      tuition: 20000,
+      sportsAndActivities: 2000
+    },
+    totalAmount: 22000,
+    paidAmount: 22000,
+    status: 'Paid',
+    paymentDate: '2026-08-20',
+    paymentMethod: 'UPI',
+    transactionId: 'TXN-UPI-88201944'
+  },
+
   // Ananya Deshmukh (Class 8-A) - Tuition fee
   {
     id: 'fee-4',
     invoiceNo: 'INV-2026-Q3-004',
-    studentId: 'std-2',
+    studentId: 'std-3',
     studentName: 'Ananya Deshmukh',
     grade: 'Class 8-A',
     term: 'Quarter 3 (Oct - Dec 2026)',
@@ -587,7 +705,7 @@ export const INITIAL_FEES: FeeItem[] = [
   {
     id: 'fee-5',
     invoiceNo: 'INV-2026-Q3-012',
-    studentId: 'std-3',
+    studentId: 'std-4',
     studentName: 'Aarav Gupta',
     grade: 'Class 7-A',
     term: 'Quarter 3 (Oct - Dec 2026)',

@@ -11,7 +11,7 @@ export const AdmissionsPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     applicantName: '',
-    gradeApplying: 'Grade 1',
+    gradeApplying: 'Class 1',
     dob: '',
     gender: 'Male' as const,
     parentName: '',
@@ -141,16 +141,16 @@ export const AdmissionsPage: React.FC = () => {
                     onChange={e => setFormData({ ...formData, gradeApplying: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   >
-                    <option value="Nursery">Early Years: Nursery</option>
-                    <option value="Kindergarten">Early Years: Kindergarten (LKG / UKG)</option>
-                    <option value="Grade 1">Primary: Grade 1</option>
-                    <option value="Grade 2">Primary: Grade 2</option>
-                    <option value="Grade 3">Primary: Grade 3</option>
-                    <option value="Grade 4">Primary: Grade 4</option>
-                    <option value="Grade 5">Primary: Grade 5</option>
-                    <option value="Grade 6">Middle School: Grade 6</option>
-                    <option value="Grade 7">Middle School: Grade 7</option>
-                    <option value="Grade 8">Middle School: Grade 8 (Senior Class)</option>
+                    <option value="Nursery">Foundational: Nursery</option>
+                    <option value="Kindergarten">Foundational: Kindergarten (LKG / UKG)</option>
+                    <option value="Class 1">Primary: Class 1</option>
+                    <option value="Class 2">Primary: Class 2</option>
+                    <option value="Class 3">Primary: Class 3</option>
+                    <option value="Class 4">Primary: Class 4</option>
+                    <option value="Class 5">Primary: Class 5</option>
+                    <option value="Class 6">Middle School: Class 6</option>
+                    <option value="Class 7">Middle School: Class 7</option>
+                    <option value="Class 8">Middle School: Class 8 (Senior Class)</option>
                   </select>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export const AdmissionsPage: React.FC = () => {
                   type="text"
                   value={formData.address}
                   onChange={e => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Street, City, Postal Code"
+                  placeholder="House No., Locality, Pali / Rajasthan, PIN Code"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                 />
               </div>

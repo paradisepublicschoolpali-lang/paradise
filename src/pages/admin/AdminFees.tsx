@@ -178,7 +178,7 @@ export const AdminFees: React.FC = () => {
     const bulkSubject = `[URGENT] Paradise Public School - Tuition Fee Dues Notice (Quarter 3)`;
     const paymentUrl = emailService.getPaymentUrl();
     const bulkBody = `======================================================================
-           🏛️  PARADISE PUBLIC SCHOOL, NEW DELHI
+           🏛️  PARADISE PUBLIC SCHOOL, PALI (RAJASTHAN)
      CBSE Affiliation No: 2130842 • School Code: 71234
 ======================================================================
 OFFICIAL TUITION FEE DUES NOTICE • ACADEMIC SESSION 2026-2027
@@ -200,7 +200,7 @@ Please settle any pending tuition dues before the upcoming deadline to ensure un
 • Instant UPI ID  : paradiseschool@sbi (Google Pay / PhonePe / Paytm / BHIM)
 • Accounts Counter: Open Monday to Saturday, 08:30 AM to 03:00 PM
 
-Helpline: +91 11 2765 4321 / +91 98110 12345
+Helpline: +91 2932 224567 / +91 98290 12345
 Official Accounts Desk: paradisepublicschool.pali@gmail.com
 ======================================================================`;
 

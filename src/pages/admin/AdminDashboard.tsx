@@ -126,7 +126,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) 
             </div>
           </div>
           <div className="text-3xl font-bold font-cinzel text-purple-700">{results.length} Transcripts</div>
-          <span className="text-[11px] text-purple-700">3.88 Average GPA Score</span>
+          <span className="text-[11px] text-purple-700">9.6 Institutional CGPA Average</span>
         </div>
 
         {/* Revenue Collections */}

@@ -44,8 +44,8 @@ export const INITIAL_SCHOOL_CONFIG: SchoolConfig = {
   academicYear: '2026-2027',
   currentTerm: 'Term 1 (Mid-Session)',
   contactEmail: 'paradisepublicschool.pali@gmail.com',
-  contactPhone: '+91 11 2765 4321',
-  address: '42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India',
+  contactPhone: '+91 2932 224567',
+  address: 'Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India',
   principalName: 'Dr. Renu Gupta',
   principalPhoto: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=800',
   principalMessage: 'We prepare students not merely for examinations, but for life and nation-building.',
@@ -283,7 +283,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       ...studentData,
       id: `std-${Date.now()}`,
       attendanceRate: 100,
-      gpa: 4.0,
+      gpa: 9.5,
       feeStatus: 'Paid'
     };
     setStudents(prev => [newStudent, ...prev]);
@@ -299,7 +299,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       ...studentData,
       id: studentId,
       attendanceRate: 100,
-      gpa: 4.0,
+      gpa: 9.5,
       feeStatus: feeData.status === 'Paid' ? 'Paid' : 'Pending'
     };
 
@@ -452,9 +452,9 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       admissionNo: `PPS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       rollNo: customStudentData.rollNo || '08A-99',
       name: app.applicantName,
-      grade: customStudentData.grade || app.gradeApplying || 'Grade 8',
+      grade: customStudentData.grade || app.gradeApplying || 'Class 8',
       section: customStudentData.section || 'A',
-      house: (customStudentData.house || 'Phoenix Gold') as any,
+      house: (customStudentData.house || 'Ashoka House') as any,
       dob: app.dob || '2010-06-15',
       gender: app.gender || 'Male',
       bloodGroup: customStudentData.bloodGroup || 'O+',
@@ -462,12 +462,12 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       guardianPhone: app.parentPhone,
       guardianEmail: app.parentEmail,
       address: app.address || '',
-      busRoute: customStudentData.busRoute || 'Route 4 - Central Campus',
-      busNumber: customStudentData.busNumber || 'PPS-BUS-04',
+      busRoute: customStudentData.busRoute || 'Route 1 - Sumerpur Road & Housing Board',
+      busNumber: customStudentData.busNumber || 'RJ-22-PA-0101',
       lockerNumber: customStudentData.lockerNumber || 'LK-01',
       avatar: customStudentData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
       attendanceRate: 100,
-      gpa: 4.0,
+      gpa: 9.5,
       feeStatus: 'Paid'
     };
 

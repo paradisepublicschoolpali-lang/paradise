@@ -18,9 +18,9 @@ export const AdminAdmissions: React.FC = () => {
   // Enrolment custom state
   const [customLoginId, setCustomLoginId] = useState('');
   const [customPassword, setCustomPassword] = useState('password123');
-  const [customGrade, setCustomGrade] = useState('Grade 8');
+  const [customGrade, setCustomGrade] = useState('Class 8');
   const [customSection, setCustomSection] = useState('A');
-  const [customHouse, setCustomHouse] = useState<Student['house']>('Phoenix Gold');
+  const [customHouse, setCustomHouse] = useState<Student['house']>('Ashoka House');
 
   const statuses = ['All', 'Pending', 'Under Review', 'Interview Scheduled', 'Accepted', 'Rejected'];
 
@@ -381,10 +381,10 @@ export const AdminAdmissions: React.FC = () => {
                   onChange={e => setCustomHouse(e.target.value as any)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900"
                 >
-                  <option value="Phoenix Gold">Phoenix Gold</option>
-                  <option value="Royal Gryphon">Royal Gryphon</option>
-                  <option value="Emerald Dragon">Emerald Dragon</option>
-                  <option value="Solar Falcon">Solar Falcon</option>
+                  <option value="Ashoka House">Ashoka House</option>
+                  <option value="Tagore House">Tagore House</option>
+                  <option value="Shivaji House">Shivaji House</option>
+                  <option value="Raman House">Raman House</option>
                 </select>
               </div>
             </div>

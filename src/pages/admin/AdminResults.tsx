@@ -84,7 +84,7 @@ export const AdminResults: React.FC = () => {
     const totalMarks = subjects.reduce((acc, curr) => acc + curr.marksObtained, 0);
     const maxTotal = subjects.length * 100;
     const percentage = Math.round((totalMarks / maxTotal) * 100);
-    const gpa = parseFloat(((percentage / 100) * 4.0).toFixed(2));
+    const gpa = parseFloat((percentage / 9.5).toFixed(2));
     const overallGrade = calculateGradeFromScore(percentage);
 
     const newResult: ExamResult = {
@@ -119,7 +119,7 @@ export const AdminResults: React.FC = () => {
     const totalMarks = editingResult.subjects.reduce((acc, s) => acc + Number(s.marksObtained), 0);
     const maxTotal = editingResult.subjects.reduce((acc, s) => acc + Number(s.maxMarks), 0);
     const percentage = Math.round((totalMarks / (maxTotal || 100)) * 100);
-    const gpa = parseFloat(((percentage / 100) * 4.0).toFixed(2));
+    const gpa = parseFloat((percentage / 9.5).toFixed(2));
     const overallGrade = calculateGradeFromScore(percentage);
 
     const updatedResult: ExamResult = {
@@ -145,8 +145,8 @@ export const AdminResults: React.FC = () => {
   };
 
   const avgGPA = results.length > 0
-    ? (results.reduce((acc, r) => acc + r.gpa, 0) / results.length).toFixed(2)
-    : '3.85';
+    ? (results.reduce((acc, r) => acc + (r.gpa > 4 ? r.gpa : (r.percentage / 9.5)), 0) / results.length).toFixed(1)
+    : '9.6';
 
   const distinctionCount = results.filter(r => r.percentage >= 90).length;
 
@@ -181,8 +181,8 @@ export const AdminResults: React.FC = () => {
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
-          <span className="text-xs text-slate-500 font-semibold uppercase">Institutional GPA Average</span>
-          <div className="text-3xl font-bold font-cinzel text-emerald-600">{avgGPA} / 4.0</div>
+          <span className="text-xs text-slate-500 font-semibold uppercase">Institutional CGPA Average</span>
+          <div className="text-3xl font-bold font-cinzel text-emerald-600">{avgGPA} / 10.0</div>
           <span className="text-[11px] text-emerald-700">Top Tier School Board Rating</span>
         </div>
 
@@ -260,7 +260,7 @@ export const AdminResults: React.FC = () => {
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200 text-xs">
-                      {res.gpa} / 4.0
+                      {res.gpa > 4 ? res.gpa : (res.percentage / 9.5).toFixed(1)} / 10.0
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">

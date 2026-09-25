@@ -108,8 +108,10 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({ result, isOpen
               <strong className="text-lg font-bold text-slate-900 font-mono">{result.percentage}%</strong>
             </div>
             <div>
-              <span className="text-slate-500 block text-[10px] uppercase">Cumulative GPA</span>
-              <strong className="text-lg font-bold text-blue-700 font-mono">{result.gpa} / 4.0</strong>
+              <span className="text-slate-500 block text-[10px] uppercase">CBSE CGPA (Scale of 10)</span>
+              <strong className="text-lg font-bold text-blue-700 font-mono">
+                {result.gpa > 4 ? result.gpa : (result.percentage / 9.5).toFixed(1)} / 10.0
+              </strong>
             </div>
             <div>
               <span className="text-slate-500 block text-[10px] uppercase">Overall Honors</span>

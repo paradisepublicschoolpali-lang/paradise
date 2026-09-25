@@ -103,9 +103,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-1">
-          <span className="text-xs text-slate-500 font-semibold uppercase">Department Batch GPA</span>
-          <div className="text-3xl font-bold font-cinzel text-emerald-600">3.88 / 4.0</div>
-          <span className="text-[11px] text-emerald-700">Top in STEM Board</span>
+          <span className="text-xs text-slate-500 font-semibold uppercase">Subject Batch Average</span>
+          <div className="text-3xl font-bold font-cinzel text-emerald-600">92.4%</div>
+          <span className="text-[11px] text-emerald-700">CBSE A1 Distinction Rating</span>
         </div>
       </div>
 

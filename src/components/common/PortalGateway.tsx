@@ -171,7 +171,7 @@ export const PortalGateway: React.FC = () => {
             </button>
 
             <div className="pt-2 text-center text-[11px] text-slate-500">
-              Forgot ID or Password? Contact School Reception: <strong className="text-slate-700">+91 11 2765 4321</strong>
+              Forgot ID or Password? Contact School Reception: <strong className="text-slate-700">+91 2932 224567</strong>
             </div>
           </form>
         </div>
@@ -236,7 +236,7 @@ export const PortalGateway: React.FC = () => {
         <div className="flex items-center gap-4 text-[11px]">
           <span className="hidden md:flex items-center gap-1">
             <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span>+91 11 2765 4321</span>
+            <span>+91 2932 224567</span>
           </span>
           <span className="flex items-center gap-1 text-emerald-700 font-bold">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -404,7 +404,7 @@ export const PortalGateway: React.FC = () => {
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-medium">
           <span className="flex items-center gap-1.5">
             <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span>School Helpline: <strong>+91 11 2765 4321</strong></span>
+            <span>School Helpline: <strong>+91 2932 224567</strong></span>
           </span>
           <span className="hidden sm:inline text-slate-300">•</span>
           <span className="flex items-center gap-1.5">

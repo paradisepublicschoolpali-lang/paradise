@@ -9,9 +9,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
   const milestones = [
     { year: '1994', title: 'Foundation of Paradise', desc: 'Inaugurated with 120 scholars and a vision for holistic academic and moral leadership.' },
     { year: '2004', title: 'National Board Accreditation', desc: 'Achieved top 5 CBSE ranking nationwide with 100% first-division distinctions.' },
-    { year: '2012', title: 'International IB & Cambridge Wing', desc: 'Established global dual-diploma accreditation for high school scholars.' },
-    { year: '2020', title: 'AI & Quantum STEM Centers', desc: 'Launched multimillion-dollar supercomputing, robotics, and clean energy laboratories.' },
-    { year: '2026', title: 'Global Distinction & 32 Years', desc: 'Recognized as an exemplary global institution with over 2,450 active scholars.' },
+    { year: '2012', title: 'CBSE Senior Secondary Affiliation', desc: 'Expanded senior wings with modern Science, Commerce, and Arts streams.' },
+    { year: '2020', title: 'Atal Tinkering Lab (ATL) & Smart Campus', desc: 'Inaugurated NITI Aayog supported ATL robotics lab and digital smart classrooms.' },
+    { year: '2026', title: 'Educational Distinction & 32 Years', desc: 'Recognized as a premier CBSE institution in Rajasthan with over 2,450 active scholars.' },
   ];
 
   const values = [
@@ -25,13 +25,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
     {
       name: 'Dr. Renu Gupta',
       role: 'Principal & Head of Institution',
-      credentials: 'Ph.D. Education (Delhi University), M.Sc. Physics, 28+ Yrs Leadership',
+      credentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
       image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=600'
     },
     {
       name: 'Mrs. Sunita Verma',
       role: 'Head of Sciences & Academic Dean',
-      credentials: 'M.Sc. Physics, B.Ed (Delhi University), CBSE Master Trainer',
+      credentials: 'M.Sc. Physics, B.Ed (Rajasthan University), CBSE Master Trainer',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600'
     },
     {

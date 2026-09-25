@@ -68,11 +68,11 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
             <div className="space-y-3 text-xs text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <span>42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India</span>
+                <span>Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>+91 11 2765 4321 / +91 98110 12345</span>
+                <span>+91 2932 224567 / +91 98290 12345</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-blue-400 shrink-0" />

@@ -26,32 +26,32 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
   const stats = [
     { label: 'Years of Excellence', value: '32+', icon: <Award className="w-5 h-5 text-blue-600" /> },
     { label: 'Board Distinction Rate', value: '100%', icon: <Trophy className="w-5 h-5 text-blue-600" /> },
-    { label: 'Ivy & Tier-1 Placements', value: '98.4%', icon: <GraduationCap className="w-5 h-5 text-blue-600" /> },
+    { label: 'Top University Selections', value: '99%', icon: <GraduationCap className="w-5 h-5 text-blue-600" /> },
     { label: 'Sports & STEM Clubs', value: '45+', icon: <Cpu className="w-5 h-5 text-blue-600" /> },
   ];
 
   const pillars = [
     {
       title: 'Academic Eminence',
-      desc: 'Dual-path curriculum offering both CBSE National Board and Cambridge/IB International diplomas.',
+      desc: 'Holistic CBSE affiliated curriculum integrated with NEP 2020 pedagogical standards.',
       icon: <BookOpen className="w-6 h-6 text-blue-600" />,
       badge: 'Curriculum'
     },
     {
-      title: 'AI & Quantum Labs',
-      desc: 'State-of-the-art supercomputing stations, robotics arenas, and nanoscale physics experimentation.',
+      title: 'Atal Tinkering Lab (ATL)',
+      desc: 'NITI Aayog supported ATL robotics lab, electronics maker-spaces, and science experimentation.',
       icon: <Cpu className="w-6 h-6 text-blue-600" />,
       badge: 'Innovation'
     },
     {
-      title: 'Olympic Sports Complex',
-      desc: '10-lane Olympic heated pool, FIFA-grade turf, equestrian track, and professional sports coaching.',
+      title: 'Spacious Sports Grounds',
+      desc: 'Cricket pitch, football turf, volleyball, table tennis, badminton, and specialized athletics coaching.',
       icon: <Trophy className="w-6 h-6 text-blue-600" />,
       badge: 'Athletics'
     },
     {
-      title: 'Character Architecture',
-      desc: 'Fostering ethical integrity, global diplomacy, leadership summits, and empathetic citizenship.',
+      title: 'Indian Sanskar & Values',
+      desc: 'Fostering ethical integrity, civic responsibility, cultural pride, and disciplined leadership.',
       icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
       badge: 'Values'
     }

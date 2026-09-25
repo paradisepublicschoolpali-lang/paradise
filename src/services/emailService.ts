@@ -253,9 +253,9 @@ export const emailService = {
           <tr>
             <td style="background-color: #0f172a; padding: 28px 32px; text-align: center; color: #94a3b8; font-size: 11px; line-height: 1.6;">
               <p style="margin: 0 0 4px 0; font-weight: 800; color: #f8fafc; font-size: 13px; font-family: Georgia, serif;">PARADISE PUBLIC SCHOOL</p>
-              <p style="margin: 0 0 4px 0;">42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India</p>
+              <p style="margin: 0 0 4px 0;">Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India</p>
               <p style="margin: 0 0 10px 0;">
-                Accounts Desk: <a href="mailto:${schoolEmail}" style="color: #60a5fa; text-decoration: none; font-weight: 600;">${schoolEmail}</a> • Helpline: +91 11 2765 4321 / +91 98110 12345
+                Accounts Desk: <a href="mailto:${schoolEmail}" style="color: #60a5fa; text-decoration: none; font-weight: 600;">${schoolEmail}</a> • Helpline: +91 2932 224567 / +91 98290 12345
               </p>
               <p style="margin: 0; font-size: 10px; color: #64748b; border-top: 1px solid #1e293b; padding-top: 10px;">
                 This is an official automated institutional communication. If you have already settled this invoice, please ignore this notice or reply with your transaction reference.
@@ -289,7 +289,7 @@ export const emailService = {
     const schoolEmail = config.senderEmail || 'paradisepublicschool.pali@gmail.com';
 
     return `======================================================================
-           🏛️  PARADISE PUBLIC SCHOOL, NEW DELHI
+           🏛️  PARADISE PUBLIC SCHOOL, PALI (RAJASTHAN)
      CBSE Affiliation No: 2130842 • School Code: 71234
 ======================================================================
 OFFICIAL TUITION FEE DUE NOTICE • INVOICE #${params.invoiceNo}
@@ -326,7 +326,7 @@ Please settle the dues on or before ${params.dueDateFormatted} to ensure uninter
 
 ----------------------------------------------------------------------
 Accounts & Treasury Directorate • Paradise Public School
-Helpline: +91 11 2765 4321 / +91 98110 12345
+Helpline: +91 2932 224567 / +91 98290 12345
 Official Accounts Desk: ${schoolEmail}
 ======================================================================`;
   },
@@ -587,9 +587,9 @@ NEXT STEPS:
 3. Offer Letter: Formal offer letters and fee schedules will be extended upon successful assessment.
 
 For any queries, please reach out to our Admissions Desk:
-Helpline : +91 11 2765 4321 / +91 98110 12345
+Helpline : +91 2932 224567 / +91 98290 12345
 Email    : ${schoolEmail}
-Address  : 42 Heritage Avenue, North Campus Enclave, New Delhi - 110007
+Address  : Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401
 
 Warm regards,
 Admissions Directorate

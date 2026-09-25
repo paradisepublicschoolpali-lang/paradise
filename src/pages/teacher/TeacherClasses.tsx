@@ -60,7 +60,7 @@ export const TeacherClasses: React.FC = () => {
     section: 'A',
     rollNo: '08A-99',
     admissionNo: `PPS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-    house: 'Phoenix Gold' as Student['house'],
+    house: 'Ashoka House' as Student['house'],
     dob: '2012-06-15',
     gender: 'Male' as Student['gender'],
     bloodGroup: 'O+',
@@ -68,8 +68,8 @@ export const TeacherClasses: React.FC = () => {
     guardianPhone: '+91 ',
     guardianEmail: '',
     address: '',
-    busRoute: 'Route 4 - Rohini & Pitampura Express',
-    busNumber: 'DL-1PB-0418',
+    busRoute: 'Route 1 - Sumerpur Road & Housing Board',
+    busNumber: 'RJ-22-PA-0101',
     lockerNumber: 'LK-08A-99',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
   });
@@ -161,7 +161,7 @@ export const TeacherClasses: React.FC = () => {
       section: 'A',
       rollNo: '08A-99',
       admissionNo: `PPS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      house: 'Phoenix Gold',
+      house: 'Ashoka House',
       dob: '2012-06-15',
       gender: 'Male',
       bloodGroup: 'O+',
@@ -169,8 +169,8 @@ export const TeacherClasses: React.FC = () => {
       guardianPhone: '+91 ',
       guardianEmail: '',
       address: '',
-      busRoute: 'Route 4 - Rohini & Pitampura Express',
-      busNumber: 'DL-1PB-0418',
+      busRoute: 'Route 1 - Sumerpur Road & Housing Board',
+      busNumber: 'RJ-22-PA-0101',
       lockerNumber: 'LK-08A-99',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
     });

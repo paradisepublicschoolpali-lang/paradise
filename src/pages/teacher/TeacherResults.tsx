@@ -27,7 +27,7 @@ export const TeacherResults: React.FC = () => {
     students.forEach((student, index) => {
       const studentScore = marks[student.id] || 90;
       const percentage = Math.round((studentScore / 100) * 100);
-      const calculatedGpa = parseFloat(((percentage / 100) * 4.0).toFixed(2));
+      const calculatedGpa = parseFloat((percentage / 9.5).toFixed(2));
 
       // Update student GPA
       updateStudent(student.id, { gpa: calculatedGpa });
@@ -42,14 +42,17 @@ export const TeacherResults: React.FC = () => {
         examName,
         academicYear: '2026-2027',
         subjects: [
-          { subject: 'Science & Discovery', marksObtained: studentScore, maxMarks: 100, grade: getGrade(studentScore), remarks: 'Outstanding analytical capability' },
-          { subject: 'Mathematics & Logic', marksObtained: Math.min(100, studentScore + 2), maxMarks: 100, grade: getGrade(studentScore + 2), remarks: 'Strong algebraic reasoning' },
-          { subject: 'English & Literature', marksObtained: Math.max(70, studentScore - 4), maxMarks: 100, grade: getGrade(studentScore - 4), remarks: 'Expressive vocabulary' },
-          { subject: 'Social Studies & Civics', marksObtained: Math.max(75, studentScore - 3), maxMarks: 100, grade: getGrade(studentScore - 3), remarks: 'Active classroom contributor' },
-          { subject: 'Robotics & Python Coding', marksObtained: Math.min(100, studentScore + 3), maxMarks: 100, grade: getGrade(studentScore + 3), remarks: 'Innovative practical projects' },
+          { subject: 'Hindi', marksObtained: Math.min(100, studentScore + 1), maxMarks: 100, grade: getGrade(studentScore + 1), remarks: 'Good grasp of language & grammar' },
+          { subject: 'English', marksObtained: Math.max(70, studentScore - 3), maxMarks: 100, grade: getGrade(studentScore - 3), remarks: 'Expressive vocabulary & literature' },
+          { subject: 'Maths', marksObtained: Math.min(100, studentScore + 2), maxMarks: 100, grade: getGrade(studentScore + 2), remarks: 'Strong algebraic reasoning & logic' },
+          { subject: 'Science', marksObtained: studentScore, maxMarks: 100, grade: getGrade(studentScore), remarks: 'Outstanding analytical capability & lab work' },
+          { subject: 'Social Science', marksObtained: Math.max(75, studentScore - 2), maxMarks: 100, grade: getGrade(studentScore - 2), remarks: 'Active classroom contributor in civics' },
+          { subject: 'Computer', marksObtained: Math.min(100, studentScore + 3), maxMarks: 100, grade: getGrade(studentScore + 3), remarks: 'Innovative practical coding skills' },
+          { subject: 'G.K', marksObtained: Math.min(100, studentScore + 2), maxMarks: 100, grade: getGrade(studentScore + 2), remarks: 'High awareness of current affairs' },
+          { subject: 'Arts', marksObtained: Math.min(100, studentScore + 4), maxMarks: 100, grade: getGrade(studentScore + 4), remarks: 'Creative design & aesthetic skills' }
         ],
-        totalMarks: studentScore * 5 - 2,
-        maxTotal: 500,
+        totalMarks: studentScore * 8,
+        maxTotal: 800,
         percentage,
         gpa: calculatedGpa,
         rank: index + 1,

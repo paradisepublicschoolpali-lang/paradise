@@ -37,8 +37,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           <div className="flex items-center gap-4 sm:gap-6 text-[11px] text-slate-300 min-w-0">
             <span className="flex items-center gap-1.5 shrink-0">
               <Phone className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden xs:inline sm:inline">+91 11 2765 4321</span>
-              <span className="xs:hidden sm:hidden text-[10px]">+91 11 2765 4321</span>
+              <span className="hidden xs:inline sm:inline">+91 2932 224567</span>
+              <span className="xs:hidden sm:hidden text-[10px]">+91 2932 224567</span>
             </span>
             <span className="hidden md:flex items-center gap-1.5 truncate">
               <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />

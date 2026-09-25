@@ -130,7 +130,9 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({ setActiveTab }
               <GraduationCap className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 font-cinzel">{student?.gpa} / 4.0</div>
+          <div className="text-2xl font-extrabold text-slate-900 font-cinzel">
+            {student?.gpa && student.gpa > 4 ? student.gpa : (latestResult?.percentage ? (latestResult.percentage / 9.5).toFixed(1) : '9.8')} / 10.0
+          </div>
           <span className="text-[11px] text-blue-600 font-medium">Rank {latestResult?.rank || 2} • {latestResult?.overallGrade || 'Distinction A1'}</span>
         </div>
 

@@ -21,7 +21,7 @@ export interface Student {
   name: string;
   grade: string;
   section: string;
-  house: 'Phoenix Gold' | 'Royal Gryphon' | 'Emerald Dragon' | 'Solar Falcon';
+  house: 'Ashoka House' | 'Tagore House' | 'Shivaji House' | 'Raman House' | string;
   dob: string;
   gender: 'Male' | 'Female' | 'Other';
   bloodGroup: string;
@@ -34,7 +34,7 @@ export interface Student {
   lockerNumber?: string;
   avatar: string;
   attendanceRate: number; // e.g. 96.5
-  gpa: number; // e.g. 3.9
+  gpa: number; // CBSE CGPA / 10-point scale e.g. 9.8
   feeStatus: 'Paid' | 'Pending' | 'Overdue';
 }
 

@@ -34,8 +34,10 @@ export const ParentResults: React.FC = () => {
       {/* Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-white border border-slate-200 text-center space-y-1 shadow-xs">
-          <span className="text-xs text-slate-500 font-semibold uppercase">Cumulative GPA</span>
-          <div className="text-3xl font-bold font-cinzel text-blue-600">{result?.gpa} / 4.0</div>
+          <span className="text-xs text-slate-500 font-semibold uppercase">CBSE CGPA (Scale of 10)</span>
+          <div className="text-3xl font-bold font-cinzel text-blue-600">
+            {result?.gpa && result.gpa > 4 ? result.gpa : (result?.percentage ? (result.percentage / 9.5).toFixed(1) : '9.8')} / 10.0
+          </div>
           <span className="text-[11px] text-emerald-700">Top 2% of Batch</span>
         </div>
 

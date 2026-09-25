@@ -96,7 +96,7 @@ export const ContactPage: React.FC = () => {
                   <MapPin className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Main Campus Address</strong>
-                    <span className="text-slate-600">42 Heritage Avenue, North Campus Enclave, New Delhi - 110007, India</span>
+                    <span className="text-slate-600">Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India</span>
                   </div>
                 </div>
 
@@ -104,7 +104,7 @@ export const ContactPage: React.FC = () => {
                   <Phone className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Admissions Helpline</strong>
-                    <span className="text-slate-600">+91 11 2765 4321 / +91 98110 12345</span>
+                    <span className="text-slate-600">+91 2932 224567 / +91 98290 12345</span>
                   </div>
                 </div>
 

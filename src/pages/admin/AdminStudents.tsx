@@ -27,7 +27,7 @@ export const AdminStudents: React.FC = () => {
     section: 'A',
     rollNo: '08A-99',
     admissionNo: `PPS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-    house: 'Phoenix Gold' as Student['house'],
+    house: 'Ashoka House' as Student['house'],
     dob: '2012-06-15',
     gender: 'Male' as Student['gender'],
     bloodGroup: 'O+',
@@ -35,8 +35,8 @@ export const AdminStudents: React.FC = () => {
     guardianPhone: '+91 ',
     guardianEmail: '',
     address: '',
-    busRoute: 'Route 4 - Rohini & Pitampura Express',
-    busNumber: 'DL-1PB-0418',
+    busRoute: 'Route 1 - Sumerpur Road & Housing Board',
+    busNumber: 'RJ-22-PA-0101',
     lockerNumber: 'LK-08A-99',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
   });
@@ -99,7 +99,7 @@ export const AdminStudents: React.FC = () => {
       section: 'A',
       rollNo: '08A-99',
       admissionNo: `PPS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      house: 'Phoenix Gold',
+      house: 'Ashoka House',
       dob: '2012-06-15',
       gender: 'Male',
       bloodGroup: 'O+',
@@ -107,8 +107,8 @@ export const AdminStudents: React.FC = () => {
       guardianPhone: '+91 ',
       guardianEmail: '',
       address: '',
-      busRoute: 'Route 4 - Rohini & Pitampura Express',
-      busNumber: 'DL-1PB-0418',
+      busRoute: 'Route 1 - Sumerpur Road & Housing Board',
+      busNumber: 'RJ-22-PA-0101',
       lockerNumber: 'LK-08A-99',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300'
     });
@@ -450,10 +450,10 @@ export const AdminStudents: React.FC = () => {
                 onChange={e => setFormData({ ...formData, house: e.target.value as any })}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
               >
-                <option value="Phoenix Gold">Phoenix Gold</option>
-                <option value="Royal Gryphon">Royal Gryphon</option>
-                <option value="Emerald Dragon">Emerald Dragon</option>
-                <option value="Solar Falcon">Solar Falcon</option>
+                <option value="Ashoka House">Ashoka House</option>
+                <option value="Tagore House">Tagore House</option>
+                <option value="Shivaji House">Shivaji House</option>
+                <option value="Raman House">Raman House</option>
               </select>
             </div>
             <div>

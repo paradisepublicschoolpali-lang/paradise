@@ -6,7 +6,7 @@ import { formatCurrency } from '../../utils/helpers';
 import { emailService } from '../../services/emailService';
 
 export const AdmissionsPage: React.FC = () => {
-  const { submitAdmission } = useSchoolData();
+  const { submitAdmission, schoolConfig } = useSchoolData();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -99,7 +99,7 @@ export const AdmissionsPage: React.FC = () => {
           <div className="text-center space-y-2 pb-4 border-b border-slate-100">
             <span className="text-xs font-bold text-blue-600 uppercase">Direct Application</span>
             <h2 className="text-2xl sm:text-3xl font-bold font-cinzel text-slate-900">Online Enrolment Form</h2>
-            <p className="text-xs text-slate-500">Academic Year 2026-2027 • All Grades</p>
+            <p className="text-xs text-slate-500">Academic Year {schoolConfig.academicYear} • All Grades</p>
           </div>
 
           {submittedAppNo ? (
@@ -110,7 +110,7 @@ export const AdmissionsPage: React.FC = () => {
                 Your application reference ID is: <strong className="font-mono text-base">{submittedAppNo}</strong>
               </p>
               <p className="text-xs text-emerald-700 max-w-md mx-auto">
-                An email confirmation with assessment guidelines has been sent from <strong>paradisepublicschool.pali@gmail.com</strong> to your registered email. The admissions bureau will contact you shortly.
+                An email confirmation with assessment guidelines has been sent from <strong>{schoolConfig.contactEmail}</strong> to your registered email. The admissions bureau will contact you shortly.
               </p>
               <button
                 onClick={() => setSubmittedAppNo(null)}

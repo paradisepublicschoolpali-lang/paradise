@@ -27,7 +27,7 @@ import { Modal } from '../../components/common/Modal';
 import { emailService } from '../../services/emailService';
 
 export const AdminFees: React.FC = () => {
-  const { fees, students, addFeeInvoice, updateFeeInvoice, deleteFeeInvoice, payFeeInvoice } = useSchoolData();
+  const { fees, students, addFeeInvoice, updateFeeInvoice, deleteFeeInvoice, payFeeInvoice, schoolConfig } = useSchoolData();
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,8 +147,8 @@ export const AdminFees: React.FC = () => {
         to: emailRecipient,
         subject: emailSubject,
         message: emailMessage,
-        fromName: 'Paradise Public School Accounts',
-        replyTo: 'paradisepublicschool.pali@gmail.com'
+        fromName: `${schoolConfig.schoolName} Accounts`,
+        replyTo: schoolConfig.contactEmail || 'paradisepublicschool.pali@gmail.com'
       });
 
       toast(
@@ -200,13 +200,13 @@ Please settle any pending tuition dues before the upcoming deadline to ensure un
 • Instant UPI ID  : paradiseschool@sbi (Google Pay / PhonePe / Paytm / BHIM)
 • Accounts Counter: Open Monday to Saturday, 08:30 AM to 03:00 PM
 
-Helpline: +91 2932 224567 / +91 98290 12345
-Official Accounts Desk: paradisepublicschool.pali@gmail.com
+Helpline: ${schoolConfig.contactPhone}${schoolConfig.secondaryPhone ? ' / ' + schoolConfig.secondaryPhone : ''}
+Official Accounts Desk: ${schoolConfig.contactEmail}
 ======================================================================`;
 
     if (mode === 'gmail') {
       emailService.openGmailComposer({
-        to: 'paradisepublicschool.pali@gmail.com',
+        to: schoolConfig.contactEmail || 'paradisepublicschool.pali@gmail.com',
         bcc: bccString,
         subject: bulkSubject,
         body: bulkBody
@@ -218,7 +218,7 @@ Official Accounts Desk: paradisepublicschool.pali@gmail.com
 
     if (mode === 'mailapp') {
       emailService.openDefaultMailClient({
-        to: 'paradisepublicschool.pali@gmail.com',
+        to: schoolConfig.contactEmail || 'paradisepublicschool.pali@gmail.com',
         bcc: bccString,
         subject: bulkSubject,
         body: bulkBody
@@ -316,7 +316,7 @@ Official Accounts Desk: paradisepublicschool.pali@gmail.com
         <div>
           <h3 className="text-xl font-bold font-cinzel text-slate-900">Student Tuition Fee Treasury</h3>
           <p className="text-xs text-slate-500">
-            Manage tuition billing in ₹ INR • Send official email reminders to pending fee scholars from <strong className="font-mono text-blue-700">paradisepublicschool.pali@gmail.com</strong>
+            Manage tuition billing in ₹ INR • Send official email reminders to pending fee scholars from <strong className="font-mono text-blue-700">{schoolConfig.contactEmail}</strong>
           </p>
         </div>
 
@@ -359,7 +359,7 @@ Official Accounts Desk: paradisepublicschool.pali@gmail.com
           <div>
             <span className="text-xs text-slate-500 font-semibold uppercase">Official Email Dispatch Desk</span>
             <div className="text-sm font-bold text-slate-900 mt-0.5 truncate font-mono text-xs text-blue-700">
-              paradisepublicschool.pali@gmail.com
+              {schoolConfig.contactEmail}
             </div>
           </div>
           <button

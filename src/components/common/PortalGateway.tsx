@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useSchoolData } from '../../context/SchoolDataContext';
 import { Logo } from './Logo';
 import {
   GraduationCap,
@@ -20,6 +21,7 @@ type GatewayView = 'select' | 'parent-login' | 'teacher-login' | 'admin-login';
 
 export const PortalGateway: React.FC = () => {
   const { enterAsGuest, loginAsParent, loginAsTeacher, loginAsAdmin } = useAuth();
+  const { schoolConfig } = useSchoolData();
   const [view, setView] = useState<GatewayView>('select');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
@@ -171,15 +173,15 @@ export const PortalGateway: React.FC = () => {
             </button>
 
             <div className="pt-2 text-center text-[11px] text-slate-500">
-              Forgot ID or Password? Contact School Reception: <strong className="text-slate-700">+91 2932 224567</strong>
+              Forgot ID or Password? Contact School Reception: <strong className="text-slate-700">{schoolConfig.contactPhone}</strong>
             </div>
           </form>
         </div>
 
         {/* School Branding Footer */}
         <div className="text-center text-xs text-slate-500 space-y-0.5">
-          <p className="font-semibold text-slate-700">Paradise Public School • CBSE Affiliated (Estd. 1994)</p>
-          <p className="text-[11px] text-slate-400">Pali, Rajasthan • Empowering Future Leaders</p>
+          <p className="font-semibold text-slate-700">{schoolConfig.schoolName} • {schoolConfig.affiliationCode || 'CBSE Affiliated'} (Estd. {schoolConfig.establishedYear || '1994'})</p>
+          <p className="text-[11px] text-slate-400">Pali, Rajasthan • {schoolConfig.motto || 'Empowering Future Leaders'}</p>
         </div>
       </div>
     </div>
@@ -231,16 +233,16 @@ export const PortalGateway: React.FC = () => {
             CBSE Affiliated Senior Secondary School
           </span>
           <span className="hidden sm:inline text-slate-400">•</span>
-          <span className="hidden sm:inline font-medium">Affiliation No. 1730248</span>
+          <span className="hidden sm:inline font-medium">{schoolConfig.affiliationCode || 'CBSE Affiliation No: 2130842'}</span>
         </div>
         <div className="flex items-center gap-4 text-[11px]">
           <span className="hidden md:flex items-center gap-1">
             <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span>+91 2932 224567</span>
+            <span>{schoolConfig.contactPhone}</span>
           </span>
           <span className="flex items-center gap-1 text-emerald-700 font-bold">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Session 2026-27 Active</span>
+            <span>Session {schoolConfig.academicYear} Active</span>
           </span>
         </div>
       </div>
@@ -404,22 +406,22 @@ export const PortalGateway: React.FC = () => {
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-medium">
           <span className="flex items-center gap-1.5">
             <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span>School Helpline: <strong>+91 2932 224567</strong></span>
+            <span>School Helpline: <strong>{schoolConfig.contactPhone}</strong></span>
           </span>
           <span className="hidden sm:inline text-slate-300">•</span>
           <span className="flex items-center gap-1.5">
             <Mail className="w-3.5 h-3.5 text-blue-600" />
-            <span>paradisepublicschool.pali@gmail.com</span>
+            <span>{schoolConfig.contactEmail}</span>
           </span>
           <span className="hidden sm:inline text-slate-300">•</span>
           <span className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-slate-500" />
-            <span>Mon - Sat: 08:00 AM - 04:30 PM</span>
+            <span>{schoolConfig.schoolTimings || 'Mon - Sat: 08:00 AM - 04:30 PM'}</span>
           </span>
         </div>
 
         <p className="text-[11px] text-slate-400">
-          © 2026 Paradise Public School, Pali (Rajasthan). All rights reserved. Recognized by Government of Rajasthan & Affiliated with CBSE, New Delhi.
+          © {new Date().getFullYear()} {schoolConfig.schoolName}, Pali (Rajasthan). All rights reserved. Recognized by Government of Rajasthan & Affiliated with CBSE, New Delhi.
         </p>
       </div>
     </div>

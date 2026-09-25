@@ -1,17 +1,20 @@
 import React from 'react';
 import { Award, Compass, HeartHandshake, ShieldCheck, Trophy, Users, ArrowRight } from 'lucide-react';
+import { useSchoolData } from '../../context/SchoolDataContext';
 
 interface AboutPageProps {
   setActiveTab: (tab: string) => void;
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
+  const { schoolConfig } = useSchoolData();
+
   const milestones = [
-    { year: '1994', title: 'Foundation of Paradise', desc: 'Inaugurated with 120 scholars and a vision for holistic academic and moral leadership.' },
-    { year: '2004', title: 'National Board Accreditation', desc: 'Achieved top 5 CBSE ranking nationwide with 100% first-division distinctions.' },
-    { year: '2012', title: 'CBSE Senior Secondary Affiliation', desc: 'Expanded senior wings with modern Science, Commerce, and Arts streams.' },
+    { year: schoolConfig.establishedYear || '1994', title: `Foundation of ${schoolConfig.schoolName}`, desc: 'Inaugurated with a visionary commitment to holistic academic, ethical, and moral leadership.' },
+    { year: '2004', title: 'National Board Accreditation', desc: 'Achieved top ranking nationwide with 100% first-division distinctions.' },
+    { year: '2012', title: 'CBSE Senior Secondary Affiliation', desc: 'Expanded senior wings with modern Science, Commerce, and Humanities streams.' },
     { year: '2020', title: 'Atal Tinkering Lab (ATL) & Smart Campus', desc: 'Inaugurated NITI Aayog supported ATL robotics lab and digital smart classrooms.' },
-    { year: '2026', title: 'Educational Distinction & 32 Years', desc: 'Recognized as a premier CBSE institution in Rajasthan with over 2,450 active scholars.' },
+    { year: '2026', title: 'Educational Distinction & Legacy', desc: 'Recognized as a premier CBSE institution with active scholars leading at national levels.' },
   ];
 
   const values = [
@@ -23,10 +26,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
 
   const leadership = [
     {
-      name: 'Dr. Renu Gupta',
-      role: 'Principal & Head of Institution',
-      credentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
-      image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=600'
+      name: schoolConfig.principalName || 'Dr. Renu Gupta',
+      role: schoolConfig.principalRole || 'Principal & Head of Institution',
+      credentials: schoolConfig.principalCredentials || 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
+      image: schoolConfig.principalPhoto || 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=600'
     },
     {
       name: 'Mrs. Sunita Verma',
@@ -48,9 +51,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
       <section className="bg-slate-50 border-b border-slate-200 py-16">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Heritage & Vision</span>
-          <h1 className="text-3xl sm:text-5xl font-bold font-cinzel text-slate-900">About Paradise Public School</h1>
+          <h1 className="text-3xl sm:text-5xl font-bold font-cinzel text-slate-900">About {schoolConfig.schoolName}</h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
-            Thirty-two years of nurturing extraordinary intellects, courageous innovators, and compassionate leaders.
+            Decades of nurturing extraordinary intellects, courageous innovators, and compassionate leaders with timeless values.
           </p>
         </div>
       </section>

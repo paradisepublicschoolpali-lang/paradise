@@ -49,7 +49,8 @@ const getInitialSession = (): StoredSession => {
       if (rawHash === 'gateway' || rawHash === 'select') {
         return { ...parsed, showGateway: true };
       }
-      return parsed;
+      // Default to public guest website when opening the root site or guest routes
+      return { ...parsed, role: 'guest', showGateway: false };
     } catch {
       // fallback
     }
@@ -64,7 +65,7 @@ const getInitialSession = (): StoredSession => {
   if (rawHash.startsWith('teacher')) {
     return { role: 'teacher', currentUser: DEMO_USERS.teacher, isAuthenticated: true, showGateway: false };
   }
-  if (!rawHash || rawHash === 'gateway' || rawHash === 'select') {
+  if (rawHash === 'gateway' || rawHash === 'select') {
     return { role: 'guest', currentUser: DEMO_USERS.guest, isAuthenticated: false, showGateway: true };
   }
 
@@ -111,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: false,
       showGateway: false
     });
-    if (window.location.hash !== '#/home') {
+    if (window.location.hash === '#/gateway' || window.location.hash === '#/select') {
       window.history.pushState({ role: 'guest', tab: 'home' }, '', '#/home');
     }
   }, [saveSession]);

@@ -45,8 +45,15 @@ export const INITIAL_SCHOOL_CONFIG: SchoolConfig = {
   currentTerm: 'Term 1 (Mid-Session)',
   contactEmail: 'paradisepublicschool.pali@gmail.com',
   contactPhone: '+91 2932 224567',
+  secondaryPhone: '+91 98290 12345',
+  whatsappNumber: '+91 98290 12345',
+  visitingHours: 'Monday to Friday: 08:30 AM - 04:30 PM\nSaturday: 09:00 AM - 01:00 PM',
+  schoolTimings: 'Mon - Sat: 08:00 AM - 04:30 PM',
+  establishedYear: '1994',
   address: 'Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India',
   principalName: 'Dr. Renu Gupta',
+  principalRole: 'Principal & Head of Institution',
+  principalCredentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
   principalPhoto: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=800',
   principalMessage: 'We prepare students not merely for examinations, but for life and nation-building.',
   heroHeadline: 'Shaping Leaders of Tomorrow',
@@ -165,7 +172,12 @@ const STORAGE_PREFIX = 'pps_v1_';
 function getStoredOrDefault<T>(key: string, defaultValue: T): T {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
-    return raw ? JSON.parse(raw) : defaultValue;
+    if (!raw) return defaultValue;
+    const parsed = JSON.parse(raw);
+    if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+      return { ...defaultValue, ...parsed };
+    }
+    return parsed;
   } catch {
     return defaultValue;
   }

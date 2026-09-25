@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, Loader2, ExternalLink, Copy } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useSchoolData } from '../../context/SchoolDataContext';
 import { emailService } from '../../services/emailService';
 
 export const ContactPage: React.FC = () => {
   const { toast } = useToast();
+  const { schoolConfig } = useSchoolData();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,7 +51,7 @@ export const ContactPage: React.FC = () => {
 
   const handleOpenGmail = () => {
     emailService.openGmailComposer({
-      to: 'paradisepublicschool.pali@gmail.com',
+      to: schoolConfig.contactEmail || 'paradisepublicschool.pali@gmail.com',
       subject: `[Website Inquiry] ${formData.subject} - from ${formData.name}`,
       body: `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`
     });
@@ -57,7 +59,7 @@ export const ContactPage: React.FC = () => {
 
   const handleOpenMailApp = () => {
     emailService.openDefaultMailClient({
-      to: 'paradisepublicschool.pali@gmail.com',
+      to: schoolConfig.contactEmail || 'paradisepublicschool.pali@gmail.com',
       subject: `[Website Inquiry] ${formData.subject} - from ${formData.name}`,
       body: `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`
     });
@@ -96,7 +98,7 @@ export const ContactPage: React.FC = () => {
                   <MapPin className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Main Campus Address</strong>
-                    <span className="text-slate-600">Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India</span>
+                    <span className="text-slate-600">{schoolConfig.address}</span>
                   </div>
                 </div>
 
@@ -104,7 +106,10 @@ export const ContactPage: React.FC = () => {
                   <Phone className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Admissions Helpline</strong>
-                    <span className="text-slate-600">+91 2932 224567 / +91 98290 12345</span>
+                    <span className="text-slate-600">
+                      {schoolConfig.contactPhone}
+                      {schoolConfig.secondaryPhone ? ` / ${schoolConfig.secondaryPhone}` : ''}
+                    </span>
                   </div>
                 </div>
 
@@ -112,7 +117,7 @@ export const ContactPage: React.FC = () => {
                   <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Official Email Desk</strong>
-                    <span className="text-slate-600 font-mono text-xs">paradisepublicschool.pali@gmail.com</span>
+                    <span className="text-slate-600 font-mono text-xs">{schoolConfig.contactEmail}</span>
                   </div>
                 </div>
 
@@ -120,7 +125,7 @@ export const ContactPage: React.FC = () => {
                   <Clock className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900 text-sm">Visiting Hours</strong>
-                    <span className="text-slate-600">Monday to Friday: 08:30 AM - 04:30 PM<br />Saturday: 09:00 AM - 01:00 PM</span>
+                    <span className="text-slate-600 whitespace-pre-line">{schoolConfig.visitingHours || 'Monday to Friday: 08:30 AM - 04:30 PM\nSaturday: 09:00 AM - 01:00 PM'}</span>
                   </div>
                 </div>
               </div>
@@ -149,7 +154,7 @@ export const ContactPage: React.FC = () => {
                   <div>
                     <h4 className="text-base font-bold text-emerald-900 font-cinzel">Inquiry Transmitted Successfully</h4>
                     <p className="text-xs text-emerald-700 mt-1">
-                      {dispatchResult?.message || 'Inquiry sent to paradisepublicschool.pali@gmail.com. Our administrative desk will contact you within 24 hours.'}
+                      {dispatchResult?.message || `Inquiry sent to ${schoolConfig.contactEmail}. Our administrative desk will contact you within 24 hours.`}
                     </p>
                     {dispatchResult?.provider && (
                       <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
@@ -270,7 +275,7 @@ export const ContactPage: React.FC = () => {
                     </button>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1">
-                      <span>Recipient: <strong className="font-mono text-slate-700">paradisepublicschool.pali@gmail.com</strong></span>
+                      <span>Recipient: <strong className="font-mono text-slate-700">{schoolConfig.contactEmail}</strong></span>
                       <button
                         type="button"
                         onClick={handleOpenGmail}

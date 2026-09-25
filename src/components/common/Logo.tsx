@@ -4,6 +4,7 @@ import { SchoolDataContext } from '../../context/SchoolDataContext';
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showSubtitle?: boolean;
+  inverted?: boolean;
   className?: string;
   customLetter?: string;
   customShieldColor?: string;
@@ -14,6 +15,7 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({
   size = 'md',
   showSubtitle = true,
+  inverted = false,
   className = '',
   customLetter,
   customShieldColor,
@@ -24,6 +26,7 @@ export const Logo: React.FC<LogoProps> = ({
   const schoolConfig = context?.schoolConfig || {
     schoolName: 'Paradise Public School',
     motto: 'Excellence • Integrity • Leadership',
+    establishedYear: '1994',
     logoType: 'shield' as const,
     logoLetter: 'P',
     logoShieldColor: '#1E40AF',
@@ -46,9 +49,9 @@ export const Logo: React.FC<LogoProps> = ({
 
   const titleSizes = {
     sm: 'text-xs sm:text-sm',
-    md: 'text-sm sm:text-base lg:text-lg',
-    lg: 'text-base sm:text-xl lg:text-2xl',
-    xl: 'text-xl sm:text-2xl lg:text-3xl'
+    md: 'text-xs sm:text-base lg:text-lg',
+    lg: 'text-sm sm:text-xl lg:text-2xl',
+    xl: 'text-lg sm:text-2xl lg:text-3xl'
   };
 
   // Split school name for two-tone styling if 3 words e.g. "Paradise Public School"
@@ -57,7 +60,7 @@ export const Logo: React.FC<LogoProps> = ({
   const restWords = nameParts.slice(1).join(' ') || 'PUBLIC SCHOOL';
 
   return (
-    <div className={`flex items-center gap-2 sm:gap-3 select-none min-w-0 ${className}`}>
+    <div className={`flex items-center gap-2 sm:gap-3 select-none min-w-0 max-w-full ${className}`}>
       {/* Emblem / Shield / Custom Image */}
       <div className={`relative ${iconSizes[size]} shrink-0 flex items-center justify-center`}>
         {logoType === 'image' && imageUrl ? (
@@ -110,18 +113,20 @@ export const Logo: React.FC<LogoProps> = ({
       </div>
 
       {/* Typography */}
-      <div className="flex flex-col text-left min-w-0">
-        <div className="flex items-center gap-1 sm:gap-1.5 leading-none">
-          <span className={`font-cinzel font-black tracking-wider uppercase text-blue-700 ${titleSizes[size]} shrink-0`}>
+      <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
+        <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1 sm:gap-1.5 leading-tight">
+          <span className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} ${titleSizes[size]} shrink-0`}>
             {firstWord}
           </span>
-          <span className={`font-cinzel font-semibold tracking-wide sm:tracking-widest text-slate-800 uppercase ${titleSizes[size]} truncate`}>
+          <span className={`font-cinzel font-semibold tracking-wide sm:tracking-widest uppercase ${inverted ? 'text-white' : 'text-slate-800'} ${titleSizes[size]} truncate`}>
             {restWords}
           </span>
         </div>
         {showSubtitle && (
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] tracking-wider text-slate-500 uppercase font-medium mt-1">
-            <span className="text-blue-600 font-bold">Estd. 1994</span>
+          <div className={`hidden sm:flex items-center gap-1.5 text-[10px] tracking-wider ${inverted ? 'text-slate-300' : 'text-slate-500'} uppercase font-medium mt-1 truncate`}>
+            <span className={`${inverted ? 'text-amber-400' : 'text-blue-600'} font-bold shrink-0`}>
+              Estd. {schoolConfig?.establishedYear || '1994'}
+            </span>
             <span>•</span>
             <span className="truncate max-w-[200px] lg:max-w-[240px]">{schoolConfig?.motto || 'Excellence • Integrity • Leadership'}</span>
           </div>

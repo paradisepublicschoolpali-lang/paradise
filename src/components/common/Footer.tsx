@@ -1,8 +1,9 @@
 import React from 'react';
 import { Logo } from './Logo';
-import { Mail, Phone, MapPin, Send, ExternalLink, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSchoolData } from '../../context/SchoolDataContext';
 
 interface FooterProps {
   setActiveTab: (tab: string) => void;
@@ -11,6 +12,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
   const { toast } = useToast();
   const { logout } = useAuth();
+  const { schoolConfig } = useSchoolData();
   const [email, setEmail] = React.useState('');
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -28,22 +30,24 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
   return (
     <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Col 1: Brand */}
-          <div className="space-y-4">
-            <div className="bg-white/10 p-3 rounded-2xl inline-block">
-              <Logo size="md" showSubtitle={false} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+          {/* Col 1: Brand (4 cols on desktop to eliminate overlap) */}
+          <div className="lg:col-span-4 space-y-4 min-w-0">
+            <div className="bg-white/5 border border-white/10 p-2.5 sm:p-3 rounded-2xl max-w-full inline-flex items-center">
+              <Logo size="md" showSubtitle={false} inverted={true} />
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Empowering global leaders of tomorrow through holistic academic rigor, STEM innovation, and character building since 1994.
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+              Empowering global leaders of tomorrow through holistic academic rigor, STEM innovation, and character building since {schoolConfig.establishedYear || '1994'}.
             </p>
-            <div className="text-xs text-blue-400 font-semibold">
-              CBSE Affiliation No: 2130842 • School Code: 71234
-            </div>
+            {schoolConfig.affiliationCode && (
+              <div className="text-xs text-blue-400 font-semibold break-words">
+                {schoolConfig.affiliationCode}
+              </div>
+            )}
           </div>
 
-          {/* Col 2: Quick Links */}
-          <div className="space-y-3">
+          {/* Col 2: Quick Links (2 cols on desktop) */}
+          <div className="lg:col-span-2 space-y-3">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider font-cinzel">Quick Links</h4>
             <ul className="space-y-2 text-xs">
               {['Home', 'About Us', 'Academics', 'Admissions', 'Events', 'Gallery', 'Notices', 'Contact'].map(link => {
@@ -62,27 +66,30 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
             </ul>
           </div>
 
-          {/* Col 3: Contact */}
-          <div className="space-y-3">
+          {/* Col 3: Contact (3 cols on desktop) */}
+          <div className="lg:col-span-3 space-y-3 min-w-0">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider font-cinzel">Contact Us</h4>
             <div className="space-y-3 text-xs text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <span>Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India</span>
+                <span className="break-words leading-relaxed">{schoolConfig.address}</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>+91 2932 224567 / +91 98290 12345</span>
+              <div className="flex items-start gap-2.5">
+                <Phone className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                <span className="break-words">
+                  {schoolConfig.contactPhone}
+                  {schoolConfig.secondaryPhone ? ` / ${schoolConfig.secondaryPhone}` : ''}
+                </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>paradisepublicschool.pali@gmail.com</span>
+                <span className="break-all">{schoolConfig.contactEmail}</span>
               </div>
             </div>
           </div>
 
-          {/* Col 4: Newsletter & Portals */}
-          <div className="space-y-4">
+          {/* Col 4: Newsletter & Portals (3 cols on desktop) */}
+          <div className="lg:col-span-3 space-y-4">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider font-cinzel">Newsletter</h4>
             <p className="text-xs text-slate-400">Subscribe for admission alerts and circulars.</p>
             <form onSubmit={handleSubscribe} className="flex gap-2">
@@ -115,7 +122,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
         </div>
 
         <div className="mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <div>© 2026 Paradise Public School. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} {schoolConfig.schoolName}. All rights reserved.</div>
           <div className="flex items-center gap-4">
             <a href="#" className="hover:text-slate-400">Privacy Policy</a>
             <span>•</span>

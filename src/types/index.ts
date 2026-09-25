@@ -219,8 +219,15 @@ export interface SchoolConfig {
   currentTerm: string;
   contactEmail: string;
   contactPhone: string;
+  secondaryPhone?: string;
+  whatsappNumber?: string;
+  visitingHours?: string;
+  schoolTimings?: string;
+  establishedYear?: string;
   address: string;
   principalName: string;
+  principalRole?: string;
+  principalCredentials?: string;
   principalPhoto: string;
   principalMessage: string;
   heroHeadline: string;

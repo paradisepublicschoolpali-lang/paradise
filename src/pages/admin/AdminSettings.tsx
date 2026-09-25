@@ -54,8 +54,15 @@ export const AdminSettings: React.FC = () => {
     currentTerm: schoolConfig.currentTerm,
     contactEmail: schoolConfig.contactEmail,
     contactPhone: schoolConfig.contactPhone,
+    secondaryPhone: schoolConfig.secondaryPhone || '+91 98290 12345',
+    whatsappNumber: schoolConfig.whatsappNumber || '+91 98290 12345',
+    visitingHours: schoolConfig.visitingHours || 'Monday to Friday: 08:30 AM - 04:30 PM\nSaturday: 09:00 AM - 01:00 PM',
+    schoolTimings: schoolConfig.schoolTimings || 'Mon - Sat: 08:00 AM - 04:30 PM',
+    establishedYear: schoolConfig.establishedYear || '1994',
     address: schoolConfig.address,
     principalName: schoolConfig.principalName,
+    principalRole: schoolConfig.principalRole || 'Principal & Head of Institution',
+    principalCredentials: schoolConfig.principalCredentials || 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
     principalPhoto: schoolConfig.principalPhoto || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
     principalMessage: schoolConfig.principalMessage,
     heroHeadline: schoolConfig.heroHeadline,
@@ -243,8 +250,15 @@ export const AdminSettings: React.FC = () => {
         currentTerm: 'Term 1 (Mid-Session)',
         contactEmail: 'paradisepublicschool.pali@gmail.com',
         contactPhone: '+91 2932 224567',
+        secondaryPhone: '+91 98290 12345',
+        whatsappNumber: '+91 98290 12345',
+        visitingHours: 'Monday to Friday: 08:30 AM - 04:30 PM\nSaturday: 09:00 AM - 01:00 PM',
+        schoolTimings: 'Mon - Sat: 08:00 AM - 04:30 PM',
+        establishedYear: '1994',
         address: 'Near New Bus Stand, Sumerpur Road, Pali, Rajasthan - 306401, India',
         principalName: 'Dr. Renu Gupta',
+        principalRole: 'Principal & Head of Institution',
+        principalCredentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
         principalPhoto: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=800',
         principalMessage: 'We prepare students not merely for examinations, but for life and nation-building.',
         heroHeadline: 'Shaping Leaders of Tomorrow',
@@ -842,16 +856,37 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={formData.principalName}
                 onChange={e => setFormData({ ...formData, principalName: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Principal's Address / Message Quote</label>
+              <label className="block text-slate-700 font-semibold mb-1">Designation / Role Title</label>
               <input
                 type="text"
+                value={formData.principalRole}
+                onChange={e => setFormData({ ...formData, principalRole: e.target.value })}
+                placeholder="e.g. Principal & Head of Institution"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-semibold mb-1">Academic Credentials & Qualifications</label>
+              <input
+                type="text"
+                value={formData.principalCredentials}
+                onChange={e => setFormData({ ...formData, principalCredentials: e.target.value })}
+                placeholder="e.g. Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-[10px] text-slate-500">Appears on the About Us Eminent Academic Leadership profile</span>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-semibold mb-1">Principal's Address / Message Quote</label>
+              <textarea
+                rows={2}
                 value={formData.principalMessage}
                 onChange={e => setFormData({ ...formData, principalMessage: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"
               />
             </div>
           </div>
@@ -895,12 +930,13 @@ export const AdminSettings: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Official School Name</label>
+              <label className="block text-slate-700 font-semibold mb-1">Official School Name *</label>
               <input
                 type="text"
+                required
                 value={formData.schoolName}
                 onChange={e => setFormData({ ...formData, schoolName: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
               />
             </div>
             <div>
@@ -922,31 +958,86 @@ export const AdminSettings: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Admissions / Office Email</label>
+              <label className="block text-slate-700 font-semibold mb-1">Foundation / Established Year</label>
+              <input
+                type="text"
+                value={formData.establishedYear}
+                onChange={e => setFormData({ ...formData, establishedYear: e.target.value })}
+                placeholder="e.g. 1994"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Official Admissions / Office Email *</label>
               <input
                 type="email"
+                required
                 value={formData.contactEmail}
                 onChange={e => setFormData({ ...formData, contactEmail: e.target.value })}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Contact Phone</label>
+              <label className="block text-slate-700 font-semibold mb-1">Primary Phone / Landline *</label>
               <input
                 type="text"
+                required
                 value={formData.contactPhone}
                 onChange={e => setFormData({ ...formData, contactPhone: e.target.value })}
+                placeholder="e.g. +91 2932 224567"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Secondary Phone / Helpline</label>
+              <input
+                type="text"
+                value={formData.secondaryPhone}
+                onChange={e => setFormData({ ...formData, secondaryPhone: e.target.value })}
+                placeholder="e.g. +91 98290 12345"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Official WhatsApp Support Number</label>
+              <input
+                type="text"
+                value={formData.whatsappNumber}
+                onChange={e => setFormData({ ...formData, whatsappNumber: e.target.value })}
+                placeholder="e.g. +91 98290 12345"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">School Operating Hours / Timings</label>
+              <input
+                type="text"
+                value={formData.schoolTimings}
+                onChange={e => setFormData({ ...formData, schoolTimings: e.target.value })}
+                placeholder="e.g. Mon - Sat: 08:00 AM - 04:30 PM"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Campus Address</label>
+              <label className="block text-slate-700 font-semibold mb-1">Full Campus Address *</label>
               <input
                 type="text"
+                required
                 value={formData.address}
                 onChange={e => setFormData({ ...formData, address: e.target.value })}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-semibold mb-1">Visitor & Office Reception Hours</label>
+              <textarea
+                rows={2}
+                value={formData.visitingHours}
+                onChange={e => setFormData({ ...formData, visitingHours: e.target.value })}
+                placeholder="e.g. Monday to Friday: 08:30 AM - 04:30 PM&#10;Saturday: 09:00 AM - 01:00 PM"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+              />
+              <span className="text-[10px] text-slate-500">Displayed on the Contact Page direct department desk</span>
             </div>
           </div>
         </div>

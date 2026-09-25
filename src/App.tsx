@@ -67,7 +67,7 @@ const getInitialGuestTab = () => {
 };
 
 const SchoolApp: React.FC = () => {
-  const { role, showGateway, openGateway } = useAuth();
+  const { role, showGateway, openGateway, enterAsGuest } = useAuth();
 
   // Internal tab states for each portal - restored from URL hash on reload
   const [guestTab, setGuestTabState] = useState(getInitialGuestTab);
@@ -109,7 +109,7 @@ const SchoolApp: React.FC = () => {
     const handleUrlNavigation = () => {
       const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
       
-      if (!rawHash || rawHash === 'gateway' || rawHash === 'select') {
+      if (rawHash === 'gateway' || rawHash === 'select') {
         openGateway();
         return;
       }
@@ -125,7 +125,8 @@ const SchoolApp: React.FC = () => {
       } else if (section === 'teacher') {
         setTeacherTabState(subTab);
       } else {
-        // Guest pages e.g. /home, /about, /academics, /admissions, /events, /gallery, /notices, /contact
+        // Guest pages e.g. /home, /about, /academics, /admissions, /events, /gallery, /notices, /contact, or root empty
+        enterAsGuest();
         setGuestTabState(section || 'home');
       }
     };
@@ -140,7 +141,7 @@ const SchoolApp: React.FC = () => {
       window.removeEventListener('popstate', handleUrlNavigation);
       window.removeEventListener('hashchange', handleUrlNavigation);
     };
-  }, [openGateway]);
+  }, [openGateway, enterAsGuest]);
 
   // If initial entry gateway is open, render PortalGateway (Guest, Parent, Teacher, Admin login)
   if (showGateway) {

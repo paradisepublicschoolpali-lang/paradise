@@ -37,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
               <Logo size="md" showSubtitle={false} inverted={true} />
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Empowering global leaders of tomorrow through holistic academic rigor, STEM innovation, and character building since {schoolConfig.establishedYear || '1994'}.
+              Nurturing young minds from Nursery to Class 8 through foundational academic excellence, junior STEM innovation, and character building since {schoolConfig.establishedYear || '1994'}.
             </p>
             {schoolConfig.affiliationCode && (
               <div className="text-xs text-blue-400 font-semibold break-words">

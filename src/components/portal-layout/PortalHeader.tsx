@@ -91,8 +91,8 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                 className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
               />
               <div className="hidden sm:block text-left">
-                <div className="text-xs font-bold text-slate-900 truncate max-w-[130px]">{currentUser.name}</div>
-                <div className="text-[10px] text-slate-500 font-mono capitalize">{role} portal</div>
+                <div className="text-xs font-bold text-slate-900 truncate max-w-[240px]">{currentUser.name}</div>
+                <div className="text-[10px] text-slate-500 font-mono capitalize">{role} Portal</div>
               </div>
 
               <button

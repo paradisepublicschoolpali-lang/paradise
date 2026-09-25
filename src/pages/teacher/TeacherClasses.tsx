@@ -229,12 +229,38 @@ export const TeacherClasses: React.FC = () => {
     }
   };
 
+  // Dynamic Class list for this teacher
+  const teacherClassesList = (currentTeacher?.assignedClasses && currentTeacher.assignedClasses.length > 0)
+    ? currentTeacher.assignedClasses.map((ac, idx) => {
+        const clsName = `${ac.grade}-${ac.section}`;
+        const count = students.filter(s => {
+          const normG = s.grade.replace(/^(Class|Grade)\s+/i, '').trim();
+          const targetG = ac.grade.replace(/^(Class|Grade)\s+/i, '').trim();
+          return normG === targetG && s.section.toLowerCase() === ac.section.toLowerCase();
+        }).length;
+        return {
+          id: clsName,
+          name: clsName,
+          grade: ac.grade,
+          section: ac.section,
+          subject: ac.subject || currentTeacher.department,
+          room: idx === 0 ? 'Science Lab 1' : `Room 10${idx + 2}`,
+          count,
+          progress: 70 + ((idx * 6) % 25)
+        };
+      })
+    : [
+        { id: 'Class 8-A', name: 'Class 8-A', grade: 'Class 8', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Science Lab 1', count: students.filter(s => s.grade.includes('8')).length, progress: 68 },
+        { id: 'Class 7-A', name: 'Class 7-A', grade: 'Class 7', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Room 104', count: students.filter(s => s.grade.includes('7')).length, progress: 74 },
+        { id: 'Class 6-A', name: 'Class 6-A', grade: 'Class 6', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Room 102', count: students.filter(s => s.grade.includes('6')).length, progress: 80 }
+      ];
+
   return (
     <div className="space-y-6 pb-12">
       {/* Header with Switcher */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h3 className="text-xl font-bold font-cinzel text-slate-900">Faculty Classes, Roster & Timetable Directorate</h3>
+          <h3 className="text-xl font-bold font-cinzel text-slate-900">Faculty Classes, Class Students & Timetable Directorate</h3>
           <p className="text-xs text-slate-500">
             Educator: <strong className="text-slate-900">{currentTeacher?.name}</strong> • Enroll students with initial fees & schedule permanent or day-specific lecture periods
           </p>
@@ -251,7 +277,7 @@ export const TeacherClasses: React.FC = () => {
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Class Rosters</span>
+              <span>Class Students</span>
             </button>
             <button
               onClick={() => setActiveTab('periods')}
@@ -289,16 +315,12 @@ export const TeacherClasses: React.FC = () => {
         </div>
       </div>
 
-      {/* TAB 1: CLASS ROSTERS & STUDENT MANAGEMENT */}
+      {/* TAB 1: CLASS STUDENTS & STUDENT MANAGEMENT */}
       {activeTab === 'roster' && (
         <div className="space-y-6">
           {/* Class Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { id: '8-A', name: 'Class 8-A', subject: 'General & Physical Science', room: 'Science Lab 1', count: students.filter(s => s.grade.includes('8')).length, progress: 68 },
-              { id: '7-A', name: 'Class 7-A', subject: 'Integrated Science & Discovery', room: 'Room 104', count: students.filter(s => s.grade.includes('7')).length, progress: 74 },
-              { id: '6-A', name: 'Class 6-A', subject: 'Environmental Science', room: 'Room 102', count: students.filter(s => s.grade.includes('6')).length, progress: 80 }
-            ].map(cls => (
+            {teacherClassesList.map(cls => (
               <div
                 key={cls.id}
                 onClick={() => setSelectedClass(cls.name)}
@@ -339,7 +361,7 @@ export const TeacherClasses: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-600" />
-                  <span>Class Roster & Directory ({selectedClass})</span>
+                  <span>Class Students & Directory ({selectedClass})</span>
                 </h3>
                 <p className="text-xs text-slate-500">
                   {classStudents.length} Scholars enrolled • Teacher authorized to add scholars & set initial fees
@@ -377,7 +399,7 @@ export const TeacherClasses: React.FC = () => {
                     <th className="py-3 px-4 font-semibold">Login ID</th>
                     <th className="py-3 px-4 font-semibold">House</th>
                     <th className="py-3 px-4 font-semibold text-center">Attendance</th>
-                    <th className="py-3 px-4 font-semibold text-center">GPA</th>
+                    <th className="py-3 px-4 font-semibold text-center">CGPA (10-Pt)</th>
                     <th className="py-3 px-4 font-semibold">Guardian Contact</th>
                     <th className="py-3 px-4 font-semibold text-center">Fee Status</th>
                   </tr>
@@ -407,10 +429,14 @@ export const TeacherClasses: React.FC = () => {
                         <td className="py-3 px-4 font-mono font-semibold">{student.rollNo}</td>
                         <td className="py-3 px-4 font-mono text-blue-700 font-bold">{student.loginId || student.admissionNo}</td>
                         <td className="py-3 px-4">
-                          <span className="text-blue-600 font-medium">{student.house}</span>
+                          <span className="text-blue-700 font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[11px]">
+                            {['Ashoka House', 'Tagore House', 'Shivaji House', 'Raman House'].includes(student.house) ? student.house : 'Ashoka House'}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-center font-bold text-emerald-600">{student.attendanceRate}%</td>
-                        <td className="py-3 px-4 text-center font-bold text-blue-600">{student.gpa}</td>
+                        <td className="py-3 px-4 text-center font-bold text-blue-600">
+                          {student.gpa > 4 ? `${student.gpa} / 10` : `${(student.gpa * 2.5).toFixed(1)} / 10`}
+                        </td>
                         <td className="py-3 px-4">
                           <div className="font-semibold text-slate-900">{student.guardianName}</div>
                           <div className="font-mono text-slate-500 text-[10px]">{student.guardianPhone}</div>
@@ -672,7 +698,7 @@ export const TeacherClasses: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Grade</label>
               <select
@@ -689,7 +715,7 @@ export const TeacherClasses: React.FC = () => {
                 <option value="Class 5">Class 5</option>
                 <option value="Class 6">Class 6</option>
                 <option value="Class 7">Class 7</option>
-                <option value="Class 8">Class 8 (Senior)</option>
+                <option value="Class 8">Class 8</option>
               </select>
             </div>
             <div>
@@ -709,6 +735,19 @@ export const TeacherClasses: React.FC = () => {
                 onChange={e => setStudentForm({ ...studentForm, rollNo: e.target.value })}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
               />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">School House</label>
+              <select
+                value={studentForm.house}
+                onChange={e => setStudentForm({ ...studentForm, house: e.target.value as any })}
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
+              >
+                <option value="Ashoka House">Ashoka House</option>
+                <option value="Tagore House">Tagore House</option>
+                <option value="Shivaji House">Shivaji House</option>
+                <option value="Raman House">Raman House</option>
+              </select>
             </div>
           </div>
 

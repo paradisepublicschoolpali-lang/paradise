@@ -155,7 +155,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
           </div>
         </div>
 
-        {/* Assigned Division Rosters Shortcut */}
+        {/* Assigned Division Class Students Shortcut */}
         <div className="lg:col-span-5 p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
@@ -166,7 +166,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
               onClick={() => setActiveTab('classes')}
               className="text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
             >
-              View Roster →
+              View Class Students →
             </button>
           </div>
 

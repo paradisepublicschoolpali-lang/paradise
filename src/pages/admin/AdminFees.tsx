@@ -19,12 +19,13 @@ import {
   Users,
   AlertTriangle,
   Loader2,
-  Globe
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { PaymentModal } from '../../components/common/PaymentModal';
 import { Modal } from '../../components/common/Modal';
-import { emailService } from '../../services/emailService';
+import { emailService, EmailDispatchLog } from '../../services/emailService';
 
 export const AdminFees: React.FC = () => {
   const { fees, students, addFeeInvoice, updateFeeInvoice, deleteFeeInvoice, payFeeInvoice, schoolConfig } = useSchoolData();
@@ -46,6 +47,9 @@ export const AdminFees: React.FC = () => {
   const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
   const [selectedBulkFeeIds, setSelectedBulkFeeIds] = useState<string[]>([]);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isAutomatingDueBatch, setIsAutomatingDueBatch] = useState(false);
+  const [isOutboxModalOpen, setIsOutboxModalOpen] = useState(false);
+  const [previewOutboxLog, setPreviewOutboxLog] = useState<EmailDispatchLog | null>(null);
 
   // New Invoice Form (Tuition only)
   const [formData, setFormData] = useState({
@@ -256,6 +260,27 @@ Official Accounts Desk: ${schoolConfig.contactEmail}
     }
   };
 
+  const handleRunAutomatedBatch = async () => {
+    if (pendingFees.length === 0) {
+      toast('No Pending Dues Found', 'All enrolled scholars have cleared their tuition fees.', 'info');
+      return;
+    }
+
+    setIsAutomatingDueBatch(true);
+    try {
+      const res = await emailService.runAutomatedDueRemindersBatch(pendingFees, students);
+      toast(
+        'Automated Fee Due Notices Dispatched!',
+        `Sent ${res.dispatchedCount} fee invoices with 1-click payment links to guardians. Check Outbox Log for records.`,
+        'success'
+      );
+    } catch (e: any) {
+      toast('Automated Batch Error', e?.message || 'Failed to dispatch notices', 'error');
+    } finally {
+      setIsAutomatingDueBatch(false);
+    }
+  };
+
   const handleCreateFee = (e: React.FormEvent) => {
     e.preventDefault();
     const selectedStudent = students.find(s => s.id === formData.studentId) || students[0];
@@ -321,13 +346,43 @@ Official Accounts Desk: ${schoolConfig.contactEmail}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsOutboxModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-300 shadow-xs cursor-pointer"
+            title="View live log of all dispatched fee reminder notices and payment receipts"
+          >
+            <Mail className="w-3.5 h-3.5 text-blue-600" />
+            <span>Outbox Log</span>
+          </button>
+
+          {pendingFees.length > 0 && (
+            <button
+              onClick={handleRunAutomatedBatch}
+              disabled={isAutomatingDueBatch}
+              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              title="Automatically dispatch fee due notices with 1-click payment links to all pending/overdue scholars"
+            >
+              {isAutomatingDueBatch ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Dispatching...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>⚡ Auto-Dispatch Dues ({pendingFees.length})</span>
+                </>
+              )}
+            </button>
+          )}
+
           {pendingFees.length > 0 && (
             <button
               onClick={handleOpenBulkEmailModal}
               className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
-              <Mail className="w-4 h-4" />
-              <span>Email All Pending ({pendingFees.length})</span>
+              <Send className="w-4 h-4" />
+              <span>Compose Manual ({pendingFees.length})</span>
             </button>
           )}
 
@@ -1075,6 +1130,123 @@ Official Accounts Desk: ${schoolConfig.contactEmail}
         isOpen={activeReceiptModal !== null}
         onClose={() => setActiveReceiptModal(null)}
       />
+
+      {/* Outbox & Dispatch History Modal */}
+      <Modal
+        isOpen={isOutboxModalOpen}
+        onClose={() => {
+          setIsOutboxModalOpen(false);
+          setPreviewOutboxLog(null);
+        }}
+        title="Tuition Fee Email Outbox & Audit Trail"
+        subtitle="Live history of automated notices and payment receipts sent to students & guardians"
+        maxWidth="2xl"
+      >
+        <div className="space-y-4 text-xs">
+          {previewOutboxLog ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">{previewOutboxLog.subject}</h4>
+                  <p className="text-slate-500 font-mono text-[11px]">To: {previewOutboxLog.recipientEmail} • {previewOutboxLog.timestamp}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewOutboxLog(null)}
+                  className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+                >
+                  &larr; Back to List
+                </button>
+              </div>
+
+              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-inner bg-slate-900 max-h-[420px] overflow-y-auto">
+                {previewOutboxLog.htmlPreview && previewOutboxLog.htmlPreview.includes('<html') ? (
+                  <iframe
+                    title="Fee Email Preview"
+                    srcDoc={previewOutboxLog.htmlPreview}
+                    className="w-full h-[400px] border-none bg-slate-900"
+                  />
+                ) : (
+                  <pre className="p-4 text-slate-100 font-mono text-xs whitespace-pre-wrap">
+                    {previewOutboxLog.htmlPreview || previewOutboxLog.details}
+                  </pre>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                    <tr>
+                      <th className="py-2.5 px-3 font-semibold">Timestamp</th>
+                      <th className="py-2.5 px-3 font-semibold">Scholar / Guardian</th>
+                      <th className="py-2.5 px-3 font-semibold">Type</th>
+                      <th className="py-2.5 px-3 font-semibold">Status</th>
+                      <th className="py-2.5 px-3 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {emailService.getLogs().filter(l => l.type === 'Fee Receipt' || l.type === 'Fee Invoice Due' || l.type === 'Manual Reminder').length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-slate-400">
+                          No fee emails dispatched yet. Click "⚡ Auto-Dispatch Dues" or settle an invoice to trigger automated emails.
+                        </td>
+                      </tr>
+                    ) : (
+                      emailService.getLogs().filter(l => l.type === 'Fee Receipt' || l.type === 'Fee Invoice Due' || l.type === 'Manual Reminder').map(log => (
+                        <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                            {log.timestamp}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="font-semibold text-slate-900">{log.recipientName}</div>
+                            <div className="font-mono text-slate-500 text-[10px]">{log.recipientEmail}</div>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                              log.type === 'Fee Receipt' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-800 border border-blue-200'
+                            }`}>
+                              {log.type}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                              {log.status}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewOutboxLog(log)}
+                              className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[10px] uppercase cursor-pointer"
+                            >
+                              Preview
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span className="text-slate-400 text-[11px]">
+                  All emails generated with official CBSE credentials and secure payment links.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsOutboxModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

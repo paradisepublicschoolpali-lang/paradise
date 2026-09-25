@@ -25,21 +25,21 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
 
   const stats = [
     { label: 'Years of Excellence', value: '32+', icon: <Award className="w-5 h-5 text-blue-600" /> },
-    { label: 'Board Distinction Rate', value: '100%', icon: <Trophy className="w-5 h-5 text-blue-600" /> },
-    { label: 'Top University Selections', value: '99%', icon: <GraduationCap className="w-5 h-5 text-blue-600" /> },
-    { label: 'Sports & STEM Clubs', value: '45+', icon: <Cpu className="w-5 h-5 text-blue-600" /> },
+    { label: 'Foundational Distinction Rate', value: '100%', icon: <Trophy className="w-5 h-5 text-blue-600" /> },
+    { label: 'Class 8 Graduating Success', value: '100%', icon: <GraduationCap className="w-5 h-5 text-blue-600" /> },
+    { label: 'Junior Sports & STEM Clubs', value: '35+', icon: <Cpu className="w-5 h-5 text-blue-600" /> },
   ];
 
   const pillars = [
     {
-      title: 'Academic Eminence',
-      desc: 'Holistic CBSE affiliated curriculum integrated with NEP 2020 pedagogical standards.',
+      title: 'Elementary Eminence (Nursery - 8th)',
+      desc: 'Holistic CBSE curriculum integrated with NEP 2020 experiential and foundational literacy standards.',
       icon: <BookOpen className="w-6 h-6 text-blue-600" />,
       badge: 'Curriculum'
     },
     {
-      title: 'Atal Tinkering Lab (ATL)',
-      desc: 'NITI Aayog supported ATL robotics lab, electronics maker-spaces, and science experimentation.',
+      title: 'Atal Tinkering Jr. Lab',
+      desc: 'NITI Aayog supported junior robotics lab, electronics maker-spaces, and hands-on science experimentation.',
       icon: <Cpu className="w-6 h-6 text-blue-600" />,
       badge: 'Innovation'
     },
@@ -51,7 +51,7 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
     },
     {
       title: 'Indian Sanskar & Values',
-      desc: 'Fostering ethical integrity, civic responsibility, cultural pride, and disciplined leadership.',
+      desc: 'Fostering ethical integrity, civic responsibility, cultural pride, and disciplined leadership from early years.',
       icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
       badge: 'Values'
     }
@@ -59,17 +59,17 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
 
   const testimonials = [
     {
-      quote: "Paradise Public School provided the foundational rigor and robotics lab mentorship that inspired my journey into aerospace innovation.",
+      quote: "Paradise Public School provided the foundational rigor and early robotics lab mentorship that inspired my journey into science and technology.",
       author: "Aditya Roy",
-      role: "Alumnus • IIT Delhi Aerospace"
+      role: "Alumnus (Middle School Batch 2018) • IIT Scholar"
     },
     {
-      quote: "The personalized attention and values-driven faculty at Paradise shaped my daughter into a confident national debater and scholar.",
+      quote: "The personalized attention and values-driven faculty at Paradise shaped my daughter into a confident young orator and Class 8 topper.",
       author: "Dr. Meenakshi Sundaram",
       role: "Parent of Rhea (Class 8)"
     },
     {
-      quote: "A disciplined, values-centric environment with unmatched sports facilities, caring mentors, and a culture of holistic excellence.",
+      quote: "A disciplined, values-centric environment with unmatched sports facilities, caring mentors, and holistic child development from Nursery to 8th.",
       author: "Col. Rajesh Verma",
       role: "Parent of Aryan (Class 8)"
     }
@@ -93,7 +93,7 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
           {/* Pill Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold shadow-xs">
             <Sparkles className="w-4 h-4 text-blue-600" />
-            <span>Admissions Open for Academic Session 2026-27</span>
+            <span>Admissions Open: Nursery to Class 8 (Session 2026-27)</span>
           </div>
 
           {/* Heading */}
@@ -205,19 +205,19 @@ export const HomePage: React.FC<HomePageProps> = ({ setActiveTab }) => {
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>100% University Placement</span>
+                <span>100% Foundational Transition</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Dual Board Accreditation</span>
+                <span>CBSE Elementary Standards</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Global Student Exchange</span>
+                <span>Junior STEM & Robotics Lab</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Olympic Standard Sports</span>
+                <span>Spacious Sports & Athletics</span>
               </div>
             </div>
             <div className="pt-2">

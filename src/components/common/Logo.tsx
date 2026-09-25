@@ -113,15 +113,26 @@ export const Logo: React.FC<LogoProps> = ({
       </div>
 
       {/* Typography */}
-      <div className="flex flex-col text-left min-w-0 flex-1 overflow-hidden">
-        <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1 sm:gap-1.5 leading-tight">
-          <span className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} ${titleSizes[size]} shrink-0`}>
-            {firstWord}
-          </span>
-          <span className={`font-cinzel font-semibold tracking-wide sm:tracking-widest uppercase ${inverted ? 'text-white' : 'text-slate-800'} ${titleSizes[size]} truncate`}>
-            {restWords}
-          </span>
-        </div>
+      <div className="flex flex-col text-left min-w-0 flex-1">
+        {size === 'sm' ? (
+          <div className="leading-tight">
+            <div className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} text-[13px] leading-none`}>
+              {firstWord}
+            </div>
+            <div className={`font-cinzel font-bold tracking-wider uppercase ${inverted ? 'text-slate-200' : 'text-slate-800'} text-[9.5px] leading-tight mt-0.5 whitespace-nowrap`}>
+              {restWords}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1 sm:gap-1.5 leading-tight">
+            <span className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} ${titleSizes[size]} shrink-0`}>
+              {firstWord}
+            </span>
+            <span className={`font-cinzel font-semibold tracking-wide sm:tracking-widest uppercase ${inverted ? 'text-white' : 'text-slate-800'} ${titleSizes[size]} whitespace-nowrap`}>
+              {restWords}
+            </span>
+          </div>
+        )}
         {showSubtitle && (
           <div className={`hidden sm:flex items-center gap-1.5 text-[10px] tracking-wider ${inverted ? 'text-slate-300' : 'text-slate-500'} uppercase font-medium mt-1 truncate`}>
             <span className={`${inverted ? 'text-amber-400' : 'text-blue-600'} font-bold shrink-0`}>

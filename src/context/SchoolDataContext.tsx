@@ -36,11 +36,12 @@ import {
 } from '../data/mockData';
 import { supabaseService } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
+import { emailService } from '../services/emailService';
 
 export const INITIAL_SCHOOL_CONFIG: SchoolConfig = {
   schoolName: 'Paradise Public School',
   motto: 'Excellence • Integrity • Leadership',
-  affiliationCode: 'CBSE Affiliation No: 2130842 / School Code: 71234',
+  affiliationCode: 'CBSE Affiliation No: 2130842 / School Code: 71234 (Nursery to Class 8)',
   academicYear: '2026-2027',
   currentTerm: 'Term 1 (Mid-Session)',
   contactEmail: 'paradisepublicschool.pali@gmail.com',
@@ -56,8 +57,8 @@ export const INITIAL_SCHOOL_CONFIG: SchoolConfig = {
   principalCredentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
   principalPhoto: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=800',
   principalMessage: 'We prepare students not merely for examinations, but for life and nation-building.',
-  heroHeadline: 'Shaping Leaders of Tomorrow',
-  heroSubtitle: 'Where timeless cultural values meet academic excellence, STEM innovation, and holistic athletic development.',
+  heroHeadline: 'Nurturing Young Minds (Nursery to Class 8)',
+  heroSubtitle: 'Where timeless Indian values meet foundational academic excellence, junior STEM robotics, and holistic child development in Pali, Rajasthan.',
   logoType: 'shield',
   logoLetter: 'P',
   logoShieldColor: '#1E40AF',
@@ -184,8 +185,29 @@ function getStoredOrDefault<T>(key: string, defaultValue: T): T {
 }
 
 export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [students, setStudents] = useState<Student[]>(() => getStoredOrDefault('students', INITIAL_STUDENTS));
-  const [teachers, setTeachers] = useState<Teacher[]>(() => getStoredOrDefault('teachers', INITIAL_TEACHERS));
+  const [students, setStudents] = useState<Student[]>(() => {
+    const raw = getStoredOrDefault('students', INITIAL_STUDENTS);
+    return raw.map(s => {
+      let house = s.house;
+      if (house === 'Phoenix Gold' || house === 'Gryffindor' || !['Ashoka House', 'Tagore House', 'Shivaji House', 'Raman House'].includes(house)) {
+        house = 'Ashoka House';
+      }
+      let gpa = s.gpa;
+      if (gpa > 0 && gpa <= 4.0) {
+        gpa = Number((gpa * 2.5).toFixed(1));
+      }
+      return { ...s, house, gpa };
+    });
+  });
+  const [teachers, setTeachers] = useState<Teacher[]>(() => {
+    const raw = getStoredOrDefault('teachers', INITIAL_TEACHERS);
+    return raw.map(t => {
+      if (t.name?.includes('Alistair') || t.loginId?.includes('alistair')) {
+        return INITIAL_TEACHERS[0];
+      }
+      return t;
+    });
+  });
   const [notices, setNotices] = useState<Notice[]>(() => getStoredOrDefault('notices', INITIAL_NOTICES));
   const [admissions, setAdmissions] = useState<AdmissionApplication[]>(() => getStoredOrDefault('admissions', INITIAL_ADMISSIONS));
   const [homework, setHomework] = useState<HomeworkItem[]>(() => getStoredOrDefault('homework', INITIAL_HOMEWORK));
@@ -430,7 +452,10 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setAdmissions(prev => {
       const next = prev.map(a => (a.id === id ? { ...a, status, notes: notes !== undefined ? notes : a.notes } : a));
       const target = next.find(a => a.id === id);
-      if (target) supabaseService.upsertAdmission(target);
+      if (target) {
+        supabaseService.upsertAdmission(target);
+        emailService.autoDispatchAdmissionStatus(target);
+      }
       return next;
     });
   };
@@ -486,6 +511,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setStudents(prev => [newStudent, ...prev]);
     supabaseService.upsertStudent(newStudent);
     updateAdmissionStatus(appId, 'Accepted', `Enrolled as student with Login ID: ${generatedLoginId}`);
+    emailService.autoDispatchEnrollmentWelcome(newStudent);
   };
 
   // ==========================================
@@ -573,6 +599,14 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
 
     supabaseService.upsertAttendanceBulk(newLogs);
+
+    // Auto-dispatch attendance alert email to absentees' guardians
+    records.filter(r => r.status === 'Absent' || r.status === 'Late').forEach(r => {
+      const student = students.find(s => s.id === r.studentId);
+      if (student) {
+        emailService.autoDispatchAttendanceAlert(student, today, r.status as 'Absent' | 'Late');
+      }
+    });
   };
 
   const applyLeave = (leaveData: Omit<LeaveApplication, 'id' | 'status' | 'appliedDate'>) => {
@@ -590,7 +624,11 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setLeaves(prev => {
       const next = prev.map(l => (l.id === id ? { ...l, status } : l));
       const target = next.find(l => l.id === id);
-      if (target) supabaseService.upsertLeave(target);
+      if (target) {
+        supabaseService.upsertLeave(target);
+        const student = students.find(s => s.id === target.studentId || s.name === target.studentName);
+        emailService.autoDispatchLeaveStatus(target, student);
+      }
       return next;
     });
   };
@@ -611,6 +649,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return next;
     });
     supabaseService.upsertExamResult(result);
+    const student = students.find(s => s.id === result.studentId || s.name === result.studentName);
+    emailService.autoDispatchExamResult(result, student);
   };
 
   const deleteExamResult = (id: string) => {
@@ -630,6 +670,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
     setFees(prev => [newFee, ...prev]);
     supabaseService.upsertFee(newFee);
+    const student = students.find(s => s.id === feeData.studentId || s.name === feeData.studentName);
+    emailService.autoDispatchFeeInvoice(newFee, student);
   };
 
   const updateFeeInvoice = (id: string, updated: Partial<FeeItem>) => {
@@ -659,6 +701,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             transactionId: `TXN-PARADISE-${Math.floor(10000000 + Math.random() * 90000000)}`
           };
           supabaseService.upsertFee(updated);
+          const student = students.find(s => s.id === f.studentId || s.name === f.studentName);
+          emailService.autoDispatchFeeReceipt(updated, student);
           return updated;
         }
         return f;

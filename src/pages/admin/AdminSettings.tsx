@@ -23,9 +23,17 @@ import {
   ExternalLink,
   Check
 } from 'lucide-react';
-import { emailService, getEmailConfig, saveEmailConfig, EmailConfig } from '../../services/emailService';
+import {
+  emailService,
+  getEmailConfig,
+  saveEmailConfig,
+  EmailConfig,
+  EmailAutomationSettings,
+  EmailDispatchLog
+} from '../../services/emailService';
 import { Logo } from '../../components/common/Logo';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
+import { Modal } from '../../components/common/Modal';
 
 export const AdminSettings: React.FC = () => {
   const {
@@ -82,9 +90,32 @@ export const AdminSettings: React.FC = () => {
 
   // Email service state
   const [emailConfig, setEmailConfigState] = useState<EmailConfig>(() => getEmailConfig());
+  const [automationSettings, setAutomationSettings] = useState<EmailAutomationSettings>(() => emailService.getAutomation());
+  const [emailLogs, setEmailLogs] = useState<EmailDispatchLog[]>(() => emailService.getLogs());
+  const [previewLog, setPreviewLog] = useState<EmailDispatchLog | null>(null);
   const [testEmailRecipient, setTestEmailRecipient] = useState('paradisepublicschool.pali@gmail.com');
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleToggleAutomation = (key: keyof EmailAutomationSettings) => {
+    const updated = { ...automationSettings, [key]: !automationSettings[key] };
+    setAutomationSettings(updated);
+    emailService.saveAutomation(updated);
+    toast('Automation Rule Updated!', `${key} is now ${updated[key] ? 'ENABLED' : 'PAUSED'}`, 'info');
+  };
+
+  const handleClearEmailLogs = () => {
+    if (window.confirm('Clear all stored outbox email logs?')) {
+      emailService.clearLogs();
+      setEmailLogs([]);
+      toast('Outbox Cleared', 'Email dispatch history has been cleared.', 'info');
+    }
+  };
+
+  const handleRefreshEmailLogs = () => {
+    setEmailLogs(emailService.getLogs());
+    toast('Outbox Refreshed', 'Loaded latest dispatch records.', 'info');
+  };
 
   const principalPhotoPresets = [
     'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
@@ -245,7 +276,7 @@ export const AdminSettings: React.FC = () => {
       setFormData({
         schoolName: 'Paradise Public School',
         motto: 'Excellence • Integrity • Leadership',
-        affiliationCode: 'CBSE Affiliation No: 2130842 / School Code: 71234',
+        affiliationCode: 'CBSE Affiliation No: 2130842 / School Code: 71234 (Nursery to Class 8)',
         academicYear: '2026-2027',
         currentTerm: 'Term 1 (Mid-Session)',
         contactEmail: 'paradisepublicschool.pali@gmail.com',
@@ -261,8 +292,8 @@ export const AdminSettings: React.FC = () => {
         principalCredentials: 'Ph.D. Education (Rajasthan University), M.Sc. Physics, 28+ Yrs Leadership',
         principalPhoto: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&q=80&w=800',
         principalMessage: 'We prepare students not merely for examinations, but for life and nation-building.',
-        heroHeadline: 'Shaping Leaders of Tomorrow',
-        heroSubtitle: 'Where timeless cultural values meet academic excellence, STEM innovation, and holistic athletic development.',
+        heroHeadline: 'Nurturing Young Minds (Nursery to Class 8)',
+        heroSubtitle: 'Where timeless Indian values meet foundational academic excellence, junior STEM robotics, and holistic child development in Pali, Rajasthan.',
         logoType: 'shield',
         logoLetter: 'P',
         logoShieldColor: '#1E40AF',
@@ -571,6 +602,196 @@ export const AdminSettings: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Automated Email Triggers & Rules Panel */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-5 text-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Automated Email Dispatch Triggers & Rules</span>
+              </h4>
+              <p className="text-slate-500 text-xs mt-0.5">
+                Automatically send institutional communications to students, parents, and guardians upon specific system events.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Auto-Engine Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {[
+              {
+                key: 'autoFeeReceiptOnPayment' as const,
+                title: 'Fee Payment Receipts',
+                badge: 'Finance',
+                desc: 'Instantly dispatches sealed official GST tax receipt to guardian whenever tuition is paid online or settled manually at counter.'
+              },
+              {
+                key: 'autoFeeInvoiceOnCreate' as const,
+                title: 'Fee Invoice Due Notices',
+                badge: 'Billing',
+                desc: 'Dispatches detailed tuition invoice with direct 1-click online payment link whenever a new term invoice is generated.'
+              },
+              {
+                key: 'autoAdmissionStatusChange' as const,
+                title: 'Admission Status Updates',
+                badge: 'Admissions',
+                desc: 'Notifies applicant parents when admission status changes (Under Review, Interview Scheduled, Accepted, or Rejected).'
+              },
+              {
+                key: 'autoAttendanceAbsenceAlert' as const,
+                title: 'Absence Safety Alerts',
+                badge: 'Attendance',
+                desc: 'Dispatches morning roll call absence notifications to parents when child is recorded Absent.'
+              },
+              {
+                key: 'autoExamResultPublished' as const,
+                title: 'CBSE Exam Report Cards',
+                badge: 'Academics',
+                desc: 'Dispatches report card marksheet summaries, CGPA, and class teacher remarks whenever exam marks are published.'
+              },
+              {
+                key: 'autoLeaveStatusUpdate' as const,
+                title: 'Leave Application Decisions',
+                badge: 'Leaves',
+                desc: 'Dispatches approval or refusal notices with dates and remarks when a student leave request is decided.'
+              }
+            ].map(rule => {
+              const enabled = automationSettings[rule.key];
+              return (
+                <div
+                  key={rule.key}
+                  className={`p-4 rounded-xl border transition-all ${
+                    enabled
+                      ? 'border-blue-200 bg-blue-50/40 ring-1 ring-blue-400/30'
+                      : 'border-slate-200 bg-slate-50 opacity-75'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="font-bold text-slate-900 text-xs">{rule.title}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                      {rule.badge}
+                    </span>
+                  </div>
+                  <p className="text-slate-600 text-[11px] leading-relaxed mb-3">
+                    {rule.desc}
+                  </p>
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                    <span className={`text-[10px] font-bold ${enabled ? 'text-emerald-700' : 'text-slate-400'}`}>
+                      {enabled ? '● Automatic Dispatch ON' : '○ Paused'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAutomation(rule.key)}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                        enabled
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                          : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+                      }`}
+                    >
+                      {enabled ? 'Disable' : 'Enable'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Live Email Dispatch Outbox & Audit History */}
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 text-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-blue-600" />
+                <span>Live Automated Email Outbox & Audit Log</span>
+              </h4>
+              <p className="text-slate-500 text-xs mt-0.5">
+                Audit trail of recent emails automatically dispatched to scholars and guardians ({emailLogs.length} total logged records).
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleRefreshEmailLogs}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh</span>
+              </button>
+              {emailLogs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearEmailLogs}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-700 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  Clear Outbox
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr>
+                  <th className="py-2.5 px-3 font-semibold">Timestamp (IST)</th>
+                  <th className="py-2.5 px-3 font-semibold">Recipient</th>
+                  <th className="py-2.5 px-3 font-semibold">Type</th>
+                  <th className="py-2.5 px-3 font-semibold">Subject</th>
+                  <th className="py-2.5 px-3 font-semibold text-center">Status</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {emailLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400">
+                      No automated emails dispatched yet. Trigger an action (like paying a fee, saving an absence, or publishing results) to view auto-dispatch logs.
+                    </td>
+                  </tr>
+                ) : (
+                  emailLogs.slice(0, 15).map(log => (
+                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                        {log.timestamp}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-slate-900">{log.recipientName}</div>
+                        <div className="font-mono text-slate-500 text-[10px]">{log.recipientEmail}</div>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-bold whitespace-nowrap">
+                          {log.type}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 max-w-xs truncate text-[11px]">
+                        <span title={log.subject}>{log.subject}</span>
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          {log.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewLog(log)}
+                          className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[10px] uppercase transition-colors cursor-pointer"
+                        >
+                          View HTML
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -1106,6 +1327,60 @@ export const AdminSettings: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {/* Email HTML Preview Modal */}
+      <Modal
+        isOpen={previewLog !== null}
+        onClose={() => setPreviewLog(null)}
+        title={previewLog ? `Email Preview: ${previewLog.type}` : 'Email Preview'}
+        subtitle={previewLog ? `Dispatched to ${previewLog.recipientEmail} (${previewLog.timestamp})` : ''}
+        maxWidth="2xl"
+      >
+        {previewLog && (
+          <div className="space-y-4 text-xs">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
+              <div>
+                <strong>Subject:</strong> {previewLog.subject}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                  {previewLog.status}
+                </span>
+                <span className="text-slate-500 text-[10px]">
+                  via {previewLog.provider}
+                </span>
+              </div>
+            </div>
+
+            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-inner bg-slate-900 max-h-[500px] overflow-y-auto">
+              {previewLog.htmlPreview && previewLog.htmlPreview.includes('<html') ? (
+                <iframe
+                  title="Email Preview Frame"
+                  srcDoc={previewLog.htmlPreview}
+                  className="w-full h-[450px] border-none bg-slate-900"
+                />
+              ) : (
+                <pre className="p-4 text-slate-100 font-mono text-xs whitespace-pre-wrap">
+                  {previewLog.htmlPreview || previewLog.details || 'No content recorded.'}
+                </pre>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-slate-500 text-[11px]">
+                {previewLog.details ? `Trigger: ${previewLog.details}` : ''}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPreviewLog(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

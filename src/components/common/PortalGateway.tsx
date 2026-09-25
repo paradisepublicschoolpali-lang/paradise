@@ -230,7 +230,7 @@ export const PortalGateway: React.FC = () => {
       <div className="max-w-5xl w-full mx-auto flex items-center justify-between text-xs text-slate-500 pb-4 border-b border-slate-200/80">
         <div className="flex items-center gap-3">
           <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">
-            CBSE Affiliated Senior Secondary School
+            CBSE Affiliated Upper Primary School (Nursery to Class 8)
           </span>
           <span className="hidden sm:inline text-slate-400">•</span>
           <span className="hidden sm:inline font-medium">{schoolConfig.affiliationCode || 'CBSE Affiliation No: 2130842'}</span>

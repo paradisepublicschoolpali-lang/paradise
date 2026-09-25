@@ -37,7 +37,7 @@ export const NoticesPage: React.FC = () => {
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Official Directives</span>
           <h1 className="text-3xl sm:text-5xl font-bold font-cinzel text-slate-900">Institutional Notice Board</h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
-            Authentic policy directives, board examination notices, athletic updates, and term dates.
+            Authentic policy directives, terminal assessment circulars, athletic updates, and academic term dates.
           </p>
         </div>
       </section>

@@ -11,10 +11,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActiveTab }) => {
 
   const milestones = [
     { year: schoolConfig.establishedYear || '1994', title: `Foundation of ${schoolConfig.schoolName}`, desc: 'Inaugurated with a visionary commitment to holistic academic, ethical, and moral leadership.' },
-    { year: '2004', title: 'National Board Accreditation', desc: 'Achieved top ranking nationwide with 100% first-division distinctions.' },
-    { year: '2012', title: 'CBSE Senior Secondary Affiliation', desc: 'Expanded senior wings with modern Science, Commerce, and Humanities streams.' },
-    { year: '2020', title: 'Atal Tinkering Lab (ATL) & Smart Campus', desc: 'Inaugurated NITI Aayog supported ATL robotics lab and digital smart classrooms.' },
-    { year: '2026', title: 'Educational Distinction & Legacy', desc: 'Recognized as a premier CBSE institution with active scholars leading at national levels.' },
+    { year: '2004', title: 'State Elementary Education Honors', desc: 'Recognized for 100% foundational learning excellence and distinction in state academic evaluations.' },
+    { year: '2012', title: 'Middle School Expansion (Class 6-8)', desc: 'Expanded modern middle school laboratories, digital language learning labs, and activity wings.' },
+    { year: '2020', title: 'Atal Tinkering Jr. Lab & Smart Campus', desc: 'Inaugurated NITI Aayog supported junior ATL robotics lab and interactive digital smart classrooms.' },
+    { year: '2026', title: 'Educational Distinction & Legacy', desc: 'Recognized as a premier Nursery to Class 8 co-educational institution in Pali, Rajasthan.' },
   ];
 
   const values = [

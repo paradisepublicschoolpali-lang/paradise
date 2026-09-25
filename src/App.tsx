@@ -204,7 +204,7 @@ const SchoolApp: React.FC = () => {
   if (role === 'teacher') {
     const tabTitles: Record<string, { title: string; subtitle: string }> = {
       dashboard: { title: 'Faculty Workstation', subtitle: 'Today’s Timetable & Allocated Divisions' },
-      classes: { title: 'Allocated Divisions', subtitle: 'Class Rosters, Contacts & Syllabus Tracking' },
+      classes: { title: 'Allocated Divisions', subtitle: 'Class Students, Contacts & Syllabus Tracking' },
       attendance: { title: 'Daily Roll Register', subtitle: 'Mark Classroom Attendance & Sync with Board' },
       results: { title: 'Results & Marks Entry', subtitle: 'Unit Tests & Comprehensive Examinations Gradebook' },
       notices: { title: 'Broadcast Circulars', subtitle: 'Transmit Announcements to Scholars & Guardians' }

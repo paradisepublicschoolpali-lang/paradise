@@ -37,6 +37,10 @@ const getInitialSession = (): StoredSession => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved) as StoredSession;
+      // Auto-migrate legacy foreign / university names to Indian school standards
+      if (parsed.currentUser?.name?.includes('Alistair') || parsed.currentUser?.loginId?.includes('alistair')) {
+        parsed.currentUser = DEMO_USERS.teacher;
+      }
       if (rawHash.startsWith('admin')) {
         return { ...parsed, role: 'admin', showGateway: false, isAuthenticated: true, currentUser: parsed.currentUser || DEMO_USERS.admin };
       }
@@ -44,7 +48,7 @@ const getInitialSession = (): StoredSession => {
         return { ...parsed, role: 'parent', showGateway: false, isAuthenticated: true };
       }
       if (rawHash.startsWith('teacher')) {
-        return { ...parsed, role: 'teacher', showGateway: false, isAuthenticated: true };
+        return { ...parsed, role: 'teacher', showGateway: false, isAuthenticated: true, currentUser: parsed.currentUser || DEMO_USERS.teacher };
       }
       if (rawHash === 'gateway' || rawHash === 'select') {
         return { ...parsed, showGateway: true };

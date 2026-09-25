@@ -72,21 +72,21 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
       {/* Main White Navbar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-2">
-            {/* Logo */}
-            <button onClick={() => navigateTo('home')} className="cursor-pointer text-left min-w-0 shrink">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 xl:gap-4">
+            {/* Logo - Never shrink */}
+            <button onClick={() => navigateTo('home')} className="cursor-pointer text-left shrink-0 flex items-center mr-1 xl:mr-3">
               <Logo size="md" />
             </button>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
               {navLinks.map(link => {
                 const isActive = activeTab === link.id;
                 return (
                   <button
                     key={link.id}
                     onClick={() => navigateTo(link.id)}
-                    className={`px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+                    className={`px-2 xl:px-3 py-1.5 xl:py-2 rounded-lg text-[11px] xl:text-xs font-semibold uppercase tracking-normal xl:tracking-wider transition-all duration-150 cursor-pointer whitespace-nowrap ${
                       isActive
                         ? 'text-blue-600 bg-blue-50 font-bold'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -99,21 +99,22 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             </nav>
 
             {/* Action Buttons */}
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 shrink-0">
               <button
                 onClick={logout}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-300"
+                className="px-2.5 xl:px-4 py-1.5 xl:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] xl:text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-300 whitespace-nowrap"
               >
-                <Lock className="w-3.5 h-3.5 text-blue-600" />
-                <span>Portal Login</span>
+                <Lock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span className="hidden xl:inline">Portal </span>
+                <span>Login</span>
               </button>
 
               <button
                 onClick={() => navigateTo('admissions')}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                className="px-3 xl:px-5 py-1.5 xl:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] xl:text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
                 <span>Apply Now</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
               </button>
             </div>
 

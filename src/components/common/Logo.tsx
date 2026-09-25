@@ -49,7 +49,7 @@ export const Logo: React.FC<LogoProps> = ({
 
   const titleSizes = {
     sm: 'text-xs sm:text-sm',
-    md: 'text-xs sm:text-base lg:text-lg',
+    md: 'text-xs sm:text-sm xl:text-base',
     lg: 'text-sm sm:text-xl lg:text-2xl',
     xl: 'text-lg sm:text-2xl lg:text-3xl'
   };
@@ -60,7 +60,7 @@ export const Logo: React.FC<LogoProps> = ({
   const restWords = nameParts.slice(1).join(' ') || 'PUBLIC SCHOOL';
 
   return (
-    <div className={`flex items-center gap-2 sm:gap-3 select-none min-w-0 max-w-full ${className}`}>
+    <div className={`flex items-center gap-2 sm:gap-2.5 select-none shrink-0 ${className}`}>
       {/* Emblem / Shield / Custom Image */}
       <div className={`relative ${iconSizes[size]} shrink-0 flex items-center justify-center`}>
         {logoType === 'image' && imageUrl ? (
@@ -125,7 +125,7 @@ export const Logo: React.FC<LogoProps> = ({
           </div>
         ) : (
           <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1 sm:gap-1.5 leading-tight">
-            <span className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} ${titleSizes[size]} shrink-0`}>
+            <span className={`font-cinzel font-black tracking-wider uppercase ${inverted ? 'text-blue-400' : 'text-blue-700'} ${titleSizes[size]} shrink-0 whitespace-nowrap`}>
               {firstWord}
             </span>
             <span className={`font-cinzel font-semibold tracking-wide sm:tracking-widest uppercase ${inverted ? 'text-white' : 'text-slate-800'} ${titleSizes[size]} whitespace-nowrap`}>
@@ -134,12 +134,12 @@ export const Logo: React.FC<LogoProps> = ({
           </div>
         )}
         {showSubtitle && (
-          <div className={`hidden sm:flex items-center gap-1.5 text-[10px] tracking-wider ${inverted ? 'text-slate-300' : 'text-slate-500'} uppercase font-medium mt-1 truncate`}>
+          <div className={`hidden xl:flex items-center gap-1.5 text-[9.5px] tracking-wider ${inverted ? 'text-slate-300' : 'text-slate-500'} uppercase font-medium mt-0.5 truncate`}>
             <span className={`${inverted ? 'text-amber-400' : 'text-blue-600'} font-bold shrink-0`}>
               Estd. {schoolConfig?.establishedYear || '1994'}
             </span>
             <span>•</span>
-            <span className="truncate max-w-[200px] lg:max-w-[240px]">{schoolConfig?.motto || 'Excellence • Integrity • Leadership'}</span>
+            <span className="truncate max-w-[200px] xl:max-w-[240px]">{schoolConfig?.motto || 'Excellence • Integrity • Leadership'}</span>
           </div>
         )}
       </div>

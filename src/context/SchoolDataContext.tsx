@@ -218,7 +218,19 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [fees, setFees] = useState<FeeItem[]>(() => getStoredOrDefault('fees', INITIAL_FEES));
   const [events, setEvents] = useState<SchoolEvent[]>(() => getStoredOrDefault('events', INITIAL_EVENTS));
   const [gallery, setGallery] = useState<GalleryItem[]>(() => getStoredOrDefault('gallery', INITIAL_GALLERY));
-  const [schoolConfig, setSchoolConfig] = useState<SchoolConfig>(() => getStoredOrDefault('config', INITIAL_SCHOOL_CONFIG));
+  const [schoolConfig, setSchoolConfig] = useState<SchoolConfig>(() => {
+    const raw = getStoredOrDefault('config', INITIAL_SCHOOL_CONFIG);
+    if (raw.contactPhone?.includes('254') || raw.address?.includes('Nairobi')) {
+      return {
+        ...raw,
+        contactPhone: INITIAL_SCHOOL_CONFIG.contactPhone,
+        secondaryPhone: INITIAL_SCHOOL_CONFIG.secondaryPhone,
+        whatsappNumber: INITIAL_SCHOOL_CONFIG.whatsappNumber,
+        address: INITIAL_SCHOOL_CONFIG.address
+      };
+    }
+    return raw;
+  });
   const [subjects, setSubjects] = useState<SchoolSubject[]>(() => getStoredOrDefault('subjects', INITIAL_SUBJECTS));
   const [teacherPeriods, setTeacherPeriods] = useState<TeacherPeriod[]>(() => getStoredOrDefault('periods', INITIAL_TEACHER_PERIODS));
   const [periodSlots, setPeriodSlots] = useState<PeriodSlot[]>(() => getStoredOrDefault('period_slots', INITIAL_PERIOD_SLOTS));

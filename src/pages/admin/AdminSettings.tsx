@@ -447,17 +447,40 @@ ALTER TABLE public.fees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow All Students" ON public.students;
 CREATE POLICY "Allow All Students" ON public.students FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Teachers" ON public.teachers;
 CREATE POLICY "Allow All Teachers" ON public.teachers FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Notices" ON public.notices;
 CREATE POLICY "Allow All Notices" ON public.notices FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Admissions" ON public.admissions;
 CREATE POLICY "Allow All Admissions" ON public.admissions FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Homework" ON public.homework;
 CREATE POLICY "Allow All Homework" ON public.homework FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Submissions" ON public.homework_submissions;
 CREATE POLICY "Allow All Submissions" ON public.homework_submissions FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Attendance" ON public.attendance;
 CREATE POLICY "Allow All Attendance" ON public.attendance FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Leaves" ON public.leaves;
 CREATE POLICY "Allow All Leaves" ON public.leaves FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Results" ON public.exam_results;
 CREATE POLICY "Allow All Results" ON public.exam_results FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Fees" ON public.fees;
 CREATE POLICY "Allow All Fees" ON public.fees FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Events" ON public.events;
 CREATE POLICY "Allow All Events" ON public.events FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow All Gallery" ON public.gallery;
 CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
 `;
 

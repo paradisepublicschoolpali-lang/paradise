@@ -225,26 +225,62 @@ ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
 
 -- Allow read & write access for authenticated & anonymous users (adjust for strict production)
+DROP POLICY IF EXISTS "Public Read Students" ON public.students;
+DROP POLICY IF EXISTS "Public Write Students" ON public.students;
 CREATE POLICY "Public Read Students" ON public.students FOR SELECT USING (true);
 CREATE POLICY "Public Write Students" ON public.students FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Teachers" ON public.teachers;
+DROP POLICY IF EXISTS "Public Write Teachers" ON public.teachers;
 CREATE POLICY "Public Read Teachers" ON public.teachers FOR SELECT USING (true);
 CREATE POLICY "Public Write Teachers" ON public.teachers FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Notices" ON public.notices;
+DROP POLICY IF EXISTS "Public Write Notices" ON public.notices;
 CREATE POLICY "Public Read Notices" ON public.notices FOR SELECT USING (true);
 CREATE POLICY "Public Write Notices" ON public.notices FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Admissions" ON public.admissions;
+DROP POLICY IF EXISTS "Public Write Admissions" ON public.admissions;
 CREATE POLICY "Public Read Admissions" ON public.admissions FOR SELECT USING (true);
 CREATE POLICY "Public Write Admissions" ON public.admissions FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Homework" ON public.homework;
+DROP POLICY IF EXISTS "Public Write Homework" ON public.homework;
 CREATE POLICY "Public Read Homework" ON public.homework FOR SELECT USING (true);
 CREATE POLICY "Public Write Homework" ON public.homework FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Submissions" ON public.homework_submissions;
+DROP POLICY IF EXISTS "Public Write Submissions" ON public.homework_submissions;
+CREATE POLICY "Public Read Submissions" ON public.homework_submissions FOR SELECT USING (true);
+CREATE POLICY "Public Write Submissions" ON public.homework_submissions FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Public Read Attendance" ON public.attendance;
+DROP POLICY IF EXISTS "Public Write Attendance" ON public.attendance;
+CREATE POLICY "Public Read Attendance" ON public.attendance FOR SELECT USING (true);
+CREATE POLICY "Public Write Attendance" ON public.attendance FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Public Read Leaves" ON public.leaves;
+DROP POLICY IF EXISTS "Public Write Leaves" ON public.leaves;
+CREATE POLICY "Public Read Leaves" ON public.leaves FOR SELECT USING (true);
+CREATE POLICY "Public Write Leaves" ON public.leaves FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Public Read Exam Results" ON public.exam_results;
+DROP POLICY IF EXISTS "Public Write Exam Results" ON public.exam_results;
+CREATE POLICY "Public Read Exam Results" ON public.exam_results FOR SELECT USING (true);
+CREATE POLICY "Public Write Exam Results" ON public.exam_results FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Public Read Fees" ON public.fees;
+DROP POLICY IF EXISTS "Public Write Fees" ON public.fees;
 CREATE POLICY "Public Read Fees" ON public.fees FOR SELECT USING (true);
 CREATE POLICY "Public Write Fees" ON public.fees FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Events" ON public.events;
+DROP POLICY IF EXISTS "Public Write Events" ON public.events;
 CREATE POLICY "Public Read Events" ON public.events FOR SELECT USING (true);
 CREATE POLICY "Public Write Events" ON public.events FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "Public Read Gallery" ON public.gallery;
+DROP POLICY IF EXISTS "Public Write Gallery" ON public.gallery;
 CREATE POLICY "Public Read Gallery" ON public.gallery FOR SELECT USING (true);
 CREATE POLICY "Public Write Gallery" ON public.gallery FOR ALL USING (true);

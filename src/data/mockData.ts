@@ -216,10 +216,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     name: 'Mrs. Sunita Verma',
     email: 's.verma@paradiseschool.edu',
     phone: '+91 98110 23456',
-    designation: 'Head of Department - Sciences',
-    department: 'Physics & STEM Labs',
-    qualification: 'M.Sc. Physics, B.Ed (Delhi University)',
-    experienceYears: 14,
+    designation: 'Teacher',
+    department: 'Science',
     assignedClasses: [
       { grade: 'Class 8', section: 'A', subject: 'Science' },
       { grade: 'Class 7', section: 'A', subject: 'Science' },
@@ -236,10 +234,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     name: 'Mr. Rajesh Iyer',
     email: 'r.iyer@paradiseschool.edu',
     phone: '+91 98205 34567',
-    designation: 'Senior Faculty - Mathematics',
-    department: 'Mathematics & Computing',
-    qualification: 'M.Sc. Mathematics, B.Ed (Chennai Mathematical Institute)',
-    experienceYears: 16,
+    designation: 'Teacher',
+    department: 'Maths',
     assignedClasses: [
       { grade: 'Class 8', section: 'A', subject: 'Maths' },
       { grade: 'Class 7', section: 'B', subject: 'Maths' },
@@ -256,10 +252,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     name: 'Mrs. Anjali Sharma',
     email: 'a.sharma@paradiseschool.edu',
     phone: '+91 98114 56789',
-    designation: 'Head of Languages & Literature',
-    department: 'Languages & Literature',
-    qualification: 'M.A. English, B.Ed (Jawaharlal Nehru University)',
-    experienceYears: 12,
+    designation: 'Teacher',
+    department: 'English',
     assignedClasses: [
       { grade: 'Class 8', section: 'A', subject: 'English' },
       { grade: 'Class 7', section: 'A', subject: 'English' },
@@ -276,13 +270,11 @@ export const INITIAL_TEACHERS: Teacher[] = [
     name: 'Dr. Vikramaditya Sen',
     email: 'v.sen@paradiseschool.edu',
     phone: '+91 98311 98765',
-    designation: 'Director of Junior Coding & Robotics',
-    department: 'General Knowledge',
-    qualification: 'M.Tech / Ph.D. in Computer Science (IIT Delhi)',
-    experienceYears: 10,
+    designation: 'Teacher',
+    department: 'Computer',
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'GK' },
-      { grade: 'Class 6', section: 'A', subject: 'GK' }
+      { grade: 'Class 8', section: 'A', subject: 'Computer' },
+      { grade: 'Class 6', section: 'A', subject: 'Computer' }
     ],
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
     joiningDate: '2021-04-10'

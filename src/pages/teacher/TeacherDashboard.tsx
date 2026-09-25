@@ -43,11 +43,11 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-slate-900 font-cinzel">{teacher?.name}</h2>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                {teacher?.designation}
+                {teacher?.department} Faculty
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Emp ID: <strong className="font-mono text-slate-700">{teacher?.employeeId}</strong> • {teacher?.department} • {teacher?.qualification}
+              Emp ID: <strong className="font-mono text-slate-700">{teacher?.employeeId}</strong> • Subject: {teacher?.department}
             </p>
           </div>
         </div>

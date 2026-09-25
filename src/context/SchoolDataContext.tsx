@@ -158,7 +158,7 @@ interface SchoolDataContextType {
   resetAllData: () => void;
 }
 
-const SchoolDataContext = createContext<SchoolDataContextType | undefined>(undefined);
+export const SchoolDataContext = createContext<SchoolDataContextType | undefined>(undefined);
 
 const STORAGE_PREFIX = 'pps_v1_';
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSchoolData } from '../../context/SchoolDataContext';
+import React, { useContext } from 'react';
+import { SchoolDataContext } from '../../context/SchoolDataContext';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -20,21 +20,16 @@ export const Logo: React.FC<LogoProps> = ({
   customAccentColor,
   customImageUrl
 }) => {
-  let schoolConfig;
-  try {
-    const context = useSchoolData();
-    schoolConfig = context.schoolConfig;
-  } catch {
-    schoolConfig = {
-      schoolName: 'Paradise Public School',
-      motto: 'Excellence • Integrity • Leadership',
-      logoType: 'shield' as const,
-      logoLetter: 'P',
-      logoShieldColor: '#1E40AF',
-      logoAccentColor: '#2563EB',
-      logoImageUrl: ''
-    };
-  }
+  const context = useContext(SchoolDataContext);
+  const schoolConfig = context?.schoolConfig || {
+    schoolName: 'Paradise Public School',
+    motto: 'Excellence • Integrity • Leadership',
+    logoType: 'shield' as const,
+    logoLetter: 'P',
+    logoShieldColor: '#1E40AF',
+    logoAccentColor: '#2563EB',
+    logoImageUrl: ''
+  };
 
   const letter = customLetter !== undefined ? customLetter : (schoolConfig?.logoLetter || 'P');
   const shieldColor = customShieldColor || schoolConfig?.logoShieldColor || '#1E40AF';

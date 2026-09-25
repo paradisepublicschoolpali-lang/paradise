@@ -837,7 +837,7 @@ export const TeacherClasses: React.FC = () => {
           setEditingPeriod(null);
         }}
         title={editingPeriod ? "Edit Scheduled Period" : "Schedule Period (Permanent or For a Day)"}
-        subtitle={`Teacher: ${currentTeacher?.name || 'Faculty Member'} • ${currentTeacher?.department}`}
+        subtitle={`Teacher: ${currentTeacher?.name || 'Faculty Member'} • Subject: ${currentTeacher?.department}`}
         maxWidth="lg"
       >
         <form onSubmit={handleSavePeriod} className="space-y-4 text-xs">

@@ -46,10 +46,10 @@ export interface Teacher {
   name: string;
   email: string;
   phone: string;
-  designation: string;
+  designation?: string;
   department: string;
-  qualification: string;
-  experienceYears: number;
+  qualification?: string;
+  experienceYears?: number;
   assignedClasses: {
     grade: string;
     section: string;

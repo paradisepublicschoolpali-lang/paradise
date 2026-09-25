@@ -16,7 +16,7 @@ export const AdminTeachers: React.FC = () => {
     addTeacherPeriod,
     updateTeacherPeriod,
     deleteTeacherPeriod,
-    subjects
+    subjects: curriculumSubjects
   } = useSchoolData();
   const { toast } = useToast();
 
@@ -50,18 +50,19 @@ export const AdminTeachers: React.FC = () => {
     employeeId: `PPS-FAC-${Math.floor(100 + Math.random() * 900)}`,
     email: '',
     phone: '',
-    designation: 'Senior Faculty',
-    department: 'Physics & STEM Labs',
-    qualification: 'M.Sc. / Ph.D. in Specialization',
-    experienceYears: 8,
+    designation: 'Teacher',
+    department: 'Hindi',
+    qualification: '',
+    experienceYears: 0,
     assignedClasses: [
-      { grade: 'Grade 10', section: 'A', subject: 'Advanced Physics' }
+      { grade: 'Grade 10', section: 'A', subject: 'Hindi' }
     ],
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
     joiningDate: new Date().toISOString().split('T')[0]
   });
 
-  const departments = ['All', 'Physics & STEM Labs', 'Mathematics & Computing', 'English Literature & Rhetoric', 'Computer Science'];
+  const teacherSubjects = ['All', 'Hindi', 'English', 'Maths', 'Science', 'Social Science', 'Computer', 'G.K', 'Arts'];
+  const subjectList = ['Hindi', 'English', 'Maths', 'Science', 'Social Science', 'Computer', 'G.K', 'Arts'];
 
   const filteredTeachers = teachers.filter(t => {
     return selectedDept === 'All' || t.department.toLowerCase() === selectedDept.toLowerCase();
@@ -78,6 +79,9 @@ export const AdminTeachers: React.FC = () => {
 
     addTeacher({
       ...formData,
+      designation: 'Teacher',
+      qualification: '',
+      experienceYears: 0,
       loginId: assignedLoginId,
       password: formData.password || 'teacher123'
     });
@@ -91,12 +95,12 @@ export const AdminTeachers: React.FC = () => {
       employeeId: `PPS-FAC-${Math.floor(100 + Math.random() * 900)}`,
       email: '',
       phone: '',
-      designation: 'Senior Faculty',
-      department: 'Physics & STEM Labs',
-      qualification: 'M.Sc. / Ph.D. in Specialization',
-      experienceYears: 8,
+      designation: 'Teacher',
+      department: 'Hindi',
+      qualification: '',
+      experienceYears: 0,
       assignedClasses: [
-        { grade: 'Grade 10', section: 'A', subject: 'Advanced Physics' }
+        { grade: 'Grade 10', section: 'A', subject: 'Hindi' }
       ],
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
       joiningDate: new Date().toISOString().split('T')[0]
@@ -138,19 +142,19 @@ export const AdminTeachers: React.FC = () => {
         </button>
       </div>
 
-      {/* Filter */}
+      {/* Subject Filter */}
       <div className="flex flex-wrap items-center gap-2">
-        {departments.map(dept => (
+        {teacherSubjects.map(subj => (
           <button
-            key={dept}
-            onClick={() => setSelectedDept(dept)}
+            key={subj}
+            onClick={() => setSelectedDept(subj)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-              selectedDept === dept
+              selectedDept === subj
                 ? 'bg-blue-600 text-white font-bold'
                 : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
             }`}
           >
-            {dept}
+            {subj}
           </button>
         ))}
       </div>
@@ -172,7 +176,7 @@ export const AdminTeachers: React.FC = () => {
                   />
                   <div>
                     <h4 className="text-base font-bold font-cinzel text-slate-900">{tch.name}</h4>
-                    <span className="text-xs text-blue-600 font-semibold">{tch.designation}</span>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">{tch.department}</span>
                     <div className="text-[10px] text-slate-500 font-mono">Emp ID: {tch.employeeId}</div>
                   </div>
                 </div>
@@ -234,9 +238,7 @@ export const AdminTeachers: React.FC = () => {
               </div>
 
               <div className="space-y-1 text-xs text-slate-600">
-                <div>Department: <strong className="text-slate-900">{tch.department}</strong></div>
-                <div>Qualification: <span className="text-slate-600">{tch.qualification}</span></div>
-                <div>Experience: <span className="text-slate-900 font-semibold">{tch.experienceYears} Years</span></div>
+                <div>Subject: <strong className="text-slate-900">{tch.department}</strong></div>
               </div>
 
               <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-3 text-[11px] text-slate-500">
@@ -273,7 +275,7 @@ export const AdminTeachers: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Appoint New Faculty Member & Assign ID"
-        subtitle="Set educator credentials, department, and teaching allocation"
+        subtitle="Set educator credentials, subject, and teaching allocation"
         maxWidth="2xl"
       >
         <form onSubmit={handleCreateTeacher} className="space-y-4 text-xs">
@@ -352,28 +354,18 @@ export const AdminTeachers: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Department</label>
+              <label className="block text-slate-700 font-semibold mb-1">Subject *</label>
               <select
                 value={formData.department}
                 onChange={e => setFormData({ ...formData, department: e.target.value })}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
               >
-                <option>Physics & STEM Labs</option>
-                <option>Mathematics & Computing</option>
-                <option>English Literature & Rhetoric</option>
-                <option>Computer Science</option>
+                {subjectList.map(subj => (
+                  <option key={subj} value={subj}>{subj}</option>
+                ))}
               </select>
-            </div>
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Designation</label>
-              <input
-                type="text"
-                value={formData.designation}
-                onChange={e => setFormData({ ...formData, designation: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              />
             </div>
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Phone *</label>
@@ -384,27 +376,6 @@ export const AdminTeachers: React.FC = () => {
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+1 (555) 000-0000"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Academic Qualifications</label>
-              <input
-                type="text"
-                value={formData.qualification}
-                onChange={e => setFormData({ ...formData, qualification: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Experience (Years)</label>
-              <input
-                type="number"
-                value={formData.experienceYears}
-                onChange={e => setFormData({ ...formData, experienceYears: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -432,7 +403,7 @@ export const AdminTeachers: React.FC = () => {
         isOpen={editingTeacher !== null}
         onClose={() => setEditingTeacher(null)}
         title="Edit Faculty Record & Teacher ID"
-        subtitle={editingTeacher ? `${editingTeacher.name} • ${editingTeacher.department}` : ''}
+        subtitle={editingTeacher ? `${editingTeacher.name} • Subject: ${editingTeacher.department}` : ''}
         maxWidth="2xl"
       >
         {editingTeacher && (
@@ -517,28 +488,18 @@ export const AdminTeachers: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Department</label>
+                <label className="block text-slate-700 font-semibold mb-1">Subject</label>
                 <select
                   value={editingTeacher.department}
                   onChange={e => setEditingTeacher({ ...editingTeacher, department: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
                 >
-                  <option>Physics & STEM Labs</option>
-                  <option>Mathematics & Computing</option>
-                  <option>English Literature & Rhetoric</option>
-                  <option>Computer Science</option>
+                  {subjectList.map(subj => (
+                    <option key={subj} value={subj}>{subj}</option>
+                  ))}
                 </select>
-              </div>
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Designation</label>
-                <input
-                  type="text"
-                  value={editingTeacher.designation}
-                  onChange={e => setEditingTeacher({ ...editingTeacher, designation: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-                />
               </div>
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Phone</label>
@@ -548,27 +509,6 @@ export const AdminTeachers: React.FC = () => {
                   value={editingTeacher.phone}
                   onChange={e => setEditingTeacher({ ...editingTeacher, phone: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Qualifications</label>
-                <input
-                  type="text"
-                  value={editingTeacher.qualification}
-                  onChange={e => setEditingTeacher({ ...editingTeacher, qualification: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Experience Years</label>
-                <input
-                  type="number"
-                  value={editingTeacher.experienceYears}
-                  onChange={e => setEditingTeacher({ ...editingTeacher, experienceYears: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -597,7 +537,7 @@ export const AdminTeachers: React.FC = () => {
         isOpen={managingPeriodsTeacher !== null}
         onClose={() => setManagingPeriodsTeacher(null)}
         title={`Faculty Timetable & Period Allocation`}
-        subtitle={`Teacher: ${managingPeriodsTeacher?.name} • ${managingPeriodsTeacher?.department}`}
+        subtitle={`Teacher: ${managingPeriodsTeacher?.name} • Subject: ${managingPeriodsTeacher?.department}`}
         maxWidth="2xl"
       >
         {managingPeriodsTeacher && (
@@ -757,7 +697,7 @@ export const AdminTeachers: React.FC = () => {
                     className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold"
                   />
                   <datalist id="admin-subjects-list">
-                    {subjects.map(s => (
+                    {curriculumSubjects.map(s => (
                       <option key={s.id} value={s.name} />
                     ))}
                   </datalist>

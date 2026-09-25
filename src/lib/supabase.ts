@@ -1,15 +1,18 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Retrieve credentials from localStorage first, then fallback to environment variables
+// Pre-configured manual Supabase credentials
+export const DEFAULT_SUPABASE_URL = 'https://fxkyhyedecrtxwawcbaz.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4a3loeWVkZWNydHh3YXdjYmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4MzU1NjMsImV4cCI6MjEwMzQxMTU2M30.3vc5tlK-qXRgN_IwPUgROjGIh5DKm4AFzuMMez4lwF8';
+
+// Retrieve credentials: environment variables first, then localStorage, then default manual credentials
 export const getSupabaseConfig = () => {
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   const localUrl = localStorage.getItem('pps_supabase_url');
   const localKey = localStorage.getItem('pps_supabase_anon_key');
 
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-  const url = localUrl || envUrl;
-  const anonKey = localKey || envKey;
+  const url = envUrl || localUrl || DEFAULT_SUPABASE_URL;
+  const anonKey = envKey || localKey || DEFAULT_SUPABASE_ANON_KEY;
 
   const isConfigured = Boolean(
     url &&

@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useToast } from '../../context/ToastContext';
 import {
-  Settings,
   Shield,
   RefreshCw,
   Save,
   Building,
   Globe,
-  Database,
   Sparkles,
   Image as ImageIcon,
   Palette,
@@ -16,23 +14,15 @@ import {
   EyeOff,
   CheckCircle2,
   AlertCircle,
-  Copy,
-  UploadCloud,
-  Terminal,
   Download,
   Upload,
   Lock,
-  Key,
-  Smartphone,
-  Share2,
   Mail,
   Send,
   Loader2,
   ExternalLink,
   Check
 } from 'lucide-react';
-import { getSupabaseConfig, setSupabaseCredentials, clearSupabaseCredentials, reinitializeSupabase, testSupabaseConnection } from '../../lib/supabase';
-import { supabaseService } from '../../services/supabaseService';
 import { emailService, getEmailConfig, saveEmailConfig, EmailConfig } from '../../services/emailService';
 import { Logo } from '../../components/common/Logo';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
@@ -52,9 +42,7 @@ export const AdminSettings: React.FC = () => {
     results,
     attendanceLogs,
     homework,
-    submissions,
-    leaves,
-    refreshFromSupabase
+    leaves
   } = useSchoolData();
   const { toast } = useToast();
 
@@ -91,17 +79,6 @@ export const AdminSettings: React.FC = () => {
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Supabase connection state
-  const [supabaseUrl, setSupabaseUrl] = useState(() => getSupabaseConfig().url);
-  const [supabaseKey, setSupabaseKey] = useState(() => getSupabaseConfig().anonKey);
-  const [showKey, setShowKey] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<{ connected: boolean; message: string }>({
-    connected: getSupabaseConfig().isConfigured,
-    message: getSupabaseConfig().isConfigured ? 'Connected to Supabase Cloud' : 'Using Local Storage Engine'
-  });
-
   const principalPhotoPresets = [
     'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
     'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
@@ -127,36 +104,6 @@ export const AdminSettings: React.FC = () => {
     { name: 'Silver Platinum', color: '#64748B' },
   ];
 
-  const handleTestAndConnectSupabase = async () => {
-    if (!supabaseUrl || !supabaseKey) {
-      toast('Please provide Supabase URL and Anon Key', '', 'error');
-      return;
-    }
-
-    setIsTesting(true);
-    const result = await testSupabaseConnection(supabaseUrl, supabaseKey);
-    setIsTesting(false);
-
-    if (result.success) {
-      setSupabaseCredentials(supabaseUrl, supabaseKey);
-      reinitializeSupabase();
-      await refreshFromSupabase();
-      setConnectionStatus({ connected: true, message: result.message });
-      toast('Supabase Connected Successfully!', result.message, 'success');
-    } else {
-      setConnectionStatus({ connected: false, message: result.message });
-      toast('Connection Failed', result.message, 'error');
-    }
-  };
-
-  const handleDisconnectSupabase = () => {
-    clearSupabaseCredentials();
-    reinitializeSupabase();
-    setSupabaseUrl('');
-    setSupabaseKey('');
-    setConnectionStatus({ connected: false, message: 'Switched to Local Storage Mode' });
-    toast('Disconnected from Supabase', 'Now operating in offline local storage mode.', 'info');
-  };
 
   const handleSaveEmailConfig = (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,302 +138,6 @@ export const AdminSettings: React.FC = () => {
     }
   };
 
-  const handleSyncToSupabase = async () => {
-    if (!getSupabaseConfig().isConfigured) {
-      toast('Please connect to Supabase first', '', 'error');
-      return;
-    }
-
-    setIsSyncing(true);
-    const result = await supabaseService.syncLocalDataToSupabase({
-      students,
-      teachers,
-      notices,
-      admissions,
-      events,
-      gallery,
-      homework,
-      submissions,
-      attendance: attendanceLogs,
-      leaves,
-      results,
-      fees
-    });
-    setIsSyncing(false);
-
-    if (result.success) {
-      toast('Cloud Data Synchronization Complete!', result.message, 'success');
-    } else {
-      toast('Sync Alert', result.message, 'error');
-    }
-  };
-
-  const handleCopySchemaSql = () => {
-    const schemaSql = `-- =========================================================
--- PARADISE PUBLIC SCHOOL - COMPLETE SUPABASE DATABASE SCHEMA
--- Paste & execute in your Supabase Project -> SQL Editor
--- =========================================================
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- 1. STUDENTS
-CREATE TABLE IF NOT EXISTS public.students (
-    id TEXT PRIMARY KEY,
-    login_id TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL DEFAULT 'password123',
-    admission_no TEXT NOT NULL,
-    roll_no TEXT NOT NULL,
-    name TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    section TEXT NOT NULL,
-    house TEXT NOT NULL,
-    dob DATE NOT NULL,
-    gender TEXT NOT NULL,
-    blood_group TEXT,
-    guardian_name TEXT NOT NULL,
-    guardian_phone TEXT NOT NULL,
-    guardian_email TEXT,
-    address TEXT,
-    bus_route TEXT,
-    bus_number TEXT,
-    locker_number TEXT,
-    avatar TEXT,
-    attendance_rate NUMERIC DEFAULT 96.0,
-    gpa NUMERIC DEFAULT 3.9,
-    fee_status TEXT DEFAULT 'Pending',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 2. TEACHERS
-CREATE TABLE IF NOT EXISTS public.teachers (
-    id TEXT PRIMARY KEY,
-    login_id TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL DEFAULT 'teacher123',
-    employee_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    designation TEXT NOT NULL,
-    department TEXT NOT NULL,
-    qualification TEXT NOT NULL,
-    experience_years INTEGER DEFAULT 5,
-    assigned_classes JSONB DEFAULT '[]'::jsonb,
-    avatar TEXT,
-    joining_date DATE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 3. NOTICES
-CREATE TABLE IF NOT EXISTS public.notices (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    target_audience TEXT NOT NULL DEFAULT 'All',
-    date DATE NOT NULL DEFAULT CURRENT_DATE,
-    content TEXT NOT NULL,
-    pdf_url TEXT,
-    author TEXT NOT NULL,
-    is_pinned BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 4. ADMISSIONS
-CREATE TABLE IF NOT EXISTS public.admissions (
-    id TEXT PRIMARY KEY,
-    application_no TEXT UNIQUE NOT NULL,
-    applicant_name TEXT NOT NULL,
-    grade_applying TEXT NOT NULL,
-    dob DATE NOT NULL,
-    gender TEXT NOT NULL,
-    parent_name TEXT NOT NULL,
-    parent_email TEXT NOT NULL,
-    parent_phone TEXT NOT NULL,
-    address TEXT,
-    previous_school TEXT,
-    submission_date DATE DEFAULT CURRENT_DATE,
-    status TEXT DEFAULT 'Pending',
-    notes TEXT,
-    test_score NUMERIC,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 5. HOMEWORK
-CREATE TABLE IF NOT EXISTS public.homework (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    subject TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    section TEXT NOT NULL,
-    teacher_name TEXT NOT NULL,
-    assigned_date DATE DEFAULT CURRENT_DATE,
-    due_date DATE NOT NULL,
-    description TEXT NOT NULL,
-    max_points INTEGER DEFAULT 50,
-    status TEXT DEFAULT 'Active',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 6. HOMEWORK SUBMISSIONS
-CREATE TABLE IF NOT EXISTS public.homework_submissions (
-    id TEXT PRIMARY KEY,
-    homework_id TEXT,
-    student_id TEXT,
-    student_name TEXT NOT NULL,
-    submission_date DATE DEFAULT CURRENT_DATE,
-    status TEXT DEFAULT 'Submitted',
-    score NUMERIC,
-    feedback TEXT,
-    file_name TEXT,
-    file_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 7. ATTENDANCE
-CREATE TABLE IF NOT EXISTS public.attendance (
-    id TEXT PRIMARY KEY,
-    student_id TEXT,
-    student_name TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    section TEXT NOT NULL,
-    date DATE NOT NULL,
-    status TEXT NOT NULL,
-    remarks TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 8. LEAVES
-CREATE TABLE IF NOT EXISTS public.leaves (
-    id TEXT PRIMARY KEY,
-    student_id TEXT,
-    student_name TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    from_date DATE NOT NULL,
-    to_date DATE NOT NULL,
-    reason TEXT NOT NULL,
-    status TEXT DEFAULT 'Pending',
-    applied_date DATE DEFAULT CURRENT_DATE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 9. EXAM RESULTS
-CREATE TABLE IF NOT EXISTS public.exam_results (
-    id TEXT PRIMARY KEY,
-    student_id TEXT,
-    student_name TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    section TEXT NOT NULL,
-    exam_name TEXT NOT NULL,
-    academic_year TEXT NOT NULL,
-    subjects JSONB NOT NULL DEFAULT '[]'::jsonb,
-    total_marks NUMERIC NOT NULL,
-    max_total NUMERIC NOT NULL,
-    percentage NUMERIC NOT NULL,
-    gpa NUMERIC NOT NULL,
-    rank INTEGER,
-    overall_grade TEXT NOT NULL,
-    teacher_remarks TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 10. FEES
-CREATE TABLE IF NOT EXISTS public.fees (
-    id TEXT PRIMARY KEY,
-    invoice_no TEXT UNIQUE NOT NULL,
-    student_id TEXT,
-    student_name TEXT NOT NULL,
-    grade TEXT NOT NULL,
-    term TEXT NOT NULL,
-    due_date DATE NOT NULL,
-    breakdown JSONB NOT NULL,
-    total_amount NUMERIC NOT NULL,
-    paid_amount NUMERIC DEFAULT 0,
-    status TEXT DEFAULT 'Pending',
-    payment_date DATE,
-    payment_method TEXT,
-    transaction_id TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 11. EVENTS
-CREATE TABLE IF NOT EXISTS public.events (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    date DATE NOT NULL,
-    time TEXT NOT NULL,
-    venue TEXT NOT NULL,
-    description TEXT NOT NULL,
-    cover_image TEXT,
-    rsvp_count INTEGER DEFAULT 1,
-    is_upcoming BOOLEAN DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 12. GALLERY
-CREATE TABLE IF NOT EXISTS public.gallery (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    image_url TEXT NOT NULL,
-    description TEXT,
-    date DATE DEFAULT CURRENT_DATE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Row Level Security (RLS) Open Policies
-ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notices ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.admissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.homework ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.homework_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.leaves ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.exam_results ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.fees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Allow All Students" ON public.students;
-CREATE POLICY "Allow All Students" ON public.students FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Teachers" ON public.teachers;
-CREATE POLICY "Allow All Teachers" ON public.teachers FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Notices" ON public.notices;
-CREATE POLICY "Allow All Notices" ON public.notices FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Admissions" ON public.admissions;
-CREATE POLICY "Allow All Admissions" ON public.admissions FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Homework" ON public.homework;
-CREATE POLICY "Allow All Homework" ON public.homework FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Submissions" ON public.homework_submissions;
-CREATE POLICY "Allow All Submissions" ON public.homework_submissions FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Attendance" ON public.attendance;
-CREATE POLICY "Allow All Attendance" ON public.attendance FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Leaves" ON public.leaves;
-CREATE POLICY "Allow All Leaves" ON public.leaves FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Results" ON public.exam_results;
-CREATE POLICY "Allow All Results" ON public.exam_results FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Fees" ON public.fees;
-CREATE POLICY "Allow All Fees" ON public.fees FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Events" ON public.events;
-CREATE POLICY "Allow All Events" ON public.events FOR ALL USING (true);
-
-DROP POLICY IF EXISTS "Allow All Gallery" ON public.gallery;
-CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
-`;
-
-    navigator.clipboard.writeText(schemaSql);
-    toast('Full 12-Table SQL Schema Copied to Clipboard!', 'Paste and execute in your Supabase Project -> SQL Editor to initialize all tables.', 'success');
-  };
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -614,7 +265,7 @@ CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
       <div className="border-b border-slate-200 pb-4">
         <h3 className="text-xl font-bold font-cinzel text-slate-900">Institutional Settings & System Directorate</h3>
         <p className="text-xs text-slate-500">
-          Supabase database, Google publishing status, master credentials, database backups, crest logo, and website CMS
+          Google publishing status, master credentials, database backups, crest logo, and website CMS
         </p>
       </div>
 
@@ -909,110 +560,6 @@ CREATE POLICY "Allow All Gallery" ON public.gallery FOR ALL USING (true);
           </div>
         </div>
 
-        {/* Supabase Cloud Database Connection Card */}
-        <div className="p-6 rounded-2xl bg-white border-2 border-emerald-200 shadow-sm space-y-4 text-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h4 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
-              <Database className="w-4 h-4 text-emerald-600" />
-              <span>Connect Supabase Cloud Database</span>
-            </h4>
-            <span
-              className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 ${
-                connectionStatus.connected
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                  : 'bg-amber-50 text-amber-800 border border-amber-200'
-              }`}
-            >
-              {connectionStatus.connected ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-              <span>{connectionStatus.connected ? '● Live Supabase Connected' : '○ Offline / Local Mode'}</span>
-            </span>
-          </div>
-
-          <p className="text-slate-600 leading-relaxed">
-            Connect your website directly to your Supabase PostgreSQL cloud backend. Enter your <strong>Project URL</strong> and <strong>Anon Public API Key</strong> from your Supabase Dashboard (Settings → API).
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Supabase Project URL *</label>
-              <input
-                type="url"
-                value={supabaseUrl}
-                onChange={e => setSupabaseUrl(e.target.value)}
-                placeholder="https://your-project-id.supabase.co"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Supabase Anon Public API Key *</label>
-              <div className="relative">
-                <input
-                  type={showKey ? 'text' : 'password'}
-                  value={supabaseKey}
-                  onChange={e => setSupabaseKey(e.target.value)}
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  className="w-full px-3 py-2 pr-9 rounded-xl border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons for Supabase */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleTestAndConnectSupabase}
-                disabled={isTesting}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-50"
-              >
-                <Database className="w-3.5 h-3.5" />
-                <span>{isTesting ? 'Testing Connection...' : 'Connect & Verify Supabase'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCopySchemaSql}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 border border-slate-300 transition-colors cursor-pointer"
-                title="Copy ready-to-run PostgreSQL schema"
-              >
-                <Copy className="w-3.5 h-3.5 text-blue-600" />
-                <span>Copy 1-Click SQL Schema</span>
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSyncToSupabase}
-                disabled={isSyncing || !connectionStatus.connected}
-                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-50"
-                title="Push local students, faculty, and notices to Supabase"
-              >
-                <UploadCloud className="w-3.5 h-3.5" />
-                <span>{isSyncing ? 'Synchronizing...' : 'Sync Local Data to Supabase'}</span>
-              </button>
-
-              {connectionStatus.connected && (
-                <button
-                  type="button"
-                  onClick={handleDisconnectSupabase}
-                  className="px-3 py-2 rounded-xl bg-white hover:bg-red-50 text-red-600 font-semibold text-xs border border-red-200 transition-colors cursor-pointer"
-                >
-                  Disconnect
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Master Database Backup & Restore */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 text-xs">

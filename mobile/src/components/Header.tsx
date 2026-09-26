@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useSchoolData } from '../context/SchoolDataContext';
+import { useAuth } from '../context/AuthContext';
 import { linkingService } from '../services/linkingService';
 
 interface HeaderProps {
@@ -11,6 +12,7 @@ interface HeaderProps {
   showBack?: boolean;
   onBack?: () => void;
   showContactAction?: boolean;
+  onOpenProfile?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,10 +20,27 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle,
   showBack = false,
   onBack,
-  showContactAction = true
+  showContactAction = true,
+  onOpenProfile
 }) => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { config } = useSchoolData();
+  const { currentUser, role, isAuthenticated } = useAuth();
+
+  const getRoleBadge = () => {
+    switch (role) {
+      case 'admin':
+        return { label: 'Admin', icon: 'shield-checkmark', bg: '#DC2626', text: '#FFFFFF' };
+      case 'teacher':
+        return { label: 'Faculty', icon: 'school', bg: '#059669', text: '#FFFFFF' };
+      case 'parent':
+        return { label: 'Parent', icon: 'people', bg: '#2563EB', text: '#FFFFFF' };
+      default:
+        return { label: 'Guest', icon: 'person', bg: '#64748B', text: '#FFFFFF' };
+    }
+  };
+
+  const badge = getRoleBadge();
 
   return (
     <View
@@ -46,9 +65,11 @@ export const Header: React.FC<HeaderProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.logoBadge}>
-            <View style={styles.shieldIcon}>
-              <Ionicons name="shield-checkmark" size={22} color="#FFFFFF" />
-            </View>
+            <Image
+              source={require('../../assets/icon.png')}
+              style={styles.logoImg}
+              resizeMode="cover"
+            />
           </View>
         )}
 
@@ -62,18 +83,32 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
       </View>
 
-      {showContactAction && (
-        <View style={styles.rightActions}>
+      <View style={styles.rightActions}>
+        {/* Role Pill Badge */}
+        {isAuthenticated && (
+          <TouchableOpacity
+            style={[styles.roleBadge, { backgroundColor: badge.bg }]}
+            onPress={onOpenProfile}
+            activeOpacity={0.8}
+          >
+            <Ionicons name={badge.icon as any} size={11} color={badge.text} style={{ marginRight: 3 }} />
+            <Text style={[styles.roleBadgeText, { color: badge.text }]}>
+              {badge.label}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {showContactAction && (
           <TouchableOpacity
             style={[styles.actionIconBtn, { backgroundColor: colors.primaryTint }]}
             onPress={() => linkingService.openPhone(config.contactPhone)}
             accessibilityLabel="Call school"
             accessibilityRole="button"
           >
-            <Ionicons name="call" size={17} color={colors.primary} />
+            <Ionicons name="call" size={16} color={colors.primary} />
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 };
@@ -84,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   leftRow: {
@@ -94,41 +129,33 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   backBtn: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 10,
   },
   logoBadge: {
-    marginRight: 12,
+    marginRight: 10,
   },
-  shieldIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: '#1E3A8A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#1E3A8A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 3,
+  logoImg: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
   },
   titleCol: {
     flex: 1,
   },
   mainTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
   subTitle: {
-    fontSize: 11,
-    marginTop: 1.5,
+    fontSize: 10.5,
+    marginTop: 1,
     fontWeight: '500',
   },
   rightActions: {
@@ -136,10 +163,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  roleBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
   actionIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   }

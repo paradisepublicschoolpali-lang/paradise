@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, BackHandler, Platform } from 'react-native';
+import { View, StyleSheet, BackHandler, Modal } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { SchoolDataProvider } from './src/context/SchoolDataContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 import { BottomNav } from './src/components/BottomNav';
 import { NoticeDetailModal } from './src/components/NoticeDetailModal';
 import { AdmissionFormModal } from './src/components/AdmissionFormModal';
 
+import { LoginScreen } from './src/screens/LoginScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
+import { TeacherDashboardScreen } from './src/screens/TeacherDashboardScreen';
+import { AdminDashboardScreen } from './src/screens/AdminDashboardScreen';
 import { AcademicsScreen } from './src/screens/AcademicsScreen';
 import { AttendanceScreen } from './src/screens/AttendanceScreen';
 import { CommunicationScreen } from './src/screens/CommunicationScreen';
@@ -27,10 +31,12 @@ import { RootTab, MoreSubScreen, Notice, SchoolEvent } from './src/types';
 
 const MainNavigator: React.FC = () => {
   const { colors, isDark } = useTheme();
+  const { role, isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [activeTab, setActiveTab] = useState<RootTab>('home');
   const [moreSubScreen, setMoreSubScreen] = useState<MoreSubScreen>('menu');
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
 
   // Modals
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
@@ -39,6 +45,10 @@ const MainNavigator: React.FC = () => {
   // Hardware back button handler
   useEffect(() => {
     const onBackPress = () => {
+      if (showLoginModal) {
+        setShowLoginModal(false);
+        return true;
+      }
       if (selectedNotice) {
         setSelectedNotice(null);
         return true;
@@ -60,7 +70,7 @@ const MainNavigator: React.FC = () => {
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => subscription.remove();
-  }, [selectedNotice, showAdmissionForm, activeTab, moreSubScreen]);
+  }, [showLoginModal, selectedNotice, showAdmissionForm, activeTab, moreSubScreen]);
 
   const handleTabChange = useCallback((tab: RootTab) => {
     setActiveTab(tab);
@@ -75,7 +85,22 @@ const MainNavigator: React.FC = () => {
   }, []);
 
   const renderCurrentScreen = () => {
+    // If not authenticated, present the Login Portal directly
+    if (!isAuthenticated) {
+      return (
+        <LoginScreen
+          onSuccess={() => setShowLoginModal(false)}
+        />
+      );
+    }
+
     if (activeTab === 'home') {
+      if (role === 'admin') {
+        return <AdminDashboardScreen />;
+      }
+      if (role === 'teacher') {
+        return <TeacherDashboardScreen />;
+      }
       return (
         <HomeScreen
           onNavigateTab={handleTabChange}
@@ -128,6 +153,7 @@ const MainNavigator: React.FC = () => {
             <MoreScreen
               onNavigateSub={setMoreSubScreen}
               onOpenAdmissionForm={() => setShowAdmissionForm(true)}
+              onOpenLogin={() => setShowLoginModal(true)}
             />
           );
       }
@@ -143,12 +169,27 @@ const MainNavigator: React.FC = () => {
       {/* Main Screen Container */}
       <View style={styles.screenContainer}>{renderCurrentScreen()}</View>
 
-      {/* Persistent Bottom Tab Bar */}
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        noticeCount={2}
-      />
+      {/* Persistent Bottom Tab Bar (shown when authenticated) */}
+      {isAuthenticated && (
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          noticeCount={2}
+        />
+      )}
+
+      {/* Login / Role Switcher Modal */}
+      <Modal
+        visible={showLoginModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowLoginModal(false)}
+      >
+        <LoginScreen
+          onSuccess={() => setShowLoginModal(false)}
+          onCancel={() => setShowLoginModal(false)}
+        />
+      </Modal>
 
       {/* Global Modals */}
       <NoticeDetailModal
@@ -169,9 +210,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <SchoolDataProvider>
-          <MainNavigator />
-        </SchoolDataProvider>
+        <AuthProvider>
+          <SchoolDataProvider>
+            <MainNavigator />
+          </SchoolDataProvider>
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

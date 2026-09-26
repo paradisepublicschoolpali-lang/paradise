@@ -205,5 +205,21 @@ export interface ChatMessage {
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+export type UserRole = 'admin' | 'teacher' | 'parent' | 'student' | 'guest';
+
+export interface MobileUser {
+  id: string;
+  loginId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+  designation?: string;
+  grade?: string;
+  section?: string;
+  phone?: string;
+}
+
 export type RootTab = 'home' | 'academics' | 'attendance' | 'communication' | 'more';
 export type MoreSubScreen = 'menu' | 'about' | 'admissions' | 'facilities' | 'contact' | 'fees' | 'settings';
+

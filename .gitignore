@@ -30,21 +30,13 @@ node_modules/
 .expo/
 dist/
 
-# Android build (except release APK)
-android/app/build/
-android/.gradle/
-android/build/
-!android/app/build/outputs/apk/debug/app-debug.apk
+# Mobile Android & iOS build artifacts
+mobile/android/
+mobile/ios/
+mobile/.expo/
+mobile/dist/
 
-# iOS build
-ios/App/Pods/
-ios/DerivedData/
+# Keep root APK releases
+!paradise-public-school.apk
+!app-release.apk
 
-# Environment
-.env
-.env.local
-
-# IDE
-.idea/
-.vscode/
-*.swp

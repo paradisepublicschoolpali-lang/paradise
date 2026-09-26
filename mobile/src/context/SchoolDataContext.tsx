@@ -59,12 +59,21 @@ interface SchoolDataContextType {
   submitLeaveRequest: (fromDate: string, toDate: string, reason: string) => void;
   payFeeInvoice: (invoiceId: string, amount: number) => void;
   sendMessage: (content: string) => void;
+
+  // Admin Customization & Operations
+  updateConfig: (newConfig: Partial<SchoolConfig>) => void;
+  addNotice: (notice: Omit<Notice, 'id'>) => void;
+  deleteNotice: (id: string) => void;
+  addEvent: (event: Omit<SchoolEvent, 'id' | 'rsvpCount'>) => void;
+  deleteEvent: (id: string) => void;
+  addStudent: (student: Omit<Student, 'id' | 'attendanceRate' | 'gpa' | 'feeStatus'>) => void;
+  updateStudent: (id: string, updated: Partial<Student>) => void;
 }
 
 const SchoolDataContext = createContext<SchoolDataContextType | undefined>(undefined);
 
 export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config] = useState<SchoolConfig>(SCHOOL_CONFIG);
+  const [config, setConfig] = useState<SchoolConfig>(SCHOOL_CONFIG);
   const [notices, setNotices] = useState<Notice[]>(INITIAL_NOTICES);
   const [events, setEvents] = useState<SchoolEvent[]>(INITIAL_EVENTS);
   const [gallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
@@ -74,7 +83,7 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [error, setError] = useState<string | null>(null);
 
   // ERP State
-  const [students] = useState<Student[]>(DEMO_STUDENTS);
+  const [students, setStudents] = useState<Student[]>(DEMO_STUDENTS);
   const [activeStudentId, setActiveStudentId] = useState<string>(DEMO_STUDENTS[0]?.id || 'std-1');
   const [allHomework, setAllHomework] = useState<Record<string, HomeworkTask[]>>(DEMO_HOMEWORK);
   const [allAttendance, setAllAttendance] = useState<Record<string, AttendanceRecord[]>>(DEMO_ATTENDANCE);
@@ -235,6 +244,54 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setMessages(prev => [...prev, newMsg]);
   }, []);
 
+  // Admin Customization Operations
+  const updateConfig = useCallback((newConfig: Partial<SchoolConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      ...newConfig
+    }));
+  }, []);
+
+  const addNotice = useCallback((noticeData: Omit<Notice, 'id'>) => {
+    const newNotice: Notice = {
+      ...noticeData,
+      id: `not-${Date.now()}`
+    };
+    setNotices(prev => [newNotice, ...prev]);
+  }, []);
+
+  const deleteNotice = useCallback((id: string) => {
+    setNotices(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const addEvent = useCallback((eventData: Omit<SchoolEvent, 'id' | 'rsvpCount'>) => {
+    const newEvent: SchoolEvent = {
+      ...eventData,
+      id: `evt-${Date.now()}`,
+      rsvpCount: 0
+    };
+    setEvents(prev => [newEvent, ...prev]);
+  }, []);
+
+  const deleteEvent = useCallback((id: string) => {
+    setEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
+  const addStudent = useCallback((studentData: Omit<Student, 'id' | 'attendanceRate' | 'gpa' | 'feeStatus'>) => {
+    const newStudent: Student = {
+      ...studentData,
+      id: `std-${Date.now()}`,
+      attendanceRate: 100,
+      gpa: 10.0,
+      feeStatus: 'Paid'
+    };
+    setStudents(prev => [...prev, newStudent]);
+  }, []);
+
+  const updateStudent = useCallback((id: string, updated: Partial<Student>) => {
+    setStudents(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+  }, []);
+
   return (
     <SchoolDataContext.Provider
       value={{
@@ -262,7 +319,14 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         submitHomework,
         submitLeaveRequest,
         payFeeInvoice,
-        sendMessage
+        sendMessage,
+        updateConfig,
+        addNotice,
+        deleteNotice,
+        addEvent,
+        deleteEvent,
+        addStudent,
+        updateStudent
       }}
     >
       {children}

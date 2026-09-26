@@ -81,6 +81,11 @@ export interface SchoolConfig {
   principalMessage: string;
   heroHeadline: string;
   heroSubtitle: string;
+  themeColor?: string;
+  logoType?: 'shield' | 'image';
+  logoLetter?: string;
+  logoShieldColor?: string;
+  logoAccentColor?: string;
 }
 
 export interface Student {

@@ -12,7 +12,11 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSchoolData } from '../context/SchoolDataContext';
 
-export const AdminDashboardScreen: React.FC = () => {
+interface AdminDashboardScreenProps {
+  onOpenCustomization?: () => void;
+}
+
+export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ onOpenCustomization }) => {
   const { colors } = useTheme();
   const { currentUser } = useAuth();
   const { notices } = useSchoolData();
@@ -71,6 +75,27 @@ export const AdminDashboardScreen: React.FC = () => {
           </View>
         </View>
       </View>
+
+      {/* App & School ERP Customization Banner */}
+      <TouchableOpacity
+        style={[styles.customizerBanner, { backgroundColor: '#1E3A8A', borderColor: '#3B82F6' }]}
+        onPress={onOpenCustomization}
+        activeOpacity={0.85}
+      >
+        <View style={styles.customizerIconCircle}>
+          <Ionicons name="color-palette" size={24} color="#FDE047" />
+        </View>
+        <View style={styles.customizerMeta}>
+          <View style={styles.bannerTag}>
+            <Text style={styles.bannerTagText}>ADMIN CONTROL</Text>
+          </View>
+          <Text style={styles.customizerTitle}>Customize App & School ERP</Text>
+          <Text style={styles.customizerSub}>
+            Theme colors, school branding, circulars, student roster & principal desk
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+      </TouchableOpacity>
 
       {/* Admin Quick Action Launchers */}
       <Text style={[styles.sectionTitle, { color: colors.text }]}>Administrative Control Center</Text>
@@ -255,6 +280,57 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  customizerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+    shadowColor: '#1E3A8A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  customizerIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  customizerMeta: {
+    flex: 1,
+    marginRight: 8,
+  },
+  bannerTag: {
+    backgroundColor: '#F59E0B',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 3,
+  },
+  bannerTagText: {
+    color: '#000000',
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  customizerTitle: {
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  customizerSub: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 10.5,
+    marginTop: 2,
+    lineHeight: 14,
   },
   sectionTitle: {
     fontSize: 15,

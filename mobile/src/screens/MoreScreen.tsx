@@ -12,12 +12,14 @@ interface MoreScreenProps {
   onNavigateSub: (sub: MoreSubScreen) => void;
   onOpenAdmissionForm: () => void;
   onOpenLogin?: () => void;
+  onOpenAdminCustomization?: () => void;
 }
 
 export const MoreScreen: React.FC<MoreScreenProps> = ({
   onNavigateSub,
   onOpenAdmissionForm,
-  onOpenLogin
+  onOpenLogin,
+  onOpenAdminCustomization
 }) => {
   const { colors } = useTheme();
   const { config, fees } = useSchoolData();
@@ -145,6 +147,18 @@ export const MoreScreen: React.FC<MoreScreenProps> = ({
               <Text style={styles.logoutBtnText}>Log Out</Text>
             </TouchableOpacity>
           </View>
+
+          {role === 'admin' && onOpenAdminCustomization && (
+            <TouchableOpacity
+              style={[styles.adminCustomizerBar, { backgroundColor: '#7F1D1D' }]}
+              onPress={onOpenAdminCustomization}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="color-palette" size={17} color="#FDE047" />
+              <Text style={styles.adminCustomizerBarText}>Customize App Branding & ERP Controls</Text>
+              <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Quick Apply Card */}
@@ -373,6 +387,21 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 12,
     fontWeight: '700',
+  },
+  adminCustomizerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    gap: 8,
+  },
+  adminCustomizerBarText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    flex: 1,
   },
   applyCard: {
     flexDirection: 'row',

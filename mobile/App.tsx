@@ -26,6 +26,7 @@ import { AdmissionsScreen } from './src/screens/AdmissionsScreen';
 import { FacilitiesScreen } from './src/screens/FacilitiesScreen';
 import { ContactScreen } from './src/screens/ContactScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { AdminSettingsScreen } from './src/screens/AdminSettingsScreen';
 
 import { RootTab, MoreSubScreen, Notice, SchoolEvent } from './src/types';
 
@@ -37,6 +38,7 @@ const MainNavigator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<RootTab>('home');
   const [moreSubScreen, setMoreSubScreen] = useState<MoreSubScreen>('menu');
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showAdminCustomizer, setShowAdminCustomizer] = useState<boolean>(false);
 
   // Modals
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
@@ -45,6 +47,10 @@ const MainNavigator: React.FC = () => {
   // Hardware back button handler
   useEffect(() => {
     const onBackPress = () => {
+      if (showAdminCustomizer) {
+        setShowAdminCustomizer(false);
+        return true;
+      }
       if (showLoginModal) {
         setShowLoginModal(false);
         return true;
@@ -70,7 +76,7 @@ const MainNavigator: React.FC = () => {
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => subscription.remove();
-  }, [showLoginModal, selectedNotice, showAdmissionForm, activeTab, moreSubScreen]);
+  }, [showAdminCustomizer, showLoginModal, selectedNotice, showAdmissionForm, activeTab, moreSubScreen]);
 
   const handleTabChange = useCallback((tab: RootTab) => {
     setActiveTab(tab);
@@ -85,6 +91,15 @@ const MainNavigator: React.FC = () => {
   }, []);
 
   const renderCurrentScreen = () => {
+    // If Admin Customizer is open
+    if (showAdminCustomizer) {
+      return (
+        <AdminSettingsScreen
+          onBack={() => setShowAdminCustomizer(false)}
+        />
+      );
+    }
+
     // If not authenticated, present the Login Portal directly
     if (!isAuthenticated) {
       return (
@@ -96,7 +111,11 @@ const MainNavigator: React.FC = () => {
 
     if (activeTab === 'home') {
       if (role === 'admin') {
-        return <AdminDashboardScreen />;
+        return (
+          <AdminDashboardScreen
+            onOpenCustomization={() => setShowAdminCustomizer(true)}
+          />
+        );
       }
       if (role === 'teacher') {
         return <TeacherDashboardScreen />;
@@ -154,6 +173,7 @@ const MainNavigator: React.FC = () => {
               onNavigateSub={setMoreSubScreen}
               onOpenAdmissionForm={() => setShowAdmissionForm(true)}
               onOpenLogin={() => setShowLoginModal(true)}
+              onOpenAdminCustomization={() => setShowAdminCustomizer(true)}
             />
           );
       }

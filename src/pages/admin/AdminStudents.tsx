@@ -8,8 +8,21 @@ import { ImageUploadInput } from '../../components/common/ImageUploadInput';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 export const AdminStudents: React.FC = () => {
-  const { students, addStudent, updateStudent, deleteStudent, fees, addFeeInvoice, enrollStudentWithFee } = useSchoolData();
+  const {
+    students,
+    addStudent,
+    updateStudent,
+    deleteStudent,
+    fees,
+    addFeeInvoice,
+    enrollStudentWithFee,
+    schoolClasses,
+    schoolSections
+  } = useSchoolData();
   const { toast } = useToast();
+
+  const gradeOptions = schoolClasses && schoolClasses.length > 0 ? schoolClasses : ['Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'];
+  const sectionOptions = schoolSections && schoolSections.length > 0 ? schoolSections : ['A', 'B', 'C', 'D'];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('All');
@@ -199,7 +212,7 @@ export const AdminStudents: React.FC = () => {
       {/* Filter & Search */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
-          {['All', 'Nursery', 'Kindergarten', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'].map(g => (
+          {['All', ...gradeOptions].map(g => (
             <button
               key={g}
               onClick={() => setSelectedGrade(g)}
@@ -408,28 +421,24 @@ export const AdminStudents: React.FC = () => {
               <select
                 value={formData.grade}
                 onChange={e => setFormData({ ...formData, grade: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 font-semibold"
               >
-                <option value="Nursery">Nursery</option>
-                <option value="Kindergarten">Kindergarten</option>
-                <option value="Class 1">Class 1</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 4">Class 4</option>
-                <option value="Class 5">Class 5</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 7">Class 7</option>
-                <option value="Class 8">Class 8 (Senior)</option>
+                {gradeOptions.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
               </select>
             </div>
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Section</label>
-              <input
-                type="text"
+              <select
                 value={formData.section}
                 onChange={e => setFormData({ ...formData, section: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              />
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 font-semibold"
+              >
+                {sectionOptions.map(s => (
+                  <option key={s} value={s}>Section {s}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Roll Number</label>
@@ -690,28 +699,24 @@ export const AdminStudents: React.FC = () => {
                 <select
                   value={editingStudent.grade}
                   onChange={e => setEditingStudent({ ...editingStudent, grade: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 font-semibold"
                 >
-                  <option value="Nursery">Nursery</option>
-                  <option value="Kindergarten">Kindergarten</option>
-                  <option value="Class 1">Class 1</option>
-                  <option value="Class 2">Class 2</option>
-                  <option value="Class 3">Class 3</option>
-                  <option value="Class 4">Class 4</option>
-                  <option value="Class 5">Class 5</option>
-                  <option value="Class 6">Class 6</option>
-                  <option value="Class 7">Class 7</option>
-                  <option value="Class 8">Class 8 (Senior)</option>
+                  {gradeOptions.map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Section</label>
-                <input
-                  type="text"
+                <select
                   value={editingStudent.section}
                   onChange={e => setEditingStudent({ ...editingStudent, section: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-                />
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 font-semibold"
+                >
+                  {sectionOptions.map(s => (
+                    <option key={s} value={s}>Section {s}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Roll Number</label>

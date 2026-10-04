@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import {
   CalendarCheck,
@@ -9,7 +10,11 @@ import {
   Printer,
   FileSpreadsheet,
   Users,
-  Filter
+  Filter,
+  ShieldAlert,
+  Crown,
+  Lock,
+  School
 } from 'lucide-react';
 import { AttendanceRecord, Student } from '../../types';
 import { AttendanceReportModal } from '../../components/common/AttendanceReportModal';
@@ -22,21 +27,45 @@ import {
 } from '../../utils/attendanceExport';
 
 export const TeacherAttendance: React.FC = () => {
-  const { students, markAttendanceBulk, leaves, updateLeaveStatus, attendanceLogs } = useSchoolData();
+  const { students, teachers, markAttendanceBulk, leaves, updateLeaveStatus, attendanceLogs } = useSchoolData();
+  const { currentUser } = useAuth();
   const { toast } = useToast();
 
+  const currentTeacher = teachers.find(t => t.id === currentUser?.id || t.loginId === currentUser?.loginId) || teachers[0];
+
+  // Daily Roll Call is strictly restricted to designated Class Teachers
+  const classTeacherAllocations = currentTeacher?.assignedClasses?.filter(ac => Boolean(ac.isClassTeacher)) || [];
+  const isClassTeacher = classTeacherAllocations.length > 0;
+
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [classSection, setClassSection] = useState('Grade 8-A');
+  const [classSection, setClassSection] = useState(
+    classTeacherAllocations.length > 0
+      ? `${classTeacherAllocations[0].grade}-${classTeacherAllocations[0].section}`
+      : 'Class 8-A'
+  );
+
+  useEffect(() => {
+    if (classTeacherAllocations.length > 0 && !classTeacherAllocations.some(ac => `${ac.grade}-${ac.section}` === classSection)) {
+      setClassSection(`${classTeacherAllocations[0].grade}-${classTeacherAllocations[0].section}`);
+    }
+  }, [classTeacherAllocations]);
+
   const [selectedStudentForReport, setSelectedStudentForReport] = useState<Student | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   
-  const [rollStates, setRollStates] = useState<Record<string, AttendanceRecord['status']>>({
-    'std-1': 'Present',
-    'std-2': 'Present',
-    'std-3': 'Present',
-    'std-4': 'Present',
-    'std-5': 'Absent',
-    'std-6': 'Present',
+  const [rollStates, setRollStates] = useState<Record<string, AttendanceRecord['status']>>({});
+
+  // Normalize grade strings for matching
+  const normalizeGrade = (g?: string) => (g || '').replace(/^(Class|Grade)\s+/i, '').trim().toLowerCase();
+  const parts = classSection.split('-');
+  const selectedGrade = parts[0]?.trim() || '';
+  const selectedSection = parts[1]?.trim() || '';
+
+  // Get scholars belonging exclusively to this Class Teacher's selected division
+  const divisionStudents = students.filter(s => {
+    const matchG = normalizeGrade(s.grade) === normalizeGrade(selectedGrade);
+    const matchS = (s.section || '').trim().toLowerCase() === selectedSection.toLowerCase();
+    return matchG && matchS;
   });
 
   const toggleStatus = (studentId: string) => {
@@ -47,13 +76,18 @@ export const TeacherAttendance: React.FC = () => {
 
   const handleMarkAllPresent = () => {
     const updated: Record<string, AttendanceRecord['status']> = {};
-    students.forEach(s => { updated[s.id] = 'Present'; });
+    divisionStudents.forEach(s => { updated[s.id] = 'Present'; });
     setRollStates(updated);
-    toast('All Scholars Marked Present', '', 'info');
+    toast('All Scholars Marked Present', `Marked ${divisionStudents.length} scholars present`, 'info');
   };
 
   const handleSaveAttendance = () => {
-    const records = students.map(s => ({
+    if (divisionStudents.length === 0) {
+      toast('No Scholars to Record', `No enrolled scholars in ${classSection}`, 'error');
+      return;
+    }
+
+    const records = divisionStudents.map(s => ({
       studentId: s.id,
       studentName: s.name,
       grade: s.grade,
@@ -62,14 +96,14 @@ export const TeacherAttendance: React.FC = () => {
     }));
 
     markAttendanceBulk(records);
-    toast('Attendance Roll Saved!', `Committed for ${classSection} on ${date}`, 'success');
+    toast('Official Roll Call Saved!', `Committed morning roll for ${classSection} on ${date}`, 'success');
   };
 
   const handleQuickDownloadClassCSV = (range: AttendanceRangeType) => {
     const { startDate, endDate, label } = calculateDateRange(range, date);
     downloadClassAttendanceCSV(
       classSection,
-      students,
+      divisionStudents,
       attendanceLogs,
       startDate,
       endDate,
@@ -88,6 +122,56 @@ export const TeacherAttendance: React.FC = () => {
     setIsReportModalOpen(true);
   };
 
+  // If the logged in teacher is NOT a Class Teacher, restrict access
+  if (!isClassTeacher) {
+    return (
+      <div className="space-y-6 pb-12">
+        <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-xs text-center max-w-2xl mx-auto my-8 space-y-5">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold font-cinzel text-slate-900">Daily Roll Call Restricted to Class Teachers</h3>
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              According to school safety and attendance regulations, the official morning Daily Roll Call register can <strong>only be recorded and submitted by the appointed Class Teacher</strong> for each respective section.
+            </p>
+          </div>
+
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-slate-500 font-semibold">Logged-in Faculty:</span>
+              <strong className="text-slate-900">{currentTeacher?.name}</strong>
+            </div>
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-slate-500 font-semibold">Faculty Role:</span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold">
+                {currentTeacher?.department} Subject Teacher
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-500 font-semibold block mb-1">Your Allocated Teaching Classes:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {currentTeacher?.assignedClasses && currentTeacher.assignedClasses.length > 0 ? (
+                  currentTeacher.assignedClasses.map((ac, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-medium text-[11px]">
+                      {ac.grade}-{ac.section} ({ac.subject})
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-slate-400 italic text-[11px]">No classes currently allocated</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 italic">
+            If you have been appointed as the Class Teacher for a division (e.g. 8th A), please contact the school administration to assign your Class Teacher role in the Admin Panel Faculty Directorate.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-12">
       {/* Header & Controls Bar */}
@@ -104,15 +188,23 @@ export const TeacherAttendance: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-slate-500 font-semibold mb-1">Select Division</label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="block text-slate-700 font-semibold">Select Division</label>
+              <span className="text-[10px] text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded font-bold flex items-center gap-0.5">
+                <Crown className="w-2.5 h-2.5 text-amber-600" />
+                <span>Class Teacher</span>
+              </span>
+            </div>
             <select
               value={classSection}
               onChange={e => setClassSection(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 rounded-xl border border-amber-300 bg-amber-50/50 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
-              <option value="Grade 8-A">Grade 8-A (General Science)</option>
-              <option value="Grade 7-A">Grade 7-A (Integrated Science)</option>
-              <option value="Grade 6-A">Grade 6-A (Nature Science)</option>
+              {classTeacherAllocations.map((ac, idx) => (
+                <option key={idx} value={`${ac.grade}-${ac.section}`}>
+                  {ac.grade}-{ac.section} ({ac.subject} • Class Teacher)
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -226,48 +318,57 @@ export const TeacherAttendance: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {students.map(student => {
-                const status = rollStates[student.id] || 'Present';
+              {divisionStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-500">
+                    <Users className="w-6 h-6 mx-auto mb-1 text-slate-400" />
+                    <span>No scholars found enrolled in {classSection} yet.</span>
+                  </td>
+                </tr>
+              ) : (
+                divisionStudents.map(student => {
+                  const status = rollStates[student.id] || 'Present';
 
-                return (
-                  <tr key={student.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900">{student.rollNo}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900">{student.name}</td>
-                    <td className="py-3.5 px-4 font-mono text-slate-500">{student.admissionNo}</td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                          status === 'Present'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : status === 'Late'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenStudentReport(student)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[11px] flex items-center gap-1 border border-blue-200 cursor-pointer"
-                          title="Download scholar attendance record from 1 day to whole semester"
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900">{student.rollNo}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900">{student.name}</td>
+                      <td className="py-3.5 px-4 font-mono text-slate-500">{student.admissionNo}</td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-bold ${
+                            status === 'Present'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : status === 'Late'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
                         >
-                          <Download className="w-3 h-3" />
-                          <span>Dossier</span>
-                        </button>
-                        <button
-                          onClick={() => toggleStatus(student.id)}
-                          className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer border border-slate-200"
-                        >
-                          Toggle Status
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          {status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenStudentReport(student)}
+                            className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[11px] flex items-center gap-1 border border-blue-200 cursor-pointer"
+                            title="Download scholar attendance record from 1 day to whole semester"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>Dossier</span>
+                          </button>
+                          <button
+                            onClick={() => toggleStatus(student.id)}
+                            className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer border border-slate-200"
+                          >
+                            Toggle Status
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

@@ -263,7 +263,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     designation: 'Teacher',
     department: 'Science',
     assignedClasses: [
-      { grade: 'Class 8', section: 'A', subject: 'Science' },
+      { grade: 'Class 8', section: 'A', subject: 'Science', isClassTeacher: true },
       { grade: 'Class 7', section: 'A', subject: 'Science' },
       { grade: 'Class 6', section: 'A', subject: 'Science' }
     ],
@@ -282,7 +282,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     department: 'Maths',
     assignedClasses: [
       { grade: 'Class 8', section: 'A', subject: 'Maths' },
-      { grade: 'Class 7', section: 'B', subject: 'Maths' },
+      { grade: 'Class 7', section: 'B', subject: 'Maths', isClassTeacher: true },
       { grade: 'Class 6', section: 'A', subject: 'Maths' }
     ],
     avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=300',
@@ -300,7 +300,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     department: 'English',
     assignedClasses: [
       { grade: 'Class 8', section: 'A', subject: 'English' },
-      { grade: 'Class 7', section: 'A', subject: 'English' },
+      { grade: 'Class 7', section: 'A', subject: 'English', isClassTeacher: true },
       { grade: 'Class 5', section: 'B', subject: 'English' }
     ],
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=300',

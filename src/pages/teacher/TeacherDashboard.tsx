@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSchoolData } from '../../context/SchoolDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { CalendarCheck, BookOpen, Users, Clock, Award, CheckCircle2, ArrowRight, GraduationCap } from 'lucide-react';
+import { CalendarCheck, BookOpen, Users, Clock, Award, CheckCircle2, ArrowRight, GraduationCap, Crown } from 'lucide-react';
 
 interface TeacherDashboardProps {
   setActiveTab: (tab: string) => void;
@@ -11,6 +11,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
   const { teachers, students, results, teacherPeriods } = useSchoolData();
   const { currentUser } = useAuth();
   const teacher = teachers.find(t => t.id === currentUser.id || t.loginId === currentUser.loginId) || teachers[0];
+
+  const classTeacherAllocations = teacher?.assignedClasses?.filter(ac => Boolean(ac.isClassTeacher)) || [];
+  const isClassTeacher = classTeacherAllocations.length > 0;
 
   const today = new Date();
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -40,11 +43,21 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
             className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500 shadow-sm shrink-0"
           />
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-slate-900 font-cinzel">{teacher?.name}</h2>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                 {teacher?.department} Faculty
               </span>
+              {isClassTeacher ? (
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold flex items-center gap-1">
+                  <Crown className="w-3 h-3 text-amber-600" />
+                  <span>Class Teacher: {classTeacherAllocations.map(c => `${c.grade}-${c.section}`).join(', ')}</span>
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-medium">
+                  Subject Faculty
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Emp ID: <strong className="font-mono text-slate-700">{teacher?.employeeId}</strong> • Subject: {teacher?.department}
@@ -55,10 +68,14 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('attendance')}
-            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer ${
+              isClassTeacher
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+            }`}
           >
-            <CalendarCheck className="w-4 h-4" />
-            <span>Mark Class Roll Call</span>
+            <CalendarCheck className={`w-4 h-4 ${isClassTeacher ? 'text-white' : 'text-slate-500'}`} />
+            <span>{isClassTeacher ? `Mark Class Roll Call (${classTeacherAllocations[0].grade}-${classTeacherAllocations[0].section})` : 'Daily Roll Call (Class Teachers Only)'}</span>
           </button>
 
           <button

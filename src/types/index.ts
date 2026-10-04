@@ -54,6 +54,7 @@ export interface Teacher {
     grade: string;
     section: string;
     subject: string;
+    isClassTeacher?: boolean;
   }[];
   avatar: string;
   joiningDate: string;

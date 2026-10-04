@@ -26,7 +26,8 @@ import {
   X,
   Send,
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  Crown
 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
@@ -47,7 +48,13 @@ export const AdminTeachers: React.FC = () => {
     students,
     addStudent,
     updateStudent,
-    deleteStudent
+    deleteStudent,
+    schoolClasses,
+    schoolSections,
+    addSchoolClass,
+    deleteSchoolClass,
+    addSchoolSection,
+    deleteSchoolSection
   } = useSchoolData();
   const { toast } = useToast();
 
@@ -56,6 +63,15 @@ export const AdminTeachers: React.FC = () => {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [managingPeriodsTeacher, setManagingPeriodsTeacher] = useState<Teacher | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Manage Classes and Sections Modal State
+  const [isClassSectionModalOpen, setIsClassSectionModalOpen] = useState(false);
+  const [newClassNameInput, setNewClassNameInput] = useState('');
+  const [newSectionNameInput, setNewSectionNameInput] = useState('');
+  const [inlineAddClassOpen, setInlineAddClassOpen] = useState(false);
+  const [inlineAddSectionOpen, setInlineAddSectionOpen] = useState(false);
+  const [quickClassInput, setQuickClassInput] = useState('');
+  const [quickSectionInput, setQuickSectionInput] = useState('');
 
   // Class Students Management State for each Teacher
   const [managingStudentsTeacher, setManagingStudentsTeacher] = useState<Teacher | null>(null);
@@ -67,7 +83,8 @@ export const AdminTeachers: React.FC = () => {
   const [newAllocationForm, setNewAllocationForm] = useState({
     grade: 'Class 8',
     section: 'A',
-    subject: 'Science'
+    subject: 'Science',
+    isClassTeacher: false
   });
 
   // New Student Form for Teacher's Class
@@ -111,7 +128,29 @@ export const AdminTeachers: React.FC = () => {
     notes: ''
   });
 
-  // Form State
+  // Helper to normalize grade names: "Class 8", "Grade 8", "8" all match
+  const normalizeGrade = (g?: string) => (g || '').replace(/^(Class|Grade)\s+/i, '').trim().toLowerCase();
+
+  // Dynamic School Standards and Sections from SchoolDataContext
+  const gradeOptions = schoolClasses && schoolClasses.length > 0 ? schoolClasses : ['Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'];
+  const sectionOptions = schoolSections && schoolSections.length > 0 ? schoolSections : ['A', 'B', 'C', 'D'];
+  const houseOptions = ['Ashoka House', 'Tagore House', 'Shivaji House', 'Raman House'];
+
+  // Helper to find if another teacher is already class teacher for this grade & section (Enforces 1 Class Teacher per section)
+  const findClassTeacherForSection = (grade: string, section: string, excludeTeacherId?: string): Teacher | undefined => {
+    const targetG = normalizeGrade(grade);
+    const targetS = (section || '').trim().toLowerCase();
+    return teachers.find(t => 
+      t.id !== excludeTeacherId &&
+      t.assignedClasses?.some(ac => 
+        Boolean(ac.isClassTeacher) &&
+        normalizeGrade(ac.grade) === targetG &&
+        (ac.section || '').trim().toLowerCase() === targetS
+      )
+    );
+  };
+
+  // Form State for Appointing New Faculty
   const [formData, setFormData] = useState(() => ({
     name: '',
     loginId: '',
@@ -123,9 +162,10 @@ export const AdminTeachers: React.FC = () => {
     department: 'Hindi',
     qualification: '',
     experienceYears: 0,
-    assignedClasses: [
-      { grade: 'Grade 10', section: 'A', subject: 'Hindi' }
-    ],
+    allocatedGrade: 'Class 8',
+    allocatedSection: 'A',
+    allocatedSubject: 'Hindi',
+    isClassTeacher: false,
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
     joiningDate: new Date().toISOString().split('T')[0]
   }));
@@ -144,18 +184,58 @@ export const AdminTeachers: React.FC = () => {
       return;
     }
 
+    let shouldBeClassTeacher = formData.isClassTeacher;
+    if (shouldBeClassTeacher) {
+      const existing = findClassTeacherForSection(formData.allocatedGrade, formData.allocatedSection);
+      if (existing) {
+        const confirmReassign = window.confirm(
+          `${existing.name} is currently the designated Class Teacher for ${formData.allocatedGrade}-${formData.allocatedSection}.\n\nThere can only be ONE Class Teacher per section (e.g. 8th A).\n\nDo you want to reassign the Class Teacher role from ${existing.name} to ${formData.name}?`
+        );
+        if (confirmReassign) {
+          const updatedExistingClasses = existing.assignedClasses.map(ac => {
+            if (normalizeGrade(ac.grade) === normalizeGrade(formData.allocatedGrade) && ac.section.trim().toLowerCase() === formData.allocatedSection.trim().toLowerCase()) {
+              return { ...ac, isClassTeacher: false };
+            }
+            return ac;
+          });
+          updateTeacher(existing.id, { assignedClasses: updatedExistingClasses });
+          toast('Class Teacher Reassigned', `${formData.name} is now designated Class Teacher for ${formData.allocatedGrade}-${formData.allocatedSection}`, 'info');
+        } else {
+          shouldBeClassTeacher = false;
+        }
+      }
+    }
+
     const assignedLoginId = formData.loginId || formData.name.toLowerCase().split(' ')[0] + '.' + formData.department.toLowerCase().split(' ')[0];
 
     addTeacher({
-      ...formData,
-      designation: 'Teacher',
+      name: formData.name,
+      loginId: assignedLoginId,
+      password: formData.password || 'teacher123',
+      employeeId: formData.employeeId,
+      email: formData.email,
+      phone: formData.phone,
+      designation: formData.designation || 'Teacher',
+      department: formData.department,
       qualification: '',
       experienceYears: 0,
-      loginId: assignedLoginId,
-      password: formData.password || 'teacher123'
+      avatar: formData.avatar,
+      joiningDate: formData.joiningDate,
+      assignedClasses: [
+        {
+          grade: formData.allocatedGrade,
+          section: formData.allocatedSection,
+          subject: formData.allocatedSubject || formData.department,
+          isClassTeacher: shouldBeClassTeacher
+        }
+      ]
     });
 
-    toast('Faculty Appointed & ID Generated!', `Teacher ID: ${assignedLoginId} | Password: ${formData.password || 'teacher123'}`, 'success');
+    toast(
+      'Faculty Appointed & ID Generated!',
+      `Teacher ID: ${assignedLoginId} | Password: ${formData.password || 'teacher123'}${shouldBeClassTeacher ? ` | Class Teacher: ${formData.allocatedGrade}-${formData.allocatedSection}` : ''}`,
+      'success'
+    );
     setIsAddModalOpen(false);
     setFormData({
       name: '',
@@ -168,9 +248,10 @@ export const AdminTeachers: React.FC = () => {
       department: 'Hindi',
       qualification: '',
       experienceYears: 0,
-      assignedClasses: [
-        { grade: 'Grade 10', section: 'A', subject: 'Hindi' }
-      ],
+      allocatedGrade: 'Class 8',
+      allocatedSection: 'A',
+      allocatedSubject: 'Hindi',
+      isClassTeacher: false,
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
       joiningDate: new Date().toISOString().split('T')[0]
     });
@@ -190,14 +271,6 @@ export const AdminTeachers: React.FC = () => {
       toast('Staff Record Removed', `${name} has been archived`, 'info');
     }
   };
-
-  // Indian CBSE School standards
-  const gradeOptions = ['Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'];
-  const sectionOptions = ['A', 'B', 'C'];
-  const houseOptions = ['Ashoka House', 'Tagore House', 'Shivaji House', 'Raman House'];
-
-  // Helper to normalize grade names: "Class 8", "Grade 8", "8" all match
-  const normalizeGrade = (g?: string) => (g || '').replace(/^(Class|Grade)\s+/i, '').trim().toLowerCase();
 
   // Get all students enrolled in a teacher's allocated classes (or a specific class key)
   const getTeacherStudents = (teacher: Teacher, classKey?: string) => {
@@ -324,12 +397,85 @@ export const AdminTeachers: React.FC = () => {
       return;
     }
 
-    const updatedClasses = [...managingStudentsTeacher.assignedClasses, { ...newAllocationForm }];
+    let shouldBeClassTeacher = newAllocationForm.isClassTeacher;
+    if (shouldBeClassTeacher) {
+      const existing = findClassTeacherForSection(newAllocationForm.grade, newAllocationForm.section, managingStudentsTeacher.id);
+      if (existing) {
+        const confirmReassign = window.confirm(
+          `${existing.name} is currently the designated Class Teacher for ${newAllocationForm.grade}-${newAllocationForm.section}.\n\nThere can only be ONE Class Teacher per section (e.g. 8th A).\n\nDo you want to reassign the Class Teacher role from ${existing.name} to ${managingStudentsTeacher.name}?`
+        );
+        if (confirmReassign) {
+          const updatedExistingClasses = existing.assignedClasses.map(ac => {
+            if (normalizeGrade(ac.grade) === normalizeGrade(newAllocationForm.grade) && ac.section.trim().toLowerCase() === newAllocationForm.section.trim().toLowerCase()) {
+              return { ...ac, isClassTeacher: false };
+            }
+            return ac;
+          });
+          updateTeacher(existing.id, { assignedClasses: updatedExistingClasses });
+          toast('Class Teacher Reassigned', `${managingStudentsTeacher.name} is now designated Class Teacher for ${newAllocationForm.grade}-${newAllocationForm.section}`, 'info');
+        } else {
+          shouldBeClassTeacher = false;
+        }
+      }
+    }
+
+    const updatedClasses = [...managingStudentsTeacher.assignedClasses, { ...newAllocationForm, isClassTeacher: shouldBeClassTeacher }];
     updateTeacher(managingStudentsTeacher.id, { assignedClasses: updatedClasses });
     setManagingStudentsTeacher({ ...managingStudentsTeacher, assignedClasses: updatedClasses });
     setSelectedTeacherClass(`${newAllocationForm.grade}-${newAllocationForm.section}`);
     setIsAddAllocationOpen(false);
-    toast('Class Allocation Assigned', `Allocated ${newAllocationForm.grade}-${newAllocationForm.section} (${newAllocationForm.subject}) to ${managingStudentsTeacher.name}`, 'success');
+    toast(
+      'Class Allocation Assigned',
+      `Allocated ${newAllocationForm.grade}-${newAllocationForm.section} (${newAllocationForm.subject})${shouldBeClassTeacher ? ' with Class Teacher role' : ''} to ${managingStudentsTeacher.name}`,
+      'success'
+    );
+  };
+
+  const handleToggleClassTeacherRole = (grade: string, section: string) => {
+    if (!managingStudentsTeacher) return;
+    const currentClass = managingStudentsTeacher.assignedClasses.find(
+      ac => normalizeGrade(ac.grade) === normalizeGrade(grade) && ac.section.trim().toLowerCase() === section.trim().toLowerCase()
+    );
+    if (!currentClass) return;
+
+    if (currentClass.isClassTeacher) {
+      if (window.confirm(`Revoke Class Teacher designation from ${managingStudentsTeacher.name} for ${grade}-${section}?`)) {
+        const updated = managingStudentsTeacher.assignedClasses.map(ac => {
+          if (normalizeGrade(ac.grade) === normalizeGrade(grade) && ac.section.trim().toLowerCase() === section.trim().toLowerCase()) {
+            return { ...ac, isClassTeacher: false };
+          }
+          return ac;
+        });
+        updateTeacher(managingStudentsTeacher.id, { assignedClasses: updated });
+        setManagingStudentsTeacher({ ...managingStudentsTeacher, assignedClasses: updated });
+        toast('Class Teacher Role Revoked', `${managingStudentsTeacher.name} is no longer Class Teacher for ${grade}-${section}`, 'info');
+      }
+    } else {
+      const existing = findClassTeacherForSection(grade, section, managingStudentsTeacher.id);
+      if (existing) {
+        const confirmReassign = window.confirm(
+          `${existing.name} is currently the designated Class Teacher for ${grade}-${section}.\n\nThere can only be ONE Class Teacher per section (e.g. 8th A).\n\nDo you want to reassign the Class Teacher role from ${existing.name} to ${managingStudentsTeacher.name}?`
+        );
+        if (!confirmReassign) return;
+        const updatedExisting = existing.assignedClasses.map(ac => {
+          if (normalizeGrade(ac.grade) === normalizeGrade(grade) && ac.section.trim().toLowerCase() === section.trim().toLowerCase()) {
+            return { ...ac, isClassTeacher: false };
+          }
+          return ac;
+        });
+        updateTeacher(existing.id, { assignedClasses: updatedExisting });
+      }
+
+      const updated = managingStudentsTeacher.assignedClasses.map(ac => {
+        if (normalizeGrade(ac.grade) === normalizeGrade(grade) && ac.section.trim().toLowerCase() === section.trim().toLowerCase()) {
+          return { ...ac, isClassTeacher: true };
+        }
+        return ac;
+      });
+      updateTeacher(managingStudentsTeacher.id, { assignedClasses: updated });
+      setManagingStudentsTeacher({ ...managingStudentsTeacher, assignedClasses: updated });
+      toast('Appointed as Class Teacher', `👑 ${managingStudentsTeacher.name} is now the official Class Teacher for ${grade}-${section}!`, 'success');
+    }
   };
 
   const handleRemoveClassAllocationFromTeacher = (grade: string, section: string) => {
@@ -408,13 +554,22 @@ export const AdminTeachers: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Appoint New Faculty</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsClassSectionModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs border border-slate-200 cursor-pointer"
+          >
+            <School className="w-4 h-4 text-blue-600" />
+            <span>Manage Classes & Sections</span>
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Appoint New Faculty</span>
+          </button>
+        </div>
       </div>
 
       {/* Subject Filter */}
@@ -450,7 +605,15 @@ export const AdminTeachers: React.FC = () => {
                     className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shrink-0"
                   />
                   <div>
-                    <h4 className="text-base font-bold font-cinzel text-slate-900">{tch.name}</h4>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="text-base font-bold font-cinzel text-slate-900">{tch.name}</h4>
+                      {tch.assignedClasses?.some(ac => ac.isClassTeacher) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs">
+                          <Crown className="w-3 h-3 text-amber-600 fill-amber-500" />
+                          <span>Class Teacher</span>
+                        </span>
+                      )}
+                    </div>
                     <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">{tch.department}</span>
                     <div className="text-[10px] text-slate-500 font-mono">Emp ID: {tch.employeeId}</div>
                   </div>
@@ -544,8 +707,15 @@ export const AdminTeachers: React.FC = () => {
                     tch.assignedClasses.map((ac, idx) => (
                       <span
                         key={idx}
-                        className="group/tag inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100"
+                        className={`group/tag inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border ${
+                          ac.isClassTeacher
+                            ? 'bg-amber-50 text-amber-800 border-amber-200'
+                            : 'bg-blue-50 text-blue-700 border-blue-100'
+                        }`}
                       >
+                        {ac.isClassTeacher && (
+                          <Crown className="w-2.5 h-2.5 text-amber-600 fill-amber-500 shrink-0" />
+                        )}
                         <span>{ac.grade}-{ac.section} ({ac.subject})</span>
                         <button
                           type="button"
@@ -689,6 +859,172 @@ export const AdminTeachers: React.FC = () => {
                 placeholder="+91 98765 43210"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
               />
+            </div>
+          </div>
+
+          {/* Initial Teaching Allocation & Class Teacher Designation */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                <School className="w-4 h-4 text-blue-600" />
+                <span>Initial Class Division Allocation</span>
+              </div>
+              <span className="text-[10px] text-slate-500">Assign standard & Class Teacher status</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-700 font-semibold">Standard / Grade</label>
+                  <button
+                    type="button"
+                    onClick={() => setInlineAddClassOpen(!inlineAddClassOpen)}
+                    className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                  >
+                    {inlineAddClassOpen ? 'Close' : '+ Add Class'}
+                  </button>
+                </div>
+                {inlineAddClassOpen ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={quickClassInput}
+                      onChange={e => setQuickClassInput(e.target.value)}
+                      placeholder="e.g. Class 9"
+                      className="w-full px-2 py-1 rounded-lg bg-white border border-slate-300 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (quickClassInput.trim()) {
+                          addSchoolClass(quickClassInput.trim());
+                          setFormData({ ...formData, allocatedGrade: quickClassInput.trim() });
+                          setQuickClassInput('');
+                          setInlineAddClassOpen(false);
+                          toast('Class Added', `Added ${quickClassInput.trim()} to school standards`, 'success');
+                        }
+                      }}
+                      className="px-2 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={formData.allocatedGrade}
+                    onChange={e => setFormData({ ...formData, allocatedGrade: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                  >
+                    {gradeOptions.map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-700 font-semibold">Section</label>
+                  <button
+                    type="button"
+                    onClick={() => setInlineAddSectionOpen(!inlineAddSectionOpen)}
+                    className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                  >
+                    {inlineAddSectionOpen ? 'Close' : '+ Add Sec'}
+                  </button>
+                </div>
+                {inlineAddSectionOpen ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={quickSectionInput}
+                      onChange={e => setQuickSectionInput(e.target.value)}
+                      placeholder="e.g. E"
+                      className="w-full px-2 py-1 rounded-lg bg-white border border-slate-300 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (quickSectionInput.trim()) {
+                          addSchoolSection(quickSectionInput.trim().toUpperCase());
+                          setFormData({ ...formData, allocatedSection: quickSectionInput.trim().toUpperCase() });
+                          setQuickSectionInput('');
+                          setInlineAddSectionOpen(false);
+                          toast('Section Added', `Added Section ${quickSectionInput.trim().toUpperCase()}`, 'success');
+                        }
+                      }}
+                      className="px-2 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={formData.allocatedSection}
+                    onChange={e => setFormData({ ...formData, allocatedSection: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                  >
+                    {sectionOptions.map(s => (
+                      <option key={s} value={s}>Section {s}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Assigned Subject</label>
+                <select
+                  value={formData.allocatedSubject}
+                  onChange={e => setFormData({ ...formData, allocatedSubject: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                >
+                  {curriculumSubjects.length > 0
+                    ? curriculumSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)
+                    : subjectList.map(s => <option key={s} value={s}>{s}</option>)
+                  }
+                </select>
+              </div>
+            </div>
+
+            {/* Class Teacher Designation Checkbox & Conflict Notice */}
+            <div className="pt-2 border-t border-slate-200">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isClassTeacher}
+                  onChange={e => setFormData({ ...formData, isClassTeacher: e.target.checked })}
+                  className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                />
+                <div>
+                  <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <Crown className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Designate as Official Class Teacher for {formData.allocatedGrade}-{formData.allocatedSection}</span>
+                  </span>
+                  <span className="text-[11px] text-slate-500 block mt-0.5">
+                    Class Teachers conduct daily morning roll calls and supervise the entire division roster. (Strictly 1 Class Teacher per section).
+                  </span>
+                </div>
+              </label>
+
+              {formData.isClassTeacher && (() => {
+                const existingCT = findClassTeacherForSection(formData.allocatedGrade, formData.allocatedSection);
+                if (existingCT) {
+                  return (
+                    <div className="mt-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>
+                        <strong>Note:</strong> <strong>{existingCT.name}</strong> is currently Class Teacher for {formData.allocatedGrade}-{formData.allocatedSection}. Appointing will reassign this title to {formData.name || 'the new educator'}.
+                      </span>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="mt-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{formData.allocatedGrade}-{formData.allocatedSection} currently has no active Class Teacher.</span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -1212,29 +1548,103 @@ export const AdminTeachers: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-slate-700 font-semibold mb-1">Standard / Grade *</label>
-                        <select
-                          value={newAllocationForm.grade}
-                          onChange={e => setNewAllocationForm({ ...newAllocationForm, grade: e.target.value })}
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
-                        >
-                          {gradeOptions.map(g => (
-                            <option key={g} value={g}>{g}</option>
-                          ))}
-                        </select>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-slate-700 font-semibold">Standard / Grade *</label>
+                          <button
+                            type="button"
+                            onClick={() => setInlineAddClassOpen(!inlineAddClassOpen)}
+                            className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                          >
+                            {inlineAddClassOpen ? 'Close' : '+ Add Class'}
+                          </button>
+                        </div>
+                        {inlineAddClassOpen ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={quickClassInput}
+                              onChange={e => setQuickClassInput(e.target.value)}
+                              placeholder="e.g. Class 9"
+                              className="w-full px-2 py-1 rounded-lg bg-white border border-slate-300 text-xs"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (quickClassInput.trim()) {
+                                  addSchoolClass(quickClassInput.trim());
+                                  setNewAllocationForm({ ...newAllocationForm, grade: quickClassInput.trim() });
+                                  setQuickClassInput('');
+                                  setInlineAddClassOpen(false);
+                                  toast('Class Added', `Added ${quickClassInput.trim()}`, 'success');
+                                }
+                              }}
+                              className="px-2 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        ) : (
+                          <select
+                            value={newAllocationForm.grade}
+                            onChange={e => setNewAllocationForm({ ...newAllocationForm, grade: e.target.value })}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
+                          >
+                            {gradeOptions.map(g => (
+                              <option key={g} value={g}>{g}</option>
+                            ))}
+                          </select>
+                        )}
                       </div>
+
                       <div>
-                        <label className="block text-slate-700 font-semibold mb-1">Section *</label>
-                        <select
-                          value={newAllocationForm.section}
-                          onChange={e => setNewAllocationForm({ ...newAllocationForm, section: e.target.value })}
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
-                        >
-                          {sectionOptions.map(s => (
-                            <option key={s} value={s}>Section {s}</option>
-                          ))}
-                        </select>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-slate-700 font-semibold">Section *</label>
+                          <button
+                            type="button"
+                            onClick={() => setInlineAddSectionOpen(!inlineAddSectionOpen)}
+                            className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                          >
+                            {inlineAddSectionOpen ? 'Close' : '+ Add Sec'}
+                          </button>
+                        </div>
+                        {inlineAddSectionOpen ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={quickSectionInput}
+                              onChange={e => setQuickSectionInput(e.target.value)}
+                              placeholder="e.g. E"
+                              className="w-full px-2 py-1 rounded-lg bg-white border border-slate-300 text-xs"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (quickSectionInput.trim()) {
+                                  addSchoolSection(quickSectionInput.trim().toUpperCase());
+                                  setNewAllocationForm({ ...newAllocationForm, section: quickSectionInput.trim().toUpperCase() });
+                                  setQuickSectionInput('');
+                                  setInlineAddSectionOpen(false);
+                                  toast('Section Added', `Added Section ${quickSectionInput.trim().toUpperCase()}`, 'success');
+                                }
+                              }}
+                              className="px-2 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        ) : (
+                          <select
+                            value={newAllocationForm.section}
+                            onChange={e => setNewAllocationForm({ ...newAllocationForm, section: e.target.value })}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
+                          >
+                            {sectionOptions.map(s => (
+                              <option key={s} value={s}>Section {s}</option>
+                            ))}
+                          </select>
+                        )}
                       </div>
+
                       <div>
                         <label className="block text-slate-700 font-semibold mb-1">Teaching Subject *</label>
                         <select
@@ -1249,6 +1659,40 @@ export const AdminTeachers: React.FC = () => {
                         </select>
                       </div>
                     </div>
+
+                    {/* Class Teacher Checkbox in Allocation Drawer */}
+                    <div className="pt-2 border-t border-blue-200/60">
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={newAllocationForm.isClassTeacher}
+                          onChange={e => setNewAllocationForm({ ...newAllocationForm, isClassTeacher: e.target.checked })}
+                          className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                        />
+                        <div>
+                          <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                            <Crown className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Designate as Official Class Teacher for {newAllocationForm.grade}-{newAllocationForm.section}</span>
+                          </span>
+                          <span className="text-[10px] text-slate-500 block">
+                            Strictly 1 Class Teacher per section. Class Teachers exclusively conduct morning roll calls.
+                          </span>
+                        </div>
+                      </label>
+
+                      {newAllocationForm.isClassTeacher && (() => {
+                        const existing = findClassTeacherForSection(newAllocationForm.grade, newAllocationForm.section, managingStudentsTeacher.id);
+                        if (existing) {
+                          return (
+                            <p className="mt-1 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-1.5">
+                              ⚠️ Currently held by <strong>{existing.name}</strong>. Allocating will prompt to reassign role.
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+
                     <div className="flex justify-end gap-2 pt-1">
                       <button
                         type="button"
@@ -1300,6 +1744,11 @@ export const AdminTeachers: React.FC = () => {
                           }`}
                           onClick={() => setSelectedTeacherClass(key)}
                         >
+                          {ac.isClassTeacher && (
+                            <span title="Designated Class Teacher" className="flex items-center">
+                              <Crown className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-amber-300 fill-amber-200' : 'text-amber-500 fill-amber-400'}`} />
+                            </span>
+                          )}
                           <span>{ac.grade}-{ac.section}</span>
                           <span className={`text-[10px] px-1.5 py-0.5 rounded font-normal ${isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-600'}`}>
                             {ac.subject}
@@ -1375,6 +1824,33 @@ export const AdminTeachers: React.FC = () => {
                             className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
                           />
                         </div>
+
+                        {selectedTeacherClass && (() => {
+                          const parts = selectedTeacherClass.split('-');
+                          const curAlloc = managingStudentsTeacher.assignedClasses.find(
+                            ac => normalizeGrade(ac.grade) === normalizeGrade(parts[0]) && ac.section.trim().toLowerCase() === (parts[1] || '').trim().toLowerCase()
+                          );
+                          const isCT = Boolean(curAlloc?.isClassTeacher);
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (parts[0] && parts[1]) {
+                                  handleToggleClassTeacherRole(parts[0].trim(), parts[1].trim());
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-xl border font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all ${
+                                isCT
+                                  ? 'border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900'
+                                  : 'border-slate-200 bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800'
+                              }`}
+                              title={isCT ? 'Revoke Class Teacher designation' : 'Designate this educator as Class Teacher'}
+                            >
+                              <Crown className={`w-3.5 h-3.5 ${isCT ? 'text-amber-600 fill-amber-500' : 'text-slate-400'}`} />
+                              <span>{isCT ? '👑 Class Teacher (Active)' : 'Make Class Teacher'}</span>
+                            </button>
+                          );
+                        })()}
 
                         <button
                           type="button"
@@ -1941,6 +2417,251 @@ export const AdminTeachers: React.FC = () => {
             </div>
           </form>
         )}
+      </Modal>
+
+      {/* MANAGE ACADEMIC CLASSES & SECTIONS MODAL */}
+      <Modal
+        isOpen={isClassSectionModalOpen}
+        onClose={() => setIsClassSectionModalOpen(false)}
+        title="Academic Standards & Class Sections Directorate"
+        subtitle="Configure institution standards, sections, and oversee designated Class Teachers"
+        maxWidth="3xl"
+      >
+        <div className="space-y-6 text-xs">
+          {/* Policy Banner */}
+          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-900">
+            <Crown className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <strong className="block text-xs font-bold">Class Teacher & Daily Roll Call Policy</strong>
+              <p className="text-[11px] text-amber-800">
+                • <strong>Strictly 1 Class Teacher per Section:</strong> Each division (e.g. <em>Class 8-A</em>) can have only ONE designated Class Teacher.<br />
+                • <strong>Exclusive Roll Call Access:</strong> Daily morning attendance registers are restricted exclusively to Class Teachers for their specific assigned divisions.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Standard / Grade Management */}
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-blue-600" />
+                  <span className="font-bold text-slate-900 text-sm">School Standards / Grades</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">
+                  {gradeOptions.length} Standards
+                </span>
+              </div>
+
+              {/* Add Standard Input */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newClassNameInput}
+                  onChange={e => setNewClassNameInput(e.target.value)}
+                  placeholder="e.g. Class 9, Class 10"
+                  className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!newClassNameInput.trim()) {
+                      toast('Please enter standard name', '', 'error');
+                      return;
+                    }
+                    if (gradeOptions.some(g => g.toLowerCase() === newClassNameInput.trim().toLowerCase())) {
+                      toast('Standard Already Exists', `${newClassNameInput.trim()} is already in list`, 'error');
+                      return;
+                    }
+                    addSchoolClass(newClassNameInput.trim());
+                    toast('Standard Added', `Added ${newClassNameInput.trim()} to school classes`, 'success');
+                    setNewClassNameInput('');
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Class</span>
+                </button>
+              </div>
+
+              {/* Standards Badges */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {gradeOptions.map(g => (
+                  <span
+                    key={g}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold shadow-2xs text-xs"
+                  >
+                    <span>{g}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (gradeOptions.length <= 1) {
+                          toast('Cannot Delete', 'School must have at least one grade registered', 'error');
+                          return;
+                        }
+                        if (window.confirm(`Delete standard ${g}? Any existing teachers or students in this standard will retain their records.`)) {
+                          deleteSchoolClass(g);
+                          toast('Standard Removed', `Deleted ${g} from options`, 'info');
+                        }
+                      }}
+                      className="opacity-50 hover:opacity-100 hover:text-red-600 transition-opacity cursor-pointer p-0.5 rounded"
+                      title={`Remove standard ${g}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Sections Management */}
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <School className="w-4 h-4 text-emerald-600" />
+                  <span className="font-bold text-slate-900 text-sm">Class Sections / Divisions</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                  {sectionOptions.length} Sections
+                </span>
+              </div>
+
+              {/* Add Section Input */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newSectionNameInput}
+                  onChange={e => setNewSectionNameInput(e.target.value)}
+                  placeholder="e.g. E, F"
+                  className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium uppercase"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!newSectionNameInput.trim()) {
+                      toast('Please enter section name', '', 'error');
+                      return;
+                    }
+                    const sec = newSectionNameInput.trim().toUpperCase();
+                    if (sectionOptions.some(s => s.toUpperCase() === sec)) {
+                      toast('Section Already Exists', `Section ${sec} is already registered`, 'error');
+                      return;
+                    }
+                    addSchoolSection(sec);
+                    toast('Section Added', `Added Section ${sec}`, 'success');
+                    setNewSectionNameInput('');
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Section</span>
+                </button>
+              </div>
+
+              {/* Section Badges */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {sectionOptions.map(s => (
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold shadow-2xs text-xs"
+                  >
+                    <span>Section {s}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (sectionOptions.length <= 1) {
+                          toast('Cannot Delete', 'School must have at least one section', 'error');
+                          return;
+                        }
+                        if (window.confirm(`Delete Section ${s}?`)) {
+                          deleteSchoolSection(s);
+                          toast('Section Removed', `Deleted Section ${s}`, 'info');
+                        }
+                      }}
+                      className="opacity-50 hover:opacity-100 hover:text-red-600 transition-opacity cursor-pointer p-0.5 rounded"
+                      title={`Remove Section ${s}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Institutional Class Teacher Roster */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+              <span className="font-bold text-slate-900 flex items-center gap-1.5 text-sm">
+                <Crown className="w-4 h-4 text-amber-500" />
+                <span>Class Teacher Registry (1 per Section)</span>
+              </span>
+              <span className="text-[10px] text-slate-500">Live occupancy status across all active classes</span>
+            </div>
+
+            <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-xl">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
+                  <tr>
+                    <th className="py-2.5 px-3">Class Division</th>
+                    <th className="py-2.5 px-3">Designated Class Teacher</th>
+                    <th className="py-2.5 px-3">Subject / Dept</th>
+                    <th className="py-2.5 px-3 text-right">Roll Call Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {gradeOptions.flatMap(g =>
+                    sectionOptions.map(s => {
+                      const ct = findClassTeacherForSection(g, s);
+                      return (
+                        <tr key={`${g}-${s}`} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-2 px-3 font-semibold text-slate-900">
+                            {g} - Section {s}
+                          </td>
+                          <td className="py-2 px-3">
+                            {ct ? (
+                              <div className="flex items-center gap-2">
+                                <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400 shrink-0" />
+                                <strong className="text-slate-900">{ct.name}</strong>
+                                <span className="text-[10px] text-slate-500 font-mono">({ct.loginId || ct.employeeId})</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">Vacant (No Class Teacher)</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-slate-600">
+                            {ct ? ct.department : '—'}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {ct ? (
+                              <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                Authorized
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
+                                Unassigned
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsClassSectionModalOpen(false)}
+              className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold cursor-pointer"
+            >
+              Done & Close Directorate
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -159,6 +159,14 @@ interface SchoolDataContextType {
   updateGalleryItem: (id: string, updated: Partial<GalleryItem>) => void;
   deleteGalleryItem: (id: string) => void;
 
+  // Classes & Sections Directorate
+  schoolClasses: string[];
+  schoolSections: string[];
+  addSchoolClass: (className: string) => void;
+  deleteSchoolClass: (className: string) => void;
+  addSchoolSection: (sectionName: string) => void;
+  deleteSchoolSection: (sectionName: string) => void;
+
   // School Config
   updateSchoolConfig: (updated: Partial<SchoolConfig>) => void;
 
@@ -169,6 +177,15 @@ interface SchoolDataContextType {
 export const SchoolDataContext = createContext<SchoolDataContextType | undefined>(undefined);
 
 const STORAGE_PREFIX = 'pps_v1_';
+
+export const DEFAULT_SCHOOL_CLASSES = [
+  'Nursery', 'LKG', 'UKG',
+  'Class 1', 'Class 2', 'Class 3', 'Class 4',
+  'Class 5', 'Class 6', 'Class 7', 'Class 8',
+  'Grade 9', 'Grade 10'
+];
+
+export const DEFAULT_SCHOOL_SECTIONS = ['A', 'B', 'C', 'D'];
 
 function getStoredOrDefault<T>(key: string, defaultValue: T): T {
   try {
@@ -234,6 +251,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [subjects, setSubjects] = useState<SchoolSubject[]>(() => getStoredOrDefault('subjects', INITIAL_SUBJECTS));
   const [teacherPeriods, setTeacherPeriods] = useState<TeacherPeriod[]>(() => getStoredOrDefault('periods', INITIAL_TEACHER_PERIODS));
   const [periodSlots, setPeriodSlots] = useState<PeriodSlot[]>(() => getStoredOrDefault('period_slots', INITIAL_PERIOD_SLOTS));
+  const [schoolClasses, setSchoolClasses] = useState<string[]>(() => getStoredOrDefault('school_classes', DEFAULT_SCHOOL_CLASSES));
+  const [schoolSections, setSchoolSections] = useState<string[]>(() => getStoredOrDefault('school_sections', DEFAULT_SCHOOL_SECTIONS));
 
   // Local storage persistence
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'students', JSON.stringify(students)); }, [students]);
@@ -252,6 +271,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'subjects', JSON.stringify(subjects)); }, [subjects]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'periods', JSON.stringify(teacherPeriods)); }, [teacherPeriods]);
   useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'period_slots', JSON.stringify(periodSlots)); }, [periodSlots]);
+  useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'school_classes', JSON.stringify(schoolClasses)); }, [schoolClasses]);
+  useEffect(() => { localStorage.setItem(STORAGE_PREFIX + 'school_sections', JSON.stringify(schoolSections)); }, [schoolSections]);
 
   // Full Refresh from Supabase
   const refreshFromSupabase = useCallback(async () => {
@@ -842,6 +863,29 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   // ==========================================
+  // CLASSES & SECTIONS DIRECTORATE
+  // ==========================================
+  const addSchoolClass = (className: string) => {
+    const trimmed = className.trim();
+    if (!trimmed) return;
+    setSchoolClasses(prev => prev.some(c => c.toLowerCase() === trimmed.toLowerCase()) ? prev : [...prev, trimmed]);
+  };
+
+  const deleteSchoolClass = (className: string) => {
+    setSchoolClasses(prev => prev.filter(c => c.toLowerCase() !== className.toLowerCase()));
+  };
+
+  const addSchoolSection = (sectionName: string) => {
+    const trimmed = sectionName.trim().toUpperCase();
+    if (!trimmed) return;
+    setSchoolSections(prev => prev.some(s => s.toLowerCase() === trimmed.toLowerCase()) ? prev : [...prev, trimmed]);
+  };
+
+  const deleteSchoolSection = (sectionName: string) => {
+    setSchoolSections(prev => prev.filter(s => s.toLowerCase() !== sectionName.toLowerCase()));
+  };
+
+  // ==========================================
   // CONFIG
   // ==========================================
   const updateSchoolConfig = (updated: Partial<SchoolConfig>) => {
@@ -866,6 +910,8 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSubjects(INITIAL_SUBJECTS);
     setTeacherPeriods(INITIAL_TEACHER_PERIODS);
     setPeriodSlots(INITIAL_PERIOD_SLOTS);
+    setSchoolClasses(DEFAULT_SCHOOL_CLASSES);
+    setSchoolSections(DEFAULT_SCHOOL_SECTIONS);
   };
 
   return (
@@ -887,6 +933,12 @@ export const SchoolDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         subjects,
         teacherPeriods,
         periodSlots,
+        schoolClasses,
+        schoolSections,
+        addSchoolClass,
+        deleteSchoolClass,
+        addSchoolSection,
+        deleteSchoolSection,
         refreshFromSupabase,
         addStudent,
         enrollStudentWithFee,

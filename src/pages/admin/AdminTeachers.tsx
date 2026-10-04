@@ -227,7 +227,7 @@ export const AdminTeachers: React.FC = () => {
     if (teacher.assignedClasses && teacher.assignedClasses.length > 0) {
       setSelectedTeacherClass(`${teacher.assignedClasses[0].grade}-${teacher.assignedClasses[0].section}`);
     } else {
-      setSelectedTeacherClass('Class 8-A');
+      setSelectedTeacherClass('');
     }
     setClassStudentSearch('');
     setIsAddAllocationOpen(false);
@@ -235,7 +235,12 @@ export const AdminTeachers: React.FC = () => {
   };
 
   const handleOpenEnrollModal = () => {
-    const parts = selectedTeacherClass.split('-');
+    if (!managingStudentsTeacher?.assignedClasses?.length) {
+      toast('No Class Allocated', 'Please allocate a class division first before enrolling scholars', 'error');
+      setIsAddAllocationOpen(true);
+      return;
+    }
+    const parts = (selectedTeacherClass || `${managingStudentsTeacher.assignedClasses[0]?.grade}-${managingStudentsTeacher.assignedClasses[0]?.section}`).split('-');
     const currentGrade = parts[0]?.trim() || 'Class 8';
     const currentSection = parts[1]?.trim() || 'A';
     const gradeNum = currentGrade.replace(/\D/g, '') || '08';
@@ -329,10 +334,6 @@ export const AdminTeachers: React.FC = () => {
 
   const handleRemoveClassAllocationFromTeacher = (grade: string, section: string) => {
     if (!managingStudentsTeacher) return;
-    if (managingStudentsTeacher.assignedClasses.length <= 1) {
-      toast('Minimum 1 Allocation Required', 'Each teacher must remain assigned to at least one class division', 'error');
-      return;
-    }
 
     if (window.confirm(`Remove teaching allocation ${grade}-${section} from ${managingStudentsTeacher.name}?`)) {
       const updatedClasses = managingStudentsTeacher.assignedClasses.filter(
@@ -340,8 +341,19 @@ export const AdminTeachers: React.FC = () => {
       );
       updateTeacher(managingStudentsTeacher.id, { assignedClasses: updatedClasses });
       setManagingStudentsTeacher({ ...managingStudentsTeacher, assignedClasses: updatedClasses });
-      if (selectedTeacherClass === `${grade}-${section}`) {
-        setSelectedTeacherClass(`${updatedClasses[0]?.grade}-${updatedClasses[0]?.section}`);
+
+      const isCurrentSelected = (
+        selectedTeacherClass === `${grade}-${section}` ||
+        (normalizeGrade(selectedTeacherClass.split('-')[0]) === normalizeGrade(grade) &&
+         selectedTeacherClass.split('-')[1]?.trim().toLowerCase() === section.trim().toLowerCase())
+      );
+
+      if (isCurrentSelected) {
+        if (updatedClasses.length > 0) {
+          setSelectedTeacherClass(`${updatedClasses[0].grade}-${updatedClasses[0].section}`);
+        } else {
+          setSelectedTeacherClass('');
+        }
       }
       toast('Allocation Removed', `Removed ${grade}-${section} from ${managingStudentsTeacher.name}`, 'info');
     }
@@ -528,14 +540,35 @@ export const AdminTeachers: React.FC = () => {
               <div className="space-y-1">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">Teaching Allocations</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {tch.assignedClasses.map((ac, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100"
-                    >
-                      {ac.grade}-{ac.section} ({ac.subject})
-                    </span>
-                  ))}
+                  {tch.assignedClasses && tch.assignedClasses.length > 0 ? (
+                    tch.assignedClasses.map((ac, idx) => (
+                      <span
+                        key={idx}
+                        className="group/tag inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100"
+                      >
+                        <span>{ac.grade}-{ac.section} ({ac.subject})</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Remove teaching allocation ${ac.grade}-${ac.section} from ${tch.name}?`)) {
+                              const updatedClasses = tch.assignedClasses.filter(
+                                c => !(normalizeGrade(c.grade) === normalizeGrade(ac.grade) && c.section.trim().toLowerCase() === ac.section.trim().toLowerCase())
+                              );
+                              updateTeacher(tch.id, { assignedClasses: updatedClasses });
+                              toast('Allocation Removed', `Removed ${ac.grade}-${ac.section} from ${tch.name}`, 'info');
+                            }
+                          }}
+                          className="opacity-60 hover:opacity-100 hover:text-red-600 transition-opacity cursor-pointer p-0.5 rounded"
+                          title={`Remove ${ac.grade}-${ac.section} allocation`}
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">None allocated</span>
+                  )}
                 </div>
               </div>
               <button
@@ -1236,86 +1269,140 @@ export const AdminTeachers: React.FC = () => {
 
                 {/* Class Division Selection Pills */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  {managingStudentsTeacher.assignedClasses.map((ac, idx) => {
-                    const key = `${ac.grade}-${ac.section}`;
-                    const count = getTeacherStudents(managingStudentsTeacher, key).length;
-                    const isSelected = selectedTeacherClass === key || (
-                      normalizeGrade(selectedTeacherClass.split('-')[0]) === normalizeGrade(ac.grade) &&
-                      selectedTeacherClass.split('-')[1]?.trim() === ac.section.trim()
-                    );
-
-                    return (
-                      <div
-                        key={idx}
-                        className={`group flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs font-bold'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-slate-50'
-                        }`}
-                        onClick={() => setSelectedTeacherClass(key)}
+                  {managingStudentsTeacher.assignedClasses.length === 0 ? (
+                    <div className="py-2.5 px-3.5 text-slate-500 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-xs flex items-center justify-between w-full">
+                      <span className="italic">No class divisions currently allocated to {managingStudentsTeacher.name}.</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddAllocationOpen(true)}
+                        className="text-blue-600 font-bold hover:underline cursor-pointer flex items-center gap-1"
                       >
-                        <span>{ac.grade}-{ac.section}</span>
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded font-normal ${isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-600'}`}>
-                          {ac.subject}
-                        </span>
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${isSelected ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-700'}`}>
-                          {count} Scholars
-                        </span>
-                        {managingStudentsTeacher.assignedClasses.length > 1 && (
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Allocate Class Now</span>
+                      </button>
+                    </div>
+                  ) : (
+                    managingStudentsTeacher.assignedClasses.map((ac, idx) => {
+                      const key = `${ac.grade}-${ac.section}`;
+                      const count = getTeacherStudents(managingStudentsTeacher, key).length;
+                      const isSelected = selectedTeacherClass === key || (
+                        normalizeGrade(selectedTeacherClass.split('-')[0]) === normalizeGrade(ac.grade) &&
+                        selectedTeacherClass.split('-')[1]?.trim() === ac.section.trim()
+                      );
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`group flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs font-bold'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                          }`}
+                          onClick={() => setSelectedTeacherClass(key)}
+                        >
+                          <span>{ac.grade}-{ac.section}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-normal ${isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-600'}`}>
+                            {ac.subject}
+                          </span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-700'}`}>
+                            {count} Scholars
+                          </span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveClassAllocationFromTeacher(ac.grade, ac.section);
                             }}
-                            className={`p-0.5 rounded hover:bg-red-500 hover:text-white transition-colors cursor-pointer ${isSelected ? 'text-blue-200' : 'text-slate-400 opacity-60 group-hover:opacity-100'}`}
-                            title="Remove division allocation"
+                            className={`p-1 rounded-lg transition-colors cursor-pointer flex items-center justify-center ${
+                              isSelected
+                                ? 'text-blue-100 hover:text-white hover:bg-red-500'
+                                : 'text-slate-400 hover:text-red-600 hover:bg-red-50'
+                            }`}
+                            title={`Remove ${ac.grade}-${ac.section} division allocation`}
+                            aria-label={`Remove ${ac.grade}-${ac.section} division allocation`}
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
               {/* Class Students Directorate Workspace */}
               <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-4">
-                {/* Header & Filter Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                  <div>
-                    <h5 className="text-sm font-bold font-cinzel text-slate-900 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-emerald-600" />
-                      <span>Class Students Directory ({selectedTeacherClass})</span>
-                    </h5>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      Educator oversees {currentClassStudents.length} enrolled scholars in this division
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative w-full sm:w-56">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={classStudentSearch}
-                        onChange={e => setClassStudentSearch(e.target.value)}
-                        placeholder="Search student or roll #..."
-                        className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
-                      />
+                {managingStudentsTeacher.assignedClasses.length === 0 ? (
+                  <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                    <School className="w-8 h-8 text-slate-400 mx-auto" />
+                    <div>
+                      <h6 className="font-bold text-slate-700 text-sm">No Class Divisions Allocated</h6>
+                      <p className="text-slate-500 text-xs mt-1">
+                        All class divisions have been removed for {managingStudentsTeacher.name}. Allocate a new class division above to manage scholars.
+                      </p>
                     </div>
-
                     <button
                       type="button"
-                      onClick={handleOpenEnrollModal}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
+                      onClick={() => setIsAddAllocationOpen(true)}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer shadow-xs inline-flex items-center gap-1.5"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>+ Enroll Student</span>
+                      <span>Allocate New Class</span>
                     </button>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Header & Filter Controls */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                      <div>
+                        <h5 className="text-sm font-bold font-cinzel text-slate-900 flex items-center gap-2">
+                          <Users className="w-4 h-4 text-emerald-600" />
+                          <span>Class Students Directory {selectedTeacherClass ? `(${selectedTeacherClass})` : ''}</span>
+                        </h5>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Educator oversees {currentClassStudents.length} enrolled scholars in this division
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative w-full sm:w-56">
+                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            value={classStudentSearch}
+                            onChange={e => setClassStudentSearch(e.target.value)}
+                            placeholder="Search student or roll #..."
+                            className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleOpenEnrollModal}
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>+ Enroll Student</span>
+                        </button>
+
+                        {selectedTeacherClass && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const parts = selectedTeacherClass.split('-');
+                              if (parts[0] && parts[1]) {
+                                handleRemoveClassAllocationFromTeacher(parts[0].trim(), parts[1].trim());
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
+                            title={`Remove ${selectedTeacherClass} division from this educator`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                            <span>Remove Division</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
                 {/* Class Quick Metric Chips */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1471,6 +1558,8 @@ export const AdminTeachers: React.FC = () => {
                       </tbody>
                     </table>
                   </div>
+                )}
+                  </>
                 )}
               </div>
 

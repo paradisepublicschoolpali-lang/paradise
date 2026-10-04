@@ -112,7 +112,7 @@ export const AdminTeachers: React.FC = () => {
   });
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     name: '',
     loginId: '',
     password: 'teacher123',
@@ -128,7 +128,7 @@ export const AdminTeachers: React.FC = () => {
     ],
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300',
     joiningDate: new Date().toISOString().split('T')[0]
-  });
+  }));
 
   const teacherSubjects = ['All', 'Hindi', 'English', 'Maths', 'Science', 'Social Science', 'Computer', 'G.K', 'Arts'];
   const subjectList = ['Hindi', 'English', 'Maths', 'Science', 'Social Science', 'Computer', 'G.K', 'Arts'];

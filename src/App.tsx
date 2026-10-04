@@ -3,10 +3,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SchoolDataProvider } from './context/SchoolDataContext';
 import { ToastProvider } from './context/ToastContext';
 
-// Native Mobile & App Preview Components
+// Native Mobile Components
 import { initializeMobileApp } from './services/mobileApp';
 import { MobileBottomNav } from './components/mobile/MobileBottomNav';
-import { MobilePreviewWrapper } from './components/mobile/MobilePreviewWrapper';
 
 // Gateway & Common Components
 import { PortalGateway } from './components/common/PortalGateway';
@@ -161,7 +160,7 @@ const SchoolApp: React.FC = () => {
   // GUEST PORTAL RENDER
   if (role === 'guest') {
     return (
-      <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between selection:bg-blue-600 selection:text-white pb-16">
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between selection:bg-blue-600 selection:text-white pb-16 lg:pb-0">
         <div>
           <Navbar activeTab={guestTab} setActiveTab={setGuestTab} />
           <main className="pt-2">
@@ -195,7 +194,7 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[parentTab] || { title: 'Parent Portal', subtitle: '' };
 
     return (
-      <div className="min-h-screen flex flex-col pb-16">
+      <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
         <PortalLayout
           activeTab={parentTab}
           setActiveTab={setParentTab}
@@ -227,7 +226,7 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[teacherTab] || { title: 'Teacher Portal', subtitle: '' };
 
     return (
-      <div className="min-h-screen flex flex-col pb-16">
+      <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
         <PortalLayout
           activeTab={teacherTab}
           setActiveTab={setTeacherTab}
@@ -266,7 +265,7 @@ const SchoolApp: React.FC = () => {
     const activeInfo = tabTitles[adminTab] || { title: 'Admin Portal', subtitle: '' };
 
     return (
-      <div className="min-h-screen flex flex-col pb-16">
+      <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
         <PortalLayout
           activeTab={adminTab}
           setActiveTab={setAdminTab}
@@ -300,9 +299,7 @@ export function App() {
     <AuthProvider>
       <SchoolDataProvider>
         <ToastProvider>
-          <MobilePreviewWrapper>
-            <SchoolApp />
-          </MobilePreviewWrapper>
+          <SchoolApp />
         </ToastProvider>
       </SchoolDataProvider>
     </AuthProvider>

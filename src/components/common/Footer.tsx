@@ -11,7 +11,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
   const { toast } = useToast();
-  const { logout } = useAuth();
+  const { openGateway } = useAuth();
   const { schoolConfig } = useSchoolData();
   const [email, setEmail] = React.useState('');
 
@@ -111,7 +111,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
 
             <div className="pt-2">
               <button
-                onClick={logout}
+                onClick={openGateway}
                 className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border border-slate-700"
               >
                 <span>School Portal Login</span>

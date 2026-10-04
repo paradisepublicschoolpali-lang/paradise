@@ -10,7 +10,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
-  const { logout } = useAuth();
+  const { openGateway } = useAuth();
   const { schoolConfig } = useSchoolData();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -59,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             </span>
 
             <button
-              onClick={logout}
+              onClick={openGateway}
               className="text-xs font-semibold text-white hover:text-blue-300 flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-blue-600/80 hover:bg-blue-600 transition-colors cursor-pointer shadow-xs whitespace-nowrap"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             {/* Action Buttons */}
             <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 shrink-0">
               <button
-                onClick={logout}
+                onClick={openGateway}
                 className="px-2.5 xl:px-4 py-1.5 xl:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] xl:text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-300 whitespace-nowrap"
               >
                 <Lock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
@@ -121,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
               <button
-                onClick={logout}
+                onClick={openGateway}
                 className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-200 text-slate-700 transition-colors cursor-pointer flex items-center justify-center"
                 title="Portal Gateway"
                 aria-label="Portal Gateway"
@@ -162,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
 
             <div className="pt-4 flex flex-col gap-2 border-t border-slate-100">
               <button
-                onClick={logout}
+                onClick={openGateway}
                 className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Lock className="w-4 h-4 text-blue-400" />

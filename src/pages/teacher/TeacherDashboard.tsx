@@ -80,10 +80,14 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ setActiveTab
 
           <button
             onClick={() => setActiveTab('results')}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer ${
+              isClassTeacher
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+            }`}
           >
-            <GraduationCap className="w-4 h-4" />
-            <span>Enter Unit Marks</span>
+            <GraduationCap className={`w-4 h-4 ${isClassTeacher ? 'text-white' : 'text-slate-500'}`} />
+            <span>{isClassTeacher ? `Enter Unit Marks (${classTeacherAllocations[0].grade}-${classTeacherAllocations[0].section})` : 'Marks Entry (Class Teachers Only)'}</span>
           </button>
         </div>
       </div>

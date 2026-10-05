@@ -2432,10 +2432,10 @@ export const AdminTeachers: React.FC = () => {
           <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-900">
             <Crown className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <strong className="block text-xs font-bold">Class Teacher & Daily Roll Call Policy</strong>
+              <strong className="block text-xs font-bold">Class Teacher, Roll Call & Marks Entry Regulations</strong>
               <p className="text-[11px] text-amber-800">
                 • <strong>Strictly 1 Class Teacher per Section:</strong> Each division (e.g. <em>Class 8-A</em>) can have only ONE designated Class Teacher.<br />
-                • <strong>Exclusive Roll Call Access:</strong> Daily morning attendance registers are restricted exclusively to Class Teachers for their specific assigned divisions.
+                • <strong>Exclusive Roll Call & Marks Entry Access:</strong> Daily morning roll call registers and academic marks entry gradebooks are restricted exclusively to designated Class Teachers for their specific assigned divisions.
               </p>
             </div>
           </div>
@@ -2606,7 +2606,7 @@ export const AdminTeachers: React.FC = () => {
                     <th className="py-2.5 px-3">Class Division</th>
                     <th className="py-2.5 px-3">Designated Class Teacher</th>
                     <th className="py-2.5 px-3">Subject / Dept</th>
-                    <th className="py-2.5 px-3 text-right">Roll Call Status</th>
+                    <th className="py-2.5 px-3 text-right">Roll Call & Marks Entry Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -2635,7 +2635,7 @@ export const AdminTeachers: React.FC = () => {
                           <td className="py-2 px-3 text-right">
                             {ct ? (
                               <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                Authorized
+                                Authorized (Roll Call & Marks)
                               </span>
                             ) : (
                               <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">

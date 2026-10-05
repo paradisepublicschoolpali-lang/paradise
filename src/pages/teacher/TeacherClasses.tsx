@@ -698,7 +698,7 @@ export const TeacherClasses: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Grade</label>
               <select
@@ -735,19 +735,6 @@ export const TeacherClasses: React.FC = () => {
                 onChange={e => setStudentForm({ ...studentForm, rollNo: e.target.value })}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono focus:outline-none focus:border-blue-500"
               />
-            </div>
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">School House</label>
-              <select
-                value={studentForm.house}
-                onChange={e => setStudentForm({ ...studentForm, house: e.target.value as any })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-blue-500"
-              >
-                <option value="Ashoka House">Ashoka House</option>
-                <option value="Tagore House">Tagore House</option>
-                <option value="Shivaji House">Shivaji House</option>
-                <option value="Raman House">Raman House</option>
-              </select>
             </div>
           </div>
 

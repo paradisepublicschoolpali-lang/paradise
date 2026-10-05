@@ -2108,30 +2108,16 @@ export const AdminTeachers: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Full Student Name *</label>
-              <input
-                type="text"
-                required
-                value={newStudentForm.name}
-                onChange={e => setNewStudentForm({ ...newStudentForm, name: e.target.value })}
-                placeholder="e.g. Aarav Sharma"
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">House (Indian Standards) *</label>
-              <select
-                value={newStudentForm.house}
-                onChange={e => setNewStudentForm({ ...newStudentForm, house: e.target.value as any })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none"
-              >
-                {houseOptions.map(h => (
-                  <option key={h} value={h}>{h}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-slate-700 font-semibold mb-1">Full Student Name *</label>
+            <input
+              type="text"
+              required
+              value={newStudentForm.name}
+              onChange={e => setNewStudentForm({ ...newStudentForm, name: e.target.value })}
+              placeholder="e.g. Aarav Sharma"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2277,29 +2263,15 @@ export const AdminTeachers: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <label className="block text-slate-700 font-semibold mb-1">Scholar Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.name}
-                  onChange={e => setEditingStudent({ ...editingStudent, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">House</label>
-                <select
-                  value={editingStudent.house}
-                  onChange={e => setEditingStudent({ ...editingStudent, house: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold focus:outline-none"
-                >
-                  {houseOptions.map(h => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Scholar Full Name</label>
+              <input
+                type="text"
+                required
+                value={editingStudent.name}
+                onChange={e => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+              />
             </div>
 
             {/* Division Transfer Option */}

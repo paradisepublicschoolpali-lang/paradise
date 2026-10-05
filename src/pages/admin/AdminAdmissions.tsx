@@ -345,7 +345,7 @@ export const AdminAdmissions: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Allocated Grade</label>
                 <select
@@ -373,19 +373,6 @@ export const AdminAdmissions: React.FC = () => {
                   onChange={e => setCustomSection(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900"
                 />
-              </div>
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">House</label>
-                <select
-                  value={customHouse}
-                  onChange={e => setCustomHouse(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900"
-                >
-                  <option value="Ashoka House">Ashoka House</option>
-                  <option value="Tagore House">Tagore House</option>
-                  <option value="Shivaji House">Shivaji House</option>
-                  <option value="Raman House">Raman House</option>
-                </select>
               </div>
             </div>
 

@@ -451,20 +451,7 @@ export const AdminStudents: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">House</label>
-              <select
-                value={formData.house}
-                onChange={e => setFormData({ ...formData, house: e.target.value as any })}
-                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
-              >
-                <option value="Ashoka House">Ashoka House</option>
-                <option value="Tagore House">Tagore House</option>
-                <option value="Shivaji House">Shivaji House</option>
-                <option value="Raman House">Raman House</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Date of Birth</label>
               <input

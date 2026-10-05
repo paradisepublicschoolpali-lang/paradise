@@ -18,7 +18,9 @@ import {
   CalendarDays,
   Sparkles,
   MapPin,
-  FileText
+  FileText,
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
@@ -34,7 +36,8 @@ export const TeacherClasses: React.FC = () => {
     enrollStudentWithFee,
     addTeacherPeriod,
     updateTeacherPeriod,
-    deleteTeacherPeriod
+    deleteTeacherPeriod,
+    deleteStudent
   } = useSchoolData();
   const { currentUser } = useAuth();
   const { toast } = useToast();
@@ -48,6 +51,7 @@ export const TeacherClasses: React.FC = () => {
 
   // Modals
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
+  const [studentToRemove, setStudentToRemove] = useState<Student | null>(null);
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [editingPeriod, setEditingPeriod] = useState<TeacherPeriod | null>(null);
 
@@ -229,6 +233,33 @@ export const TeacherClasses: React.FC = () => {
     }
   };
 
+  // Check if current user is Class Teacher for the selected class (or admin)
+  const targetGrade = selectedClass.split('-')[0].trim();
+  const targetSection = selectedClass.split('-')[1]?.trim() || '';
+
+  const isClassTeacherForSelectedClass = Boolean(
+    currentTeacher?.assignedClasses?.some(ac => {
+      const normAcGrade = ac.grade.replace(/^(Class|Grade)\s+/i, '').trim().toLowerCase();
+      const normTargetGrade = targetGrade.replace(/^(Class|Grade)\s+/i, '').trim().toLowerCase();
+      const sectionMatch = !targetSection || ac.section.trim().toLowerCase() === targetSection.toLowerCase();
+      return normAcGrade === normTargetGrade && sectionMatch && Boolean(ac.isClassTeacher);
+    })
+  );
+
+  const canRemoveStudents = currentUser?.role === 'admin' || isClassTeacherForSelectedClass;
+
+  const handleConfirmRemoveStudent = () => {
+    if (!studentToRemove) return;
+    if (!canRemoveStudents) {
+      toast('Access Denied', `Only the assigned Class Teacher for ${selectedClass} is authorized to remove scholars.`, 'error');
+      setStudentToRemove(null);
+      return;
+    }
+    deleteStudent(studentToRemove.id);
+    toast('Scholar Removed', `${studentToRemove.name} has been removed from ${selectedClass}.`, 'success');
+    setStudentToRemove(null);
+  };
+
   // Dynamic Class list for this teacher
   const teacherClassesList = (currentTeacher?.assignedClasses && currentTeacher.assignedClasses.length > 0)
     ? currentTeacher.assignedClasses.map((ac, idx) => {
@@ -244,15 +275,16 @@ export const TeacherClasses: React.FC = () => {
           grade: ac.grade,
           section: ac.section,
           subject: ac.subject || currentTeacher.department,
+          isClassTeacher: Boolean(ac.isClassTeacher),
           room: idx === 0 ? 'Science Lab 1' : `Room 10${idx + 2}`,
           count,
           progress: 70 + ((idx * 6) % 25)
         };
       })
     : [
-        { id: 'Class 8-A', name: 'Class 8-A', grade: 'Class 8', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Science Lab 1', count: students.filter(s => s.grade.includes('8')).length, progress: 68 },
-        { id: 'Class 7-A', name: 'Class 7-A', grade: 'Class 7', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Room 104', count: students.filter(s => s.grade.includes('7')).length, progress: 74 },
-        { id: 'Class 6-A', name: 'Class 6-A', grade: 'Class 6', section: 'A', subject: currentTeacher?.department || 'Science', room: 'Room 102', count: students.filter(s => s.grade.includes('6')).length, progress: 80 }
+        { id: 'Class 8-A', name: 'Class 8-A', grade: 'Class 8', section: 'A', subject: currentTeacher?.department || 'Science', isClassTeacher: true, room: 'Science Lab 1', count: students.filter(s => s.grade.includes('8')).length, progress: 68 },
+        { id: 'Class 7-A', name: 'Class 7-A', grade: 'Class 7', section: 'A', subject: currentTeacher?.department || 'Science', isClassTeacher: false, room: 'Room 104', count: students.filter(s => s.grade.includes('7')).length, progress: 74 },
+        { id: 'Class 6-A', name: 'Class 6-A', grade: 'Class 6', section: 'A', subject: currentTeacher?.department || 'Science', isClassTeacher: false, room: 'Room 102', count: students.filter(s => s.grade.includes('6')).length, progress: 80 }
       ];
 
   return (
@@ -331,9 +363,16 @@ export const TeacherClasses: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">
-                    {cls.room}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">
+                      {cls.room}
+                    </span>
+                    {cls.isClassTeacher && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-emerald-700" /> Class Teacher
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-slate-500 font-semibold">{cls.count} Scholars</span>
                 </div>
 
@@ -359,12 +398,21 @@ export const TeacherClasses: React.FC = () => {
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2">
+                <h3 className="text-base font-bold font-cinzel text-slate-900 flex items-center gap-2 flex-wrap">
                   <Users className="w-4 h-4 text-blue-600" />
                   <span>Class Students & Directory ({selectedClass})</span>
+                  {isClassTeacherForSelectedClass ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Class Teacher (Removal Authorized)
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-medium flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5 text-slate-400" /> Subject Teacher View
+                    </span>
+                  )}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  {classStudents.length} Scholars enrolled • Teacher authorized to add scholars & set initial fees
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {classStudents.length} Scholars enrolled • {isClassTeacherForSelectedClass ? 'Class Teacher authorized to enroll and remove scholars from this division.' : 'Scholar removal restricted exclusively to the assigned Class Teacher.'}
                 </p>
               </div>
 
@@ -397,11 +445,11 @@ export const TeacherClasses: React.FC = () => {
                     <th className="py-3 px-4 font-semibold">Scholar Info</th>
                     <th className="py-3 px-4 font-semibold">Roll No</th>
                     <th className="py-3 px-4 font-semibold">Login ID</th>
-                    <th className="py-3 px-4 font-semibold">House</th>
                     <th className="py-3 px-4 font-semibold text-center">Attendance</th>
                     <th className="py-3 px-4 font-semibold text-center">CGPA (10-Pt)</th>
                     <th className="py-3 px-4 font-semibold">Guardian Contact</th>
                     <th className="py-3 px-4 font-semibold text-center">Fee Status</th>
+                    <th className="py-3 px-4 font-semibold text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -428,11 +476,6 @@ export const TeacherClasses: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 font-mono font-semibold">{student.rollNo}</td>
                         <td className="py-3 px-4 font-mono text-blue-700 font-bold">{student.loginId || student.admissionNo}</td>
-                        <td className="py-3 px-4">
-                          <span className="text-blue-700 font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[11px]">
-                            {['Ashoka House', 'Tagore House', 'Shivaji House', 'Raman House'].includes(student.house) ? student.house : 'Ashoka House'}
-                          </span>
-                        </td>
                         <td className="py-3 px-4 text-center font-bold text-emerald-600">{student.attendanceRate}%</td>
                         <td className="py-3 px-4 text-center font-bold text-blue-600">
                           {student.gpa > 4 ? `${student.gpa} / 10` : `${(student.gpa * 2.5).toFixed(1)} / 10`}
@@ -447,6 +490,27 @@ export const TeacherClasses: React.FC = () => {
                           }`}>
                             {student.feeStatus}
                           </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {canRemoveStudents ? (
+                            <button
+                              type="button"
+                              onClick={() => setStudentToRemove(student)}
+                              title={`Remove ${student.name} from ${selectedClass}`}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Remove</span>
+                            </button>
+                          ) : (
+                            <span
+                              title={`Only the assigned Class Teacher for ${selectedClass} can remove scholars`}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed select-none"
+                            >
+                              <Lock className="w-3 h-3 text-slate-400" />
+                              <span>Class Teacher Only</span>
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -1092,6 +1156,50 @@ export const TeacherClasses: React.FC = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Confirmation Modal to Remove Scholar */}
+      <Modal
+        isOpen={Boolean(studentToRemove)}
+        onClose={() => setStudentToRemove(null)}
+        title="Remove Scholar from Class"
+      >
+        {studentToRemove && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3">
+              <div className="p-2 bg-rose-100 rounded-lg text-rose-700 shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-sm text-rose-800">Confirm Scholar Removal</h4>
+                <p className="text-rose-700 leading-relaxed">
+                  Are you sure you want to remove scholar <strong className="text-rose-950 font-bold">{studentToRemove.name}</strong> (Roll No: <span className="font-mono font-semibold">{studentToRemove.rollNo}</span>, Admission: <span className="font-mono font-semibold">{studentToRemove.admissionNo}</span>) from <strong>{selectedClass}</strong>?
+                </p>
+                <p className="text-slate-500 text-[11px] pt-1">
+                  This action will permanently delete the scholar's profile and records from the school database.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setStudentToRemove(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRemoveStudent}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Confirm & Remove Scholar</span>
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
